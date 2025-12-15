@@ -2,59 +2,45 @@
 <html lang="uz" class="dark">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Ultra Smart Anki Pro</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>Anki Pro - macOS Style</title>
     
-    <!-- TAILWIND CSS (Full CDN) -->
     <script src="https://cdn.tailwindcss.com"></script>
-    
-    <!-- FONTAWESOME -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-    
-    <!-- GOOGLE FONTS (Inter & Outfit for Premium Look) -->
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@500;700;800&display=swap" rel="stylesheet">
-    
-    <!-- CONFETTI JS (For Celebration) -->
-    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.2/dist/confetti.browser.min.js"></script>
 
-    <!-- CONFIGURATION -->
     <script>
         tailwind.config = {
             darkMode: 'class',
             theme: {
                 extend: {
-                    fontFamily: { 
-                        sans: ['Inter', 'sans-serif'],
-                        heading: ['Outfit', 'sans-serif']
-                    },
+                    fontFamily: { sans: ['Inter', '-apple-system', 'system-ui', 'sans-serif'] },
                     colors: {
-                        dark: {
-                            bg: '#0B1120',      // Ultra dark blue
-                            surface: '#151F32', // Lighter blue
-                            card: '#1E293B',    // Card bg
-                            border: '#334155'   // Borders
-                        },
-                        primary: {
-                            DEFAULT: '#3B82F6', // Blue 500
-                            hover: '#2563EB',   // Blue 600
-                            glow: 'rgba(59, 130, 246, 0.5)'
-                        },
-                        status: {
-                            again: '#EF4444', // Red
-                            hard: '#F59E0B',  // Orange
-                            good: '#10B981',  // Emerald
-                            easy: '#06B6D4'   // Cyan
+                        ios: {
+                            bg: '#000000',
+                            surface: '#1c1c1e',
+                            surface2: '#2c2c2e',
+                            border: '#38383a',
+                            blue: '#0a84ff',
+                            green: '#30d158',
+                            indigo: '#5e5ce6',
+                            orange: '#ff9f0a',
+                            red: '#ff453a',
+                            text: '#ffffff',
+                            subtext: '#8e8e93'
                         }
                     },
                     animation: {
-                        'enter': 'enter 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards',
-                        'leave': 'leave 0.2s cubic-bezier(0.16, 1, 0.3, 1) forwards',
-                        'flip': 'flip 0.6s cubic-bezier(0.4, 0.0, 0.2, 1)',
-                        'pulse-slow': 'pulse 3s infinite',
+                        'page-enter': 'pageEnter 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards',
+                        'page-exit': 'pageExit 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards',
+                        'card-flip': 'flip 0.6s cubic-bezier(0.4, 0.0, 0.2, 1)',
+                        'scale-tap': 'scaleTap 0.1s ease-in-out',
                     },
                     keyframes: {
-                        enter: { '0%': { opacity: 0, transform: 'scale(0.95) translateY(10px)' }, '100%': { opacity: 1, transform: 'scale(1) translateY(0)' } },
-                        leave: { '0%': { opacity: 1, transform: 'scale(1)' }, '100%': { opacity: 0, transform: 'scale(0.95)' } },
+                        pageEnter: { '0%': { opacity: 0, transform: 'scale(0.98) translateY(10px)' }, '100%': { opacity: 1, transform: 'scale(1) translateY(0)' } },
+                        pageExit: { '0%': { opacity: 1 }, '100%': { opacity: 0 } },
+                        scaleTap: { '0%': { transform: 'scale(1)' }, '50%': { transform: 'scale(0.96)' }, '100%': { transform: 'scale(1)' } }
                     }
                 }
             }
@@ -62,749 +48,1013 @@
     </script>
 
     <style>
-        /* --- GLOBAL STYLES --- */
-        body {
-            background-color: #0B1120;
-            color: #F8FAFC;
-            -webkit-tap-highlight-color: transparent;
-            overflow: hidden; /* App-like feel */
-        }
+        :root { --safe-area-top: env(safe-area-inset-top); --safe-area-bottom: env(safe-area-inset-bottom); }
         
-        /* Smooth Scrollbar */
-        .scroller {
-            scrollbar-width: thin;
-            scrollbar-color: #334155 transparent;
+        body {
+            background-color: #000; color: #fff;
+            -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale;
+            overflow: hidden; user-select: none; -webkit-tap-highlight-color: transparent;
         }
-        .scroller::-webkit-scrollbar { width: 4px; }
-        .scroller::-webkit-scrollbar-thumb { background: #334155; border-radius: 10px; }
 
-        /* 3D Card Engine */
-        .scene { perspective: 1000px; }
+        .glass-panel {
+            background: rgba(28, 28, 30, 0.75);
+            backdrop-filter: blur(25px); -webkit-backdrop-filter: blur(25px);
+            border-top: 0.5px solid rgba(255,255,255,0.12);
+        }
+
+        .card-scene { perspective: 1200px; width: 100%; height: 100%; }
         .card-object {
-            position: relative; width: 100%; height: 100%;
-            transform-style: preserve-3d;
-            transition: transform 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            width: 100%; height: 100%; position: relative;
+            transform-style: preserve-3d; transition: transform 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
         }
         .card-face {
             position: absolute; width: 100%; height: 100%;
-            -webkit-backface-visibility: hidden; backface-visibility: hidden;
-            border-radius: 1.5rem;
-            display: flex; flex-direction: column; justify-content: center; align-items: center;
-            background: #1E293B; border: 1px solid #334155;
-            box-shadow: 0 10px 40px -10px rgba(0,0,0,0.5);
+            backface-visibility: hidden; -webkit-backface-visibility: hidden;
+            border-radius: 24px; display: flex; flex-direction: column;
+            justify-content: center; align-items: center; text-align: center;
+            background: #1c1c1e; border: 1px solid #38383a;
+            box-shadow: 0 15px 40px -10px rgba(0,0,0,0.6);
+            padding: 24px;
+            word-break: break-word;
         }
-        .card-back { transform: rotateY(180deg); background: #1E293B; }
+        .card-front { transform: rotateY(0deg); }
+        .card-back { transform: rotateY(180deg); background: #0a1e2e; }
         .is-flipped { transform: rotateY(180deg); }
 
-        /* Glassmorphism Utilities */
-        .glass { background: rgba(15, 23, 42, 0.8); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px); border-top: 1px solid rgba(255,255,255,0.05); }
-        .glass-panel { background: rgba(30, 41, 59, 0.5); backdrop-filter: blur(8px); border: 1px solid rgba(255,255,255,0.05); }
-
-        /* Cloze Styles */
+        .ios-input {
+            background: #2c2c2e; border: none; border-radius: 12px;
+            padding: 16px; color: white; font-size: 17px; width: 100%;
+            transition: all 0.3s; box-sizing: border-box; font-family: inherit;
+        }
+        .ios-input::placeholder { color: #8e8e93; }
+        .ios-input:focus { outline: none; background: #3a3a3c; box-shadow: 0 0 0 2px #0a84ff; }
+        
         .cloze-mask {
-            background: #3B82F6; color: transparent; border-radius: 6px; padding: 2px 8px;
-            font-weight: 700; cursor: pointer; transition: all 0.2s;
+            background: rgba(10, 132, 255, 0.3); color: #0a84ff; border-radius: 6px;
+            padding: 4px 10px; font-weight: 600; cursor: pointer; border: 1px solid #0a84ff;
+            display: inline-block; margin: 0 2px;
         }
-        .cloze-mask:active { transform: scale(0.95); }
-        .cloze-reveal {
-            color: #60A5FA; font-weight: 700; border-bottom: 2px solid #3B82F6;
-        }
+        .cloze-mask:hover { background: rgba(10, 132, 255, 0.5); }
+        .cloze-reveal { color: #30d158; font-weight: 700; border-bottom: 2px solid #30d158; padding: 0 4px; }
 
-        /* Interactive Elements */
-        .btn-press:active { transform: scale(0.96); opacity: 0.9; }
-        .input-pro {
-            background: #0F172A; border: 1px solid #334155; color: white;
-            border-radius: 0.75rem; padding: 1rem; width: 100%;
-            transition: all 0.2s; font-family: 'Inter', sans-serif;
-        }
-        .input-pro:focus { border-color: #3B82F6; outline: none; box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2); }
+        .tap-scale:active { transform: scale(0.96); opacity: 0.8; }
+        .nav-active { color: #0a84ff !important; }
+        .nav-active i { transform: scale(1.1); text-shadow: 0 0 15px rgba(10,132,255,0.5); }
 
-        /* Footer Fixed */
-        .footer-fixed {
-            position: fixed; bottom: 85px; width: 100%; text-align: center;
-            font-size: 10px; color: #475569; pointer-events: none; z-index: 0;
+        .heatmap-grid { display: grid; grid-template-columns: repeat(20, 1fr); gap: 4px; }
+        .heat-cell { width: 100%; aspect-ratio: 1; border-radius: 3px; background: #2c2c2e; }
+        .heat-1 { background: #004d1a; }
+        .heat-2 { background: #00802b; }
+        .heat-3 { background: #30d158; }
+
+        .no-scrollbar { scrollbar-width: none; }
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+
+        .study-question { 
+            font-size: 24px; 
+            line-height: 1.6; 
+            font-weight: 500; 
+            color: #ffffff;
+            min-height: 100px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .study-answer {
+            font-size: 28px;
+            line-height: 1.8;
+            font-weight: 700;
+            color: #30d158;
+            min-height: 120px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
     </style>
 </head>
-<body class="h-[100dvh] w-full flex flex-col max-w-md mx-auto relative border-x border-dark-border shadow-2xl bg-dark-bg">
+<body class="flex flex-col h-[100dvh] w-full max-w-md mx-auto relative border-x border-ios-border bg-black shadow-2xl">
 
-    <!-- 1. HEADER (Dynamic) -->
-    <header class="h-16 flex items-center justify-between px-5 z-20 glass sticky top-0 shrink-0">
+    <header class="h-14 flex items-center justify-between px-5 z-50 glass-panel absolute top-0 w-full rounded-b-2xl">
         <div class="flex items-center gap-3">
-            <div class="w-9 h-9 rounded-xl bg-gradient-to-br from-blue-600 to-indigo-600 flex items-center justify-center shadow-lg shadow-blue-500/20 text-white">
-                <i class="fa-solid fa-brain text-sm"></i>
+            <div class="w-8 h-8 rounded-full bg-gradient-to-tr from-ios-blue to-ios-indigo flex items-center justify-center text-white shadow-[0_0_15px_rgba(10,132,255,0.4)]">
+                <i class="fa-brands fa-apple text-sm"></i>
             </div>
-            <div>
-                <h1 class="font-heading font-bold text-lg leading-tight tracking-tight">Ultra Smart</h1>
-                <div class="flex items-center gap-1.5">
-                    <div class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></div>
-                    <span class="text-[10px] font-medium text-slate-400 uppercase tracking-widest">Pro Version</span>
-                </div>
-            </div>
+            <h1 class="text-[17px] font-semibold tracking-tight">Anki <span class="text-ios-blue">Pro</span></h1>
         </div>
-        
-        <!-- Language Switcher & Settings -->
-        <button onclick="App.toggleLang()" class="w-9 h-9 rounded-full bg-dark-surface border border-dark-border text-slate-400 flex items-center justify-center btn-press hover:text-white transition">
-            <span id="lang-display" class="text-xs font-bold">UZ</span>
+        <button onclick="App.toggleLang()" class="w-8 h-8 rounded-full bg-ios-surface2 flex items-center justify-center text-[10px] font-bold text-ios-subtext tap-scale">
+            <span id="lang-ind">UZ</span>
         </button>
     </header>
 
-    <!-- 2. MAIN VIEWPORT -->
-    <main id="app-viewport" class="flex-1 overflow-y-auto overflow-x-hidden p-5 pb-32 scroller relative">
-        <!-- Content Injected via JavaScript -->
+    <main id="viewport" class="flex-1 overflow-y-auto overflow-x-hidden pt-20 pb-28 px-4 relative scroll-smooth no-scrollbar">
+        <!-- Content renders here -->
     </main>
 
-    <!-- 3. FOOTER (Mandatory) -->
-    <div class="footer-fixed">
-        <p class="font-medium tracking-wide opacity-50">Made by ©️Muhammad Daler</p>
-    </div>
-
-    <!-- 4. BOTTOM NAVIGATION (Dock Style) -->
-    <nav class="h-[75px] w-full max-w-md fixed bottom-0 z-30 glass flex justify-around items-center px-4 pb-2 border-t border-white/5">
-        <button onclick="Router.nav('home')" id="nav-home" class="flex flex-col items-center justify-center w-16 h-full gap-1 text-primary transition-all btn-press">
+    <nav class="h-[80px] w-full max-w-md fixed bottom-0 z-50 glass-panel flex justify-around items-center px-4 pb-4">
+        <button onclick="Router.go('home')" id="nav-home" class="flex flex-col items-center gap-1 w-16 text-ios-subtext transition-all duration-300 tap-scale">
             <i class="fa-solid fa-layer-group text-xl mb-0.5"></i>
-            <span class="text-[10px] font-bold" data-key="nav_home">Asosiy</span>
+            <span class="text-[10px] font-medium" data-key="nav_home">Darslar</span>
         </button>
-
-        <button onclick="Router.nav('add')" id="nav-add" class="flex items-center justify-center w-14 h-14 rounded-full bg-primary hover:bg-primary-hover text-white shadow-lg shadow-blue-500/30 -mt-8 border-4 border-dark-bg btn-press transition-transform">
+        
+        <button onclick="Router.go('add')" id="nav-add" class="flex items-center justify-center w-14 h-14 bg-ios-blue text-white rounded-full shadow-[0_0_20px_rgba(10,132,255,0.4)] -mt-10 border-[5px] border-black tap-scale transition-transform hover:scale-105">
             <i class="fa-solid fa-plus text-xl"></i>
         </button>
-
-        <button onclick="Router.nav('profile')" id="nav-profile" class="flex flex-col items-center justify-center w-16 h-full gap-1 text-slate-500 transition-all btn-press">
+        
+        <button onclick="Router.go('stats')" id="nav-stats" class="flex flex-col items-center gap-1 w-16 text-ios-subtext transition-all duration-300 tap-scale">
             <i class="fa-solid fa-chart-pie text-xl mb-0.5"></i>
-            <span class="text-[10px] font-bold" data-key="nav_profile">Profil</span>
+            <span class="text-[10px] font-medium" data-key="nav_stats">Tahlil</span>
         </button>
     </nav>
 
-    <!-- 5. MODALS & OVERLAYS -->
-    
-    <!-- Celebration/Motivation Modal (Only at session end) -->
-    <div id="modal-celebrate" class="fixed inset-0 z-50 hidden flex-col items-center justify-center bg-dark-bg/95 backdrop-blur-xl p-6 text-center animate-enter">
-        <div class="w-24 h-24 rounded-full bg-dark-surface border-4 border-primary flex items-center justify-center text-5xl mb-6 shadow-2xl relative">
-            🏆
-            <div class="absolute -bottom-2 bg-primary text-white text-xs font-bold px-3 py-1 rounded-full">Completed</div>
-        </div>
-        <h2 class="font-heading text-2xl font-bold text-white mb-2" data-key="session_done">Ajoyib natija!</h2>
-        <p class="text-slate-400 text-sm mb-8" data-key="session_subtitle">Bugungi reja bajarildi.</p>
-        
-        <!-- Hikmatli So'z -->
-        <div class="bg-dark-card border border-dark-border p-6 rounded-2xl w-full max-w-sm mb-8 relative overflow-hidden">
-            <div class="absolute top-0 left-0 w-1 h-full bg-gradient-to-b from-blue-500 to-purple-500"></div>
-            <i class="fa-solid fa-quote-left text-primary/20 text-4xl absolute top-2 right-4"></i>
-            <p id="quote-text" class="text-lg font-medium text-white italic mb-4 relative z-10">"..."</p>
-            <p id="quote-author" class="text-xs font-bold text-primary uppercase tracking-widest text-right">AUTHOR</p>
-        </div>
+    <div id="modal-finish" class="fixed inset-0 z-[60] hidden flex-col items-center justify-center bg-black/90 backdrop-blur-md p-6 animate-page-enter overflow-y-auto">
+        <div class="w-full max-w-sm">
+            <div class="relative w-32 h-32 mx-auto mb-8">
+                <svg class="w-full h-full transform -rotate-90">
+                    <circle cx="64" cy="64" r="56" stroke="#2c2c2e" stroke-width="8" fill="none"></circle>
+                    <circle cx="64" cy="64" r="56" stroke="#30d158" stroke-width="8" fill="none" stroke-dasharray="351" stroke-dashoffset="0" stroke-linecap="round"></circle>
+                </svg>
+                <div class="absolute inset-0 flex items-center justify-center text-4xl">🎉</div>
+            </div>
 
-        <button onclick="Study.closeSession()" class="w-full max-w-xs py-3.5 bg-primary hover:bg-primary-hover text-white font-bold rounded-xl shadow-lg btn-press">
-            <span data-key="btn_continue">Davom etish</span>
-        </button>
+            <h2 class="text-2xl font-bold text-white mb-2 text-center" data-key="session_title">Ajoyib Natija!</h2>
+            <p class="text-ios-subtext text-sm mb-8 text-center" data-key="session_sub">Bugungi reja to'liq bajarildi.</p>
+
+            <div class="w-full bg-ios-surface border border-ios-border p-6 rounded-2xl relative overflow-hidden mb-8 shadow-2xl">
+                <div class="absolute top-0 left-0 w-1.5 h-full bg-gradient-to-b from-ios-blue to-ios-indigo"></div>
+                <i class="fa-solid fa-quote-left text-ios-surface2 text-4xl absolute top-4 right-4 opacity-20"></i>
+                <p id="quote-text" class="text-lg font-medium text-white italic mb-4 relative z-10 font-serif leading-relaxed">...</p>
+                <p id="quote-author" class="text-xs font-bold text-ios-blue uppercase tracking-widest text-right relative z-10">...</p>
+            </div>
+
+            <button onclick="Study.close()" class="w-full py-4 bg-ios-surface2 hover:bg-white hover:text-black text-white font-bold rounded-xl transition-all duration-300 tap-scale">
+                <span data-key="btn_close">Yopish</span>
+            </button>
+        </div>
     </div>
 
-    <!-- Toast Notification -->
-    <div id="toast" class="fixed top-20 left-1/2 -translate-x-1/2 bg-dark-surface border border-dark-border text-white px-5 py-3 rounded-full shadow-2xl z-50 flex items-center gap-3 opacity-0 pointer-events-none transition-all duration-300 transform translate-y-[-20px]">
-        <div class="w-2 h-2 rounded-full bg-emerald-500"></div>
-        <span id="toast-msg" class="text-xs font-bold">Notification</span>
+    <div id="toast" class="fixed top-20 left-1/2 -translate-x-1/2 bg-ios-surface2/90 backdrop-blur-md border border-ios-border text-white px-6 py-3 rounded-full shadow-2xl z-[70] flex items-center gap-3 opacity-0 pointer-events-none transition-all duration-300 transform scale-90">
+        <i class="fa-solid fa-check-circle text-ios-green"></i>
+        <span id="toast-msg" class="text-sm font-semibold">Saved</span>
     </div>
 
-    <!-- JAVASCRIPT ENGINE -->
     <script>
-        /**
-         * -------------------------------------------------------------------
-         * ULTRA SMART ANKI PRO - CORE ENGINE
-         * Architecture: MVC (Model-View-Controller)
-         * Algorithm: Modified SM-2 (Quantum Variation)
-         * -------------------------------------------------------------------
-         */
-
-        // --- 1. LOCALIZATION (i18n) ---
-        const TRANSLATIONS = {
+        // ==========================================
+        // 1. LOCALIZATION (TILLAR)
+        // ==========================================
+        const I18n = {
             uz: {
-                nav_home: "Asosiy", nav_profile: "Profil",
-                hero_title: "Bugungi Reja", hero_sub: "ta karta kutmoqda",
-                decks_title: "To'plamlarim", no_decks: "Hozircha to'plam yo'q. Yangi qo'shing!",
-                add_title: "Yangi Karta", add_tab_card: "Karta Qo'shish", add_tab_deck: "To'plam Yaratish",
-                lbl_deck: "To'plamni tanlang", lbl_front: "Savol (Front)", lbl_back: "Javob (Back)",
-                lbl_name: "Nomi", placeholder_q: "Savolni kiriting...", placeholder_a: "Javobni kiriting...",
-                hint_cloze: "Format: {{c1::yashirin so'z}}", btn_save: "Saqlash", btn_create: "Yaratish",
-                study_left: "qoldi", show_ans: "Javobni Ko'rsatish",
-                rate_again: "Qayta", rate_hard: "Qiyin", rate_good: "Yaxshi", rate_easy: "Oson",
-                session_done: "Sessiya Yakunlandi!", session_subtitle: "Siz bugungi maqsadga erishdingiz.",
-                btn_continue: "Bosh Menyuga", msg_saved: "Muvaffaqiyatli saqlandi!", msg_error: "Xatolik! Ma'lumot to'liq emas.",
-                profile_stats: "Statistika", lvl: "LEVEL", total_xp: "Umumiy XP", streak: "Kunlik Streak"
+                nav_home: "Darslar",
+                nav_stats: "Tahlil",
+                hero_title: "Bugungi Vazifalar",
+                hero_sub: "ta karta kutyapti",
+                decks: "To'plamlar",
+                no_decks: "To'plamlar yo'q. Yangi qo'shing.",
+                add_h: "Yangi Yaratish",
+                tab_card: "Karta",
+                tab_deck: "To'plam",
+                lbl_deck: "To'plamni tanlang",
+                lbl_front: "Savol",
+                lbl_back: "Javob",
+                lbl_name: "To'plam Nomi",
+                ph_front: "Savolni kiriting...",
+                ph_back: "Javobni kiriting...",
+                hint_cloze: "Format: {{c1::yashirin so'z}} yoki {{c2::yana bir so'z}}",
+                btn_save: "Saqlash",
+                btn_create: "Yaratish",
+                study_h: "O'quv Jarayoni",
+                study_left: "qoldi",
+                show_ans: "Javobni Ko'rsatish",
+                btn_again: "Qayta",
+                btn_hard: "Qiyin",
+                btn_good: "Yaxshi",
+                btn_easy: "Oson",
+                session_title: "Sessiya Yakunlandi!",
+                session_sub: "Bilim darajangiz oshdi.",
+                btn_close: "Bosh Sahifa",
+                stats_h: "Statistika",
+                strk: "Streak",
+                xp: "Jami XP",
+                total: "Kartalar",
+                msg_saved: "Muvaffaqiyatli saqlandi!",
+                msg_err: "Maydonlarni to'ldiring!",
+                msg_deck_empty: "Bu to'plamda hech qanday karta yo'q!",
+                msg_no_deck: "Avval to'plam yaratib oling!",
+                cloze_hint: "{{c1::...}}, {{c2::...}} formatini ishlating"
             },
             en: {
-                nav_home: "Home", nav_profile: "Profile",
-                hero_title: "Daily Goal", hero_sub: "cards due today",
-                decks_title: "My Decks", no_decks: "No decks found. Create one!",
-                add_title: "New Item", add_tab_card: "Add Card", add_tab_deck: "Create Deck",
-                lbl_deck: "Select Deck", lbl_front: "Question (Front)", lbl_back: "Answer (Back)",
-                lbl_name: "Name", placeholder_q: "Enter question...", placeholder_a: "Enter answer...",
-                hint_cloze: "Format: {{c1::hidden word}}", btn_save: "Save Item", btn_create: "Create",
-                study_left: "left", show_ans: "Show Answer",
-                rate_again: "Again", rate_hard: "Hard", rate_good: "Good", rate_easy: "Easy",
-                session_done: "Session Complete!", session_subtitle: "You crushed your goals today.",
-                btn_continue: "Back to Home", msg_saved: "Saved successfully!", msg_error: "Error! Missing fields.",
-                profile_stats: "Statistics", lvl: "LEVEL", total_xp: "Total XP", streak: "Daily Streak"
+                nav_home: "Library",
+                nav_stats: "Stats",
+                hero_title: "Today's Focus",
+                hero_sub: "cards due",
+                decks: "Decks",
+                no_decks: "No decks found. Create one.",
+                add_h: "Create New",
+                tab_card: "Card",
+                tab_deck: "Deck",
+                lbl_deck: "Select Deck",
+                lbl_front: "Question",
+                lbl_back: "Answer",
+                lbl_name: "Deck Name",
+                ph_front: "Enter question...",
+                ph_back: "Enter answer...",
+                hint_cloze: "Format: {{c1::hidden word}} or {{c2::another word}}",
+                btn_save: "Save Card",
+                btn_create: "Create Deck",
+                study_h: "Study Session",
+                study_left: "left",
+                show_ans: "Show Answer",
+                btn_again: "Again",
+                btn_hard: "Hard",
+                btn_good: "Good",
+                btn_easy: "Easy",
+                session_title: "Session Complete!",
+                session_sub: "Progress updated successfully.",
+                btn_close: "Home",
+                stats_h: "Analytics",
+                strk: "Streak",
+                xp: "Total XP",
+                total: "Total Cards",
+                msg_saved: "Saved Successfully!",
+                msg_err: "Please fill all fields!",
+                msg_deck_empty: "No cards in this deck!",
+                msg_no_deck: "Create a deck first!",
+                cloze_hint: "Use {{c1::...}}, {{c2::...}} format"
             }
         };
 
-        // --- 2. DATA STORE (LocalStorage Manager) ---
-        const Store = {
-            key: 'ultra_anki_pro_v1',
+        const QUOTES = {
+            uz: [
+                { t: "Ilmdan o'zga najot yo'q va bo'lmagay.", a: "Imom Buxoriy" },
+                { t: "Ozlarga hikmat - yomg'irdek, ko'plarga - seldek.", a: "Alisher Navoiy" },
+                { t: "Vaqt - bu qilich. Agar sen uni kesmasang, u seni kesadi.", a: "Arab Hikmati" },
+                { t: "Bugungi harakat - ertangi natija.", a: "Noma'lum" },
+                { t: "O'qish - aql ziyosi.", a: "O'zbek Maqoli" }
+            ],
+            en: [
+                { t: "Knowledge is power.", a: "Francis Bacon" },
+                { t: "The roots of education are bitter, but the fruit is sweet.", a: "Aristotle" },
+                { t: "Success is the sum of small efforts.", a: "Robert Collier" },
+                { t: "An investment in knowledge pays the best interest.", a: "Benjamin Franklin" },
+                { t: "Education is the most powerful weapon.", a: "Nelson Mandela" }
+            ]
+        };
+
+        // ==========================================
+        // 2. DATABASE (SAQLASH)
+        // ==========================================
+        const DB = {
+            key: 'anki_pro_v6',
             state: {
                 lang: 'uz',
-                user: { xp: 0, streak: 0, lastStudy: null },
+                user: {
+                    xp: 0,
+                    streak: 0,
+                    lastStudy: null,
+                    heatmap: {}
+                },
                 decks: [],
                 cards: []
             },
 
             init() {
                 try {
-                    const raw = localStorage.getItem(this.key);
-                    if (raw) {
-                        const parsed = JSON.parse(raw);
-                        // Deep merge to prevent crash on new version structure
+                    const stored = localStorage.getItem(this.key);
+                    if (stored) {
+                        const parsed = JSON.parse(stored);
                         this.state = { ...this.state, ...parsed };
                     } else {
-                        this.seed(); // First time user
+                        this.seed();
                     }
+                    this.syncStreak();
                 } catch (e) {
-                    console.error("DB Error", e);
+                    console.error("DB init error:", e);
                     this.seed();
                 }
-                this.checkStreak();
             },
 
             save() {
-                localStorage.setItem(this.key, JSON.stringify(this.state));
+                try {
+                    localStorage.setItem(this.key, JSON.stringify(this.state));
+                } catch (e) {
+                    console.error("Save error:", e);
+                }
             },
 
             seed() {
-                const d1 = 'deck_' + Date.now();
+                const deckId = 'd_demo_' + Date.now();
                 this.state.decks = [
-                    { id: d1, name: 'Ingliz Tili (Demo)', color: 'from-blue-600 to-cyan-500', icon: 'fa-language' }
+                    {
+                        id: deckId,
+                        name: 'Ingliz tili (Demo)',
+                        icon: 'fa-language',
+                        color: 'from-blue-500 to-cyan-500'
+                    }
                 ];
                 this.state.cards = [
-                    { id: 'c1', deckId: d1, type: 'basic', front: 'Apple', back: 'Olma', interval: 0, ease: 2.5, nextReview: Date.now() },
-                    { id: 'c2', deckId: d1, type: 'cloze', front: 'London is the capital of {{c1::Great Britain}}.', back: '', interval: 0, ease: 2.5, nextReview: Date.now() }
+                    {
+                        id: 'c1',
+                        deckId: deckId,
+                        type: 'basic',
+                        front: 'Apple',
+                        back: 'Olma (meyva)',
+                        interval: 0,
+                        ease: 2.5,
+                        due: Date.now(),
+                        created: Date.now()
+                    },
+                    {
+                        id: 'c2',
+                        deckId: deckId,
+                        type: 'cloze',
+                        front: 'London is the capital of {{c1::United Kingdom}}.',
+                        back: '',
+                        interval: 0,
+                        ease: 2.5,
+                        due: Date.now(),
+                        created: Date.now()
+                    },
+                    {
+                        id: 'c3',
+                        deckId: deckId,
+                        type: 'basic',
+                        front: 'What is 2 + 2?',
+                        back: '4 (to'rt)',
+                        interval: 0,
+                        ease: 2.5,
+                        due: Date.now(),
+                        created: Date.now()
+                    }
                 ];
                 this.save();
             },
 
-            checkStreak() {
-                const today = new Date().toDateString();
+            syncStreak() {
+                const today = new Date().toISOString().split('T')[0];
                 if (this.state.user.lastStudy && this.state.user.lastStudy !== today) {
-                    const yesterday = new Date();
-                    yesterday.setDate(yesterday.getDate() - 1);
-                    if (this.state.user.lastStudy !== yesterday.toDateString()) {
-                        this.state.user.streak = 0; // Reset if missed a day
+                    const lastDate = new Date(this.state.user.lastStudy);
+                    const currDate = new Date(today);
+                    const diffMs = currDate.getTime() - lastDate.getTime();
+                    const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+                    
+                    if (diffDays > 1) {
+                        this.state.user.streak = 0;
                     }
                 }
             }
         };
 
-        // --- 3. ALGORITHM (Quantum SM-2) ---
+        // ==========================================
+        // 3. ALGORITHM (FSRS LITE - SM2 HYBRID)
+        // ==========================================
         const Brain = {
             calc(card, rating) {
-                // Ratings: 1 (Fail), 2 (Hard), 3 (Good), 4 (Easy)
-                const oneDay = 24 * 60 * 60 * 1000;
-                let interval = 0;
+                const now = Date.now();
+                const dayMs = 86400000;
+                let newInterval = 0;
 
                 if (rating === 1) {
-                    // Reset
+                    // AGAIN - Reset va ease kamaytirish
                     card.interval = 0;
                     card.ease = Math.max(1.3, card.ease - 0.2);
-                    interval = 1 * 60 * 1000; // 1 min (immediate review)
+                    newInterval = 60000; // 1 minut
                 } else {
-                    // Success logic
+                    // Good, Hard, Easy - Interval ortirish
                     if (card.interval === 0) {
-                        card.interval = 1; // 1 day
-                    } else if (card.interval === 1) {
-                        card.interval = (rating === 4) ? 4 : 3;
+                        card.interval = 1;
                     } else {
-                        let mod = (rating === 4) ? 1.3 : (rating === 2 ? 0.8 : 1.0);
-                        card.interval = Math.ceil(card.interval * card.ease * mod);
+                        let multiplier = 1.2; // Default (Good)
+                        if (rating === 2) multiplier = 0.8; // Hard
+                        if (rating === 4) multiplier = 1.5; // Easy
+                        
+                        card.interval = Math.ceil(card.interval * card.ease * multiplier);
                     }
-
-                    // Ease adjustment
-                    if (rating === 2) card.ease -= 0.15;
+                    
+                    // Ease o'zgarishi
                     if (rating === 4) card.ease += 0.15;
-                    if (card.ease < 1.3) card.ease = 1.3;
-
-                    interval = card.interval * oneDay;
+                    else if (rating === 2) card.ease -= 0.15;
+                    
+                    card.ease = Math.max(1.3, Math.min(2.5, card.ease));
+                    
+                    newInterval = card.interval * dayMs;
                 }
-
-                card.nextReview = Date.now() + interval;
+                
+                card.due = now + newInterval;
                 return card;
             }
         };
 
-        // --- 4. UI RENDERER & ROUTER ---
+        // ==========================================
+        // 4. APP CONTROLLER (ASOSIY BOSHQARUV)
+        // ==========================================
         const App = {
-            view: 'home',
+            lang: 'uz',
             
             init() {
-                Store.init();
-                this.lang = Store.state.lang;
-                this.updateLangDisplay();
-                this.render();
-            },
-
-            t(key) {
-                return TRANSLATIONS[this.lang][key] || key;
+                DB.init();
+                this.lang = DB.state.lang;
+                this.updateLangBtn();
+                Router.go('home');
+                this.translateAll();
             },
 
             toggleLang() {
                 this.lang = this.lang === 'uz' ? 'en' : 'uz';
-                Store.state.lang = this.lang;
-                Store.save();
-                this.updateLangDisplay();
-                this.render(); // Re-render current view
+                DB.state.lang = this.lang;
+                DB.save();
+                this.updateLangBtn();
+                this.translateAll();
+                Router.refresh();
             },
 
-            updateLangDisplay() {
-                document.getElementById('lang-display').innerText = this.lang.toUpperCase();
+            updateLangBtn() {
+                const btn = document.getElementById('lang-ind');
+                if (btn) btn.textContent = this.lang.toUpperCase();
             },
 
-            render() {
-                const container = document.getElementById('app-viewport');
-                container.innerHTML = '';
+            t(key) {
+                return (I18n[this.lang] && I18n[this.lang][key]) || key;
+            },
+
+            translateAll() {
+                document.querySelectorAll('[data-key]').forEach(el => {
+                    if (el) {
+                        el.textContent = this.t(el.getAttribute('data-key'));
+                    }
+                });
+            },
+
+            toast(msg, type = 'success') {
+                const toastEl = document.getElementById('toast');
+                if (!toastEl) return;
+
+                const msgEl = toastEl.querySelector('#toast-msg');
+                const iconEl = toastEl.querySelector('i');
                 
-                // Update Nav Active State
-                ['home', 'add', 'profile'].forEach(v => {
-                    const el = document.getElementById(`nav-${v}`);
-                    if (v === this.view) {
-                        el.classList.add('text-primary');
-                        el.classList.remove('text-slate-500');
-                    } else {
-                        el.classList.remove('text-primary');
-                        el.classList.add('text-slate-500');
+                if (msgEl) msgEl.textContent = msg;
+                
+                if (type === 'error') {
+                    iconEl.className = 'fa-solid fa-triangle-exclamation text-ios-red';
+                } else {
+                    iconEl.className = 'fa-solid fa-check-circle text-ios-green';
+                }
+
+                toastEl.classList.remove('opacity-0', 'scale-90', 'pointer-events-none');
+                toastEl.classList.add('opacity-100', 'scale-100', 'pointer-events-auto');
+                
+                setTimeout(() => {
+                    toastEl.classList.add('opacity-0', 'scale-90', 'pointer-events-none');
+                    toastEl.classList.remove('opacity-100', 'scale-100', 'pointer-events-auto');
+                }, 2500);
+            }
+        };
+
+        // ==========================================
+        // 5. ROUTER (YO'NALISH)
+        // ==========================================
+        const Router = {
+            current: 'home',
+            params: null,
+            
+            go(view, params = null) {
+                this.current = view;
+                this.params = params;
+                
+                // Nav highlight
+                ['home', 'add', 'stats'].forEach(v => {
+                    const btn = document.getElementById('nav-' + v);
+                    if (btn) {
+                        if (v === view) {
+                            btn.classList.add('nav-active', 'text-ios-blue');
+                        } else {
+                            btn.classList.remove('nav-active', 'text-ios-blue');
+                        }
                     }
                 });
 
-                if (this.view === 'home') Views.home(container);
-                else if (this.view === 'add') Views.add(container);
-                else if (this.view === 'profile') Views.profile(container);
-                else if (this.view === 'study') Views.study(container);
-                
-                // Translate static UI elements
-                document.querySelectorAll('[data-key]').forEach(el => {
-                    el.innerText = this.t(el.getAttribute('data-key'));
-                });
+                const viewport = document.getElementById('viewport');
+                if (viewport) {
+                    viewport.innerHTML = '';
+                    
+                    if (view === 'home') Views.home(viewport);
+                    else if (view === 'add') Views.add(viewport);
+                    else if (view === 'stats') Views.stats(viewport);
+                    else if (view === 'study') Views.study(viewport);
+                }
+
+                App.translateAll();
+            },
+
+            refresh() {
+                this.go(this.current, this.params);
             }
         };
 
-        const Router = {
-            nav(view, params = null) {
-                App.view = view;
-                App.params = params;
-                App.render();
-            }
-        };
-
-        // --- 5. VIEWS (Components) ---
+        // ==========================================
+        // 6. VIEWS (EKRANLAR)
+        // ==========================================
         const Views = {
             home(el) {
-                const dueCount = Store.state.cards.filter(c => c.nextReview <= Date.now()).length;
+                const totalDue = DB.state.cards.filter(c => c.due <= Date.now()).length;
+                const user = DB.state.user;
+                const level = Math.floor(user.xp / 100) + 1;
                 
                 let html = `
-                    <div class="animate-enter space-y-6">
-                        <!-- Hero Stats -->
-                        <div class="w-full p-6 rounded-3xl bg-gradient-to-br from-dark-surface to-dark-card border border-dark-border relative overflow-hidden shadow-2xl">
-                            <div class="absolute -right-6 -top-6 w-32 h-32 bg-primary blur-[60px] opacity-20"></div>
-                            <h2 class="text-xs font-bold text-primary uppercase tracking-widest mb-1">${App.t('hero_title')}</h2>
-                            <div class="flex items-end gap-2">
-                                <span class="text-4xl font-heading font-extrabold text-white">${dueCount}</span>
-                                <span class="text-sm font-medium text-slate-400 mb-1.5">${App.t('hero_sub')}</span>
+                    <div class="animate-page-enter space-y-6">
+                        <!-- HERO CARD -->
+                        <div class="w-full p-6 rounded-3xl bg-gradient-to-br from-ios-surface2 to-black border border-ios-border relative overflow-hidden shadow-2xl">
+                            <div class="absolute -right-6 -top-6 w-32 h-32 bg-ios-blue blur-[60px] opacity-20"></div>
+                            
+                            <h2 class="text-xs font-bold text-ios-blue uppercase tracking-widest mb-1" data-key="hero_title">Bugungi Vazifalar</h2>
+                            <div class="flex items-end gap-2 mb-4">
+                                <span class="text-5xl font-bold text-white tracking-tighter">${totalDue}</span>
+                                <span class="text-sm font-medium text-ios-subtext mb-2" data-key="hero_sub">ta karta kutyapti</span>
                             </div>
-                            <div class="mt-4 w-full h-1.5 bg-dark-bg rounded-full overflow-hidden">
-                                <div class="h-full bg-primary rounded-full transition-all duration-1000" style="width: ${Math.min(100, (Store.state.user.xp % 100))}%"></div>
+                            
+                            <!-- Progress Bar -->
+                            <div class="flex gap-2 items-center">
+                                <div class="h-1.5 flex-1 bg-ios-surface rounded-full overflow-hidden">
+                                    <div class="h-full bg-gradient-to-r from-ios-blue to-ios-green rounded-full transition-all duration-1000" style="width: ${Math.min(100, (user.xp % 100))}%"></div>
+                                </div>
+                                <span class="text-[10px] text-ios-subtext font-bold">Lvl ${level}</span>
                             </div>
                         </div>
 
-                        <!-- Decks List -->
+                        <!-- DECKS SECTION -->
                         <div>
-                            <h3 class="font-heading font-bold text-lg text-white mb-3 px-1">${App.t('decks_title')}</h3>
+                            <h3 class="text-lg font-bold text-white mb-3 px-1" data-key="decks">To'plamlar</h3>
                             <div class="space-y-3">
                 `;
 
-                if (Store.state.decks.length === 0) {
-                    html += `<div class="p-8 text-center border border-dashed border-dark-border rounded-2xl text-slate-500 text-sm">${App.t('no_decks')}</div>`;
+                if (DB.state.decks.length === 0) {
+                    html += `<div class="p-8 text-center border border-dashed border-ios-border rounded-2xl text-ios-subtext text-sm" data-key="no_decks">To'plamlar yo'q. Yangi qo'shing.</div>`;
+                } else {
+                    DB.state.decks.forEach(deck => {
+                        const cardCount = DB.state.cards.filter(c => c.deckId === deck.id).length;
+                        const dueCount = DB.state.cards.filter(c => c.deckId === deck.id && c.due <= Date.now()).length;
+
+                        html += `
+                            <div onclick="Study.init('${deck.id}')" class="group relative bg-ios-surface hover:bg-ios-surface2 border border-ios-border p-4 rounded-2xl flex items-center justify-between transition-all tap-scale shadow-sm cursor-pointer">
+                                <div class="flex items-center gap-4 flex-1">
+                                    <div class="w-12 h-12 rounded-2xl bg-gradient-to-br ${deck.color} flex items-center justify-center text-white text-xl shadow-lg flex-shrink-0">
+                                        <i class="fa-solid ${deck.icon}"></i>
+                                    </div>
+                                    <div class="flex-1 min-w-0">
+                                        <h4 class="font-bold text-white text-[17px] tracking-tight truncate">${deck.name}</h4>
+                                        <p class="text-xs text-ios-subtext font-medium mt-0.5">${cardCount} Karta • <span class="${dueCount > 0 ? 'text-ios-green font-bold' : ''}">${dueCount} Due</span></p>
+                                    </div>
+                                </div>
+                                <div class="w-8 h-8 rounded-full bg-black border border-ios-border flex items-center justify-center text-ios-subtext group-hover:text-white transition flex-shrink-0">
+                                    <i class="fa-solid fa-chevron-right text-xs"></i>
+                                </div>
+                            </div>
+                        `;
+                    });
                 }
-
-                Store.state.decks.forEach(deck => {
-                    const total = Store.state.cards.filter(c => c.deckId === deck.id).length;
-                    const due = Store.state.cards.filter(c => c.deckId === deck.id && c.nextReview <= Date.now()).length;
-
-                    html += `
-                        <div onclick="Study.init('${deck.id}')" class="group relative bg-dark-surface hover:bg-dark-card border border-dark-border p-4 rounded-2xl flex items-center justify-between transition-all btn-press shadow-md cursor-pointer">
-                            <div class="flex items-center gap-4">
-                                <div class="w-12 h-12 rounded-xl bg-gradient-to-br ${deck.color} flex items-center justify-center text-white text-xl shadow-lg group-hover:scale-110 transition-transform">
-                                    <i class="fa-solid ${deck.icon}"></i>
-                                </div>
-                                <div>
-                                    <h4 class="font-heading font-bold text-white text-base">${deck.name}</h4>
-                                    <p class="text-xs text-slate-400 font-medium mt-0.5">${total} Cards • <span class="${due > 0 ? 'text-emerald-400 font-bold' : ''}">${due} Due</span></p>
-                                </div>
-                            </div>
-                            <div class="w-8 h-8 rounded-full bg-dark-bg flex items-center justify-center text-slate-500 group-hover:text-white transition">
-                                <i class="fa-solid fa-chevron-right text-xs"></i>
-                            </div>
-                        </div>
-                    `;
-                });
 
                 html += `</div></div></div>`;
                 el.innerHTML = html;
             },
 
             add(el) {
-                const decks = Store.state.decks.map(d => `<option value="${d.id}">${d.name}</option>`).join('');
+                if (DB.state.decks.length === 0) {
+                    el.innerHTML = `
+                        <div class="animate-page-enter space-y-6">
+                            <h2 class="text-2xl font-bold text-white px-1 tracking-tight" data-key="add_h">Yangi Yaratish</h2>
+                            <div class="p-8 text-center border border-dashed border-ios-border rounded-2xl text-ios-subtext text-sm">
+                                <p class="mb-4" data-key="msg_no_deck">Avval to'plam yaratib oling!</p>
+                                <button onclick="UI.setAddMode('deck')" class="text-ios-blue font-bold">To'plam Yaratish</button>
+                            </div>
+                        </div>
+                    `;
+                    return;
+                }
+
+                const deckOptions = DB.state.decks.map(d => `<option value="${d.id}">${d.name}</option>`).join('');
                 
                 el.innerHTML = `
-                    <div class="animate-enter space-y-6">
-                        <h2 class="font-heading font-bold text-2xl text-white px-1">${App.t('add_title')}</h2>
+                    <div class="animate-page-enter space-y-6">
+                        <h2 class="text-2xl font-bold text-white px-1 tracking-tight" data-key="add_h">Yangi Yaratish</h2>
                         
-                        <!-- Toggle Type -->
-                        <div class="grid grid-cols-2 gap-2 p-1 bg-dark-surface rounded-xl border border-dark-border">
-                            <button onclick="UI.setAddType('card')" id="tab-card" class="py-2.5 rounded-lg text-xs font-bold bg-primary text-white shadow-md transition">${App.t('add_tab_card')}</button>
-                            <button onclick="UI.setAddType('deck')" id="tab-deck" class="py-2.5 rounded-lg text-xs font-bold text-slate-400 hover:text-white transition">${App.t('add_tab_deck')}</button>
+                        <!-- MODE TOGGLE -->
+                        <div class="grid grid-cols-2 gap-1 p-1 bg-ios-surface2 rounded-xl">
+                            <button onclick="UI.setAddMode('card')" id="btn-mode-card" class="py-2 rounded-lg text-xs font-bold bg-ios-surface text-white shadow-sm transition" data-key="tab_card">Karta</button>
+                            <button onclick="UI.setAddMode('deck')" id="btn-mode-deck" class="py-2 rounded-lg text-xs font-bold text-ios-subtext transition" data-key="tab_deck">To'plam</button>
                         </div>
 
-                        <!-- Card Form -->
+                        <!-- CARD FORM -->
                         <div id="form-card" class="space-y-4">
                             <div>
-                                <label class="text-xs font-bold text-slate-500 uppercase ml-1 mb-1 block">${App.t('lbl_deck')}</label>
+                                <label class="text-xs font-bold text-ios-subtext uppercase ml-1 mb-2 block" data-key="lbl_deck">To'plamni tanlang</label>
                                 <div class="relative">
-                                    <select id="inp-deck" class="input-pro appearance-none">${decks}</select>
-                                    <i class="fa-solid fa-chevron-down absolute right-4 top-4 text-slate-500 pointer-events-none"></i>
+                                    <select id="inp-deck" class="ios-input appearance-none">${deckOptions}</select>
+                                    <i class="fa-solid fa-chevron-down absolute right-4 top-4 text-ios-subtext pointer-events-none text-sm"></i>
                                 </div>
                             </div>
-
                             <div>
-                                <label class="text-xs font-bold text-slate-500 uppercase ml-1 mb-1 block">${App.t('lbl_front')}</label>
-                                <textarea id="inp-front" rows="3" class="input-pro text-lg" placeholder="${App.t('placeholder_q')}"></textarea>
-                                <p class="text-[10px] text-primary mt-1.5 ml-1 opacity-80 bg-blue-500/10 p-1.5 rounded inline-block"><i class="fa-solid fa-circle-info mr-1"></i> ${App.t('hint_cloze')}</p>
+                                <label class="text-xs font-bold text-ios-subtext uppercase ml-1 mb-2 block" data-key="lbl_front">Savol</label>
+                                <textarea id="inp-front" rows="4" class="ios-input resize-none" placeholder="Savolni kiriting..."></textarea>
+                                <p class="text-[10px] text-ios-blue mt-2 ml-1 opacity-80"><i class="fa-solid fa-lightbulb mr-1"></i> <span data-key="cloze_hint">{{c1::...}}, {{c2::...}} formatini ishlating</span></p>
                             </div>
-
-                            <div id="box-back">
-                                <label class="text-xs font-bold text-slate-500 uppercase ml-1 mb-1 block">${App.t('lbl_back')}</label>
-                                <textarea id="inp-back" rows="3" class="input-pro text-lg" placeholder="${App.t('placeholder_a')}"></textarea>
+                            <div id="back-wrap" class="block">
+                                <label class="text-xs font-bold text-ios-subtext uppercase ml-1 mb-2 block" data-key="lbl_back">Javob</label>
+                                <textarea id="inp-back" rows="3" class="ios-input resize-none" placeholder="Javobni kiriting..."></textarea>
                             </div>
-
-                            <button onclick="Actions.saveCard()" class="w-full py-4 bg-primary hover:bg-primary-hover text-white font-bold rounded-xl shadow-lg shadow-blue-500/20 btn-press flex items-center justify-center gap-2 mt-2">
-                                <i class="fa-solid fa-check"></i> ${App.t('btn_save')}
-                            </button>
+                            <button onclick="Actions.saveCard()" class="w-full py-4 bg-ios-blue hover:bg-blue-600 text-white font-bold rounded-2xl shadow-[0_5px_15px_rgba(10,132,255,0.3)] tap-scale transition text-[17px]" data-key="btn_save">Saqlash</button>
                         </div>
 
-                        <!-- Deck Form -->
+                        <!-- DECK FORM -->
                         <div id="form-deck" class="space-y-4 hidden">
                             <div>
-                                <label class="text-xs font-bold text-slate-500 uppercase ml-1 mb-1 block">${App.t('lbl_name')}</label>
-                                <input id="inp-deck-name" type="text" class="input-pro" placeholder="M: Dasturlash...">
+                                <label class="text-xs font-bold text-ios-subtext uppercase ml-1 mb-2 block" data-key="lbl_name">To'plam Nomi</label>
+                                <input id="inp-deck-name" type="text" class="ios-input" placeholder="Nomni kiriting...">
                             </div>
-                            <button onclick="Actions.saveDeck()" class="w-full py-4 bg-dark-surface hover:bg-dark-card border border-dark-border text-white font-bold rounded-xl shadow-lg btn-press flex items-center justify-center gap-2 mt-2">
-                                <i class="fa-solid fa-plus"></i> ${App.t('btn_create')}
-                            </button>
+                            <button onclick="Actions.saveDeck()" class="w-full py-4 bg-ios-surface2 border border-ios-border text-white font-bold rounded-2xl tap-scale transition" data-key="btn_create">Yaratish</button>
                         </div>
                     </div>
                 `;
+                App.translateAll();
+            },
+
+            stats(el) {
+                const user = DB.state.user;
+                const level = Math.floor(user.xp / 100) + 1;
+                
+                let grid = '';
+                const today = new Date();
+                
+                for (let i = 0; i < 60; i++) {
+                    const d = new Date();
+                    d.setDate(today.getDate() - (59 - i));
+                    const key = d.toISOString().split('T')[0];
+                    const val = user.heatmap[key] || 0;
+                    let cls = 'heat-cell';
+                    if (val > 0) cls += ' heat-1';
+                    if (val > 5) cls += ' heat-2';
+                    if (val > 10) cls += ' heat-3';
+                    grid += `<div class="${cls}" title="${key}: ${val} cards"></div>`;
+                }
+
+                el.innerHTML = `
+                    <div class="animate-page-enter space-y-6">
+                        <!-- TROPHY -->
+                        <div class="w-24 h-24 rounded-full bg-ios-surface border-4 border-ios-blue mx-auto flex items-center justify-center shadow-2xl relative mt-4">
+                            <i class="fa-solid fa-trophy text-4xl text-ios-orange"></i>
+                            <div class="absolute -bottom-2 bg-ios-blue text-white text-[10px] font-bold px-3 py-1 rounded-full border-2 border-black">
+                                LVL ${level}
+                            </div>
+                        </div>
+
+                        <h2 class="text-2xl font-bold text-white text-center" data-key="stats_h">Statistika</h2>
+
+                        <!-- STATS GRID -->
+                        <div class="grid grid-cols-2 gap-4">
+                            <div class="bg-ios-surface p-4 rounded-2xl border border-ios-border">
+                                <div class="text-center">
+                                    <i class="fa-solid fa-fire text-ios-orange text-2xl mb-2 block"></i>
+                                    <div class="text-3xl font-bold text-white">${user.streak}</div>
+                                    <div class="text-[10px] font-bold text-ios-subtext uppercase mt-1" data-key="strk">Streak</div>
+                                </div>
+                            </div>
+                            <div class="bg-ios-surface p-4 rounded-2xl border border-ios-border">
+                                <div class="text-center">
+                                    <i class="fa-solid fa-bolt text-ios-green text-2xl mb-2 block"></i>
+                                    <div class="text-3xl font-bold text-white">${user.xp}</div>
+                                    <div class="text-[10px] font-bold text-ios-subtext uppercase mt-1" data-key="xp">Jami XP</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- HEATMAP -->
+                        <div class="bg-ios-surface p-4 rounded-2xl border border-ios-border">
+                            <h3 class="text-sm font-bold text-white mb-3">60 kun o'quv xarxasi</h3>
+                            <div class="heatmap-grid">${grid}</div>
+                        </div>
+
+                        <!-- CARD COUNT -->
+                        <div class="bg-ios-surface p-4 rounded-2xl border border-ios-border">
+                            <div class="flex items-center justify-between">
+                                <span class="text-ios-subtext" data-key="total">Kartalar</span>
+                                <span class="text-2xl font-bold text-ios-blue">${DB.state.cards.length}</span>
+                            </div>
+                        </div>
+                    </div>
+                `;
+                App.translateAll();
             },
 
             study(el) {
-                // Skeleton container, content filled by Study Controller
-                el.innerHTML = `<div id="study-container" class="h-full flex flex-col relative"></div>`;
-            },
-
-            profile(el) {
-                const user = Store.state.user;
-                const totalCards = Store.state.cards.length;
-                
-                el.innerHTML = `
-                    <div class="animate-enter flex flex-col items-center justify-center min-h-[50vh] text-center space-y-8">
-                        
-                        <div class="relative">
-                            <div class="w-28 h-28 rounded-full bg-dark-surface border-4 border-primary flex items-center justify-center shadow-[0_0_30px_rgba(59,130,246,0.3)]">
-                                <i class="fa-solid fa-user-astronaut text-4xl text-slate-300"></i>
-                            </div>
-                            <div class="absolute -bottom-3 left-1/2 -translate-x-1/2 bg-primary text-white text-[10px] font-bold px-3 py-1 rounded-full border-2 border-dark-bg uppercase tracking-wide whitespace-nowrap">
-                                ${App.t('lvl')} ${Math.floor(user.xp / 100) + 1}
-                            </div>
-                        </div>
-
-                        <div>
-                            <h2 class="font-heading font-bold text-3xl text-white mb-1">${App.t('profile_stats')}</h2>
-                            <p class="text-slate-500 text-sm">Keep pushing forward!</p>
-                        </div>
-
-                        <div class="grid grid-cols-2 gap-4 w-full">
-                            <div class="bg-dark-surface p-5 rounded-2xl border border-dark-border">
-                                <div class="text-amber-500 text-2xl mb-1"><i class="fa-solid fa-fire"></i></div>
-                                <div class="font-heading font-bold text-2xl text-white">${user.streak}</div>
-                                <div class="text-[10px] font-bold text-slate-500 uppercase">${App.t('streak')}</div>
-                            </div>
-                            <div class="bg-dark-surface p-5 rounded-2xl border border-dark-border">
-                                <div class="text-emerald-500 text-2xl mb-1"><i class="fa-solid fa-bolt"></i></div>
-                                <div class="font-heading font-bold text-2xl text-white">${user.xp}</div>
-                                <div class="text-[10px] font-bold text-slate-500 uppercase">${App.t('total_xp')}</div>
-                            </div>
-                        </div>
-                    </div>
-                `;
+                el.innerHTML = `<div id="study-area" class="h-full flex flex-col relative"></div>`;
             }
         };
 
-        // --- 6. ACTIONS & CONTROLLERS ---
+        // ==========================================
+        // 7. UI & ACTIONS (TUGMALAR VA AMALLAR)
+        // ==========================================
         const UI = {
-            toast(msg, type = 'success') {
-                const t = document.getElementById('toast');
-                t.querySelector('#toast-msg').innerText = msg;
-                t.querySelector('div').className = `w-2 h-2 rounded-full ${type === 'error' ? 'bg-red-500' : 'bg-emerald-500'}`;
-                
-                t.classList.remove('opacity-0', 'translate-y-[-20px]');
-                setTimeout(() => {
-                    t.classList.add('opacity-0', 'translate-y-[-20px]');
-                }, 2000);
-            },
+            setAddMode(mode) {
+                const isCard = mode === 'card';
+                const cardForm = document.getElementById('form-card');
+                const deckForm = document.getElementById('form-deck');
+                const btnCard = document.getElementById('btn-mode-card');
+                const btnDeck = document.getElementById('btn-mode-deck');
 
-            setAddType(type) {
-                const bCard = document.getElementById('tab-card');
-                const bDeck = document.getElementById('tab-deck');
-                const fCard = document.getElementById('form-card');
-                const fDeck = document.getElementById('form-deck');
+                if (cardForm) cardForm.classList.toggle('hidden', !isCard);
+                if (deckForm) deckForm.classList.toggle('hidden', isCard);
 
-                if (type === 'card') {
-                    bCard.className = "py-2.5 rounded-lg text-xs font-bold bg-primary text-white shadow-md transition";
-                    bDeck.className = "py-2.5 rounded-lg text-xs font-bold text-slate-400 hover:text-white transition";
-                    fCard.classList.remove('hidden');
-                    fDeck.classList.add('hidden');
-                } else {
-                    bDeck.className = "py-2.5 rounded-lg text-xs font-bold bg-primary text-white shadow-md transition";
-                    bCard.className = "py-2.5 rounded-lg text-xs font-bold text-slate-400 hover:text-white transition";
-                    fDeck.classList.remove('hidden');
-                    fCard.classList.add('hidden');
+                if (btnCard) {
+                    btnCard.className = isCard 
+                        ? "py-2 rounded-lg text-xs font-bold bg-ios-surface text-white shadow-sm transition" 
+                        : "py-2 rounded-lg text-xs font-bold text-ios-subtext transition";
+                }
+                if (btnDeck) {
+                    btnDeck.className = !isCard 
+                        ? "py-2 rounded-lg text-xs font-bold bg-ios-surface text-white shadow-sm transition" 
+                        : "py-2 rounded-lg text-xs font-bold text-ios-subtext transition";
                 }
             }
         };
 
         const Actions = {
             saveDeck() {
-                const name = document.getElementById('inp-deck-name').value.trim();
-                if (!name) return UI.toast(App.t('msg_error'), 'error');
+                const nameInput = document.getElementById('inp-deck-name');
+                const name = nameInput ? nameInput.value.trim() : '';
 
-                const colors = ['from-purple-600 to-indigo-600', 'from-pink-500 to-rose-500', 'from-amber-500 to-orange-500'];
-                const icons = ['fa-book', 'fa-code', 'fa-globe', 'fa-atom'];
+                if (!name) {
+                    App.toast(App.t('msg_err'), 'error');
+                    return;
+                }
 
-                Store.state.decks.push({
+                const colors = [
+                    'from-blue-500 to-indigo-500',
+                    'from-red-500 to-orange-500',
+                    'from-green-500 to-emerald-500',
+                    'from-purple-500 to-pink-500',
+                    'from-cyan-500 to-blue-500'
+                ];
+                const icons = ['fa-book', 'fa-code', 'fa-atom', 'fa-globe', 'fa-language', 'fa-star'];
+
+                DB.state.decks.push({
                     id: 'd_' + Date.now(),
-                    name,
-                    color: colors[Math.floor(Math.random() * colors.length)],
-                    icon: icons[Math.floor(Math.random() * icons.length)]
+                    name: name,
+                    icon: icons[Math.floor(Math.random() * icons.length)],
+                    color: colors[Math.floor(Math.random() * colors.length)]
                 });
-                Store.save();
-                Router.nav('home');
-                UI.toast(App.t('msg_saved'));
+
+                DB.save();
+                UI.setAddMode('card');
+                if (nameInput) nameInput.value = '';
+                App.toast(App.t('msg_saved'));
+                setTimeout(() => Router.go('home'), 500);
             },
 
             saveCard() {
-                const deckId = document.getElementById('inp-deck').value;
-                const front = document.getElementById('inp-front').value.trim();
-                const back = document.getElementById('inp-back').value.trim();
-                
+                const deckSelect = document.getElementById('inp-deck');
+                const frontInput = document.getElementById('inp-front');
+                const backInput = document.getElementById('inp-back');
+
+                const deckId = deckSelect ? deckSelect.value : null;
+                const front = frontInput ? frontInput.value.trim() : '';
+                const back = backInput ? backInput.value.trim() : '';
+
+                if (!front || !deckId) {
+                    App.toast(App.t('msg_err'), 'error');
+                    return;
+                }
+
                 let type = 'basic';
-                if (front.includes('{{c1::')) type = 'cloze';
+                if (front.includes('{{c1::') && front.includes('}}')) {
+                    type = 'cloze';
+                }
 
-                if (!front || (!back && type === 'basic')) return UI.toast(App.t('msg_error'), 'error');
-
-                Store.state.cards.push({
+                DB.state.cards.push({
                     id: 'c_' + Date.now(),
-                    deckId,
-                    type,
-                    front,
+                    deckId: deckId,
+                    type: type,
+                    front: front,
                     back: type === 'cloze' ? '' : back,
                     interval: 0,
                     ease: 2.5,
-                    nextReview: Date.now()
+                    due: Date.now(),
+                    created: Date.now()
                 });
-                Store.save();
-                
-                // Reset inputs
-                document.getElementById('inp-front').value = '';
-                document.getElementById('inp-back').value = '';
-                UI.toast(App.t('msg_saved'));
+
+                DB.save();
+                if (frontInput) frontInput.value = '';
+                if (backInput) backInput.value = '';
+                App.toast(App.t('msg_saved'));
             }
         };
 
-        // --- 7. STUDY LOGIC (Complex) ---
+        // ==========================================
+        // 8. STUDY ENGINE (O'QUISH JARAYONI)
+        // ==========================================
         const Study = {
             queue: [],
             current: null,
             flipped: false,
+            startTime: null,
 
             init(deckId) {
-                // Filter due cards
-                this.queue = Store.state.cards
-                    .filter(c => c.deckId === deckId && c.nextReview <= Date.now())
-                    .sort((a,b) => a.nextReview - b.nextReview);
+                this.queue = DB.state.cards
+                    .filter(c => c.deckId === deckId && c.due <= Date.now())
+                    .sort((a, b) => a.due - b.due);
 
                 if (this.queue.length === 0) {
-                    UI.toast("Hozircha darslar yo'q", 'error');
+                    App.toast(App.t('msg_deck_empty'), 'error');
                     return;
                 }
 
-                Router.nav('study');
+                this.startTime = Date.now();
+                Router.go('study');
                 this.next();
             },
 
             next() {
                 if (this.queue.length === 0) {
-                    this.finishSession();
+                    this.finish();
                     return;
                 }
 
-                this.current = this.queue[0]; // Peek
+                this.current = this.queue[0];
                 this.flipped = false;
-                this.renderUI();
+                this.renderCard();
             },
 
-            renderUI() {
-                const container = document.getElementById('study-container');
+            renderCard() {
                 const card = this.current;
+                const area = document.getElementById('study-area');
                 
-                // Parse Content
-                let frontHtml = card.front;
-                let backHtml = card.back;
-                
+                if (!area || !card) return;
+
+                let front = card.front;
+                let back = card.back;
+
+                // CLOZE processing
                 if (card.type === 'cloze') {
-                    // Regex to hide text
-                    frontHtml = card.front.replace(/{{c1::(.*?)}}/g, '<span class="cloze-mask" onclick="event.stopPropagation()">...</span>');
-                    backHtml = card.front.replace(/{{c1::(.*?)}}/g, '<span class="cloze-reveal">$1</span>');
+                    front = front.replace(/\{\{c\d+::(.*?)\}\}/g, '<span class="cloze-mask">...</span>');
+                    back = card.front.replace(/\{\{c\d+::(.*?)\}\}/g, '<span class="cloze-reveal">$1</span>');
                 }
 
-                container.innerHTML = `
-                    <div class="flex items-center justify-between mb-4">
-                        <button onclick="Router.nav('home')" class="text-slate-400 hover:text-white"><i class="fa-solid fa-xmark text-lg"></i></button>
-                        <div class="px-3 py-1 rounded-full bg-dark-surface border border-dark-border text-xs font-bold text-primary">
-                            ${this.queue.length} ${App.t('study_left')}
+                area.innerHTML = `
+                    <div class="flex items-center justify-between mb-6 animate-page-enter">
+                        <button onclick="Router.go('home')" class="w-8 h-8 rounded-full bg-ios-surface text-ios-subtext hover:text-white transition tap-scale">
+                            <i class="fa-solid fa-xmark"></i>
+                        </button>
+                        <div class="px-3 py-1 bg-ios-surface rounded-full border border-ios-border text-[10px] font-bold text-ios-blue uppercase tracking-wider">
+                            ${this.queue.length} <span data-key="study_left">qoldi</span>
                         </div>
-                        <div class="w-6"></div>
+                        <div class="w-8"></div>
                     </div>
 
                     <!-- 3D CARD CONTAINER -->
-                    <div class="flex-1 scene mb-6 cursor-pointer group" onclick="Study.flip()">
+                    <div class="flex-1 card-scene mb-8 cursor-pointer animate-page-enter" onclick="Study.flip()">
                         <div id="active-card" class="card-object">
-                            <!-- FRONT -->
+                            <!-- QUESTION SIDE -->
                             <div class="card-face card-front">
-                                <div class="text-xs font-bold text-slate-500 uppercase tracking-widest mb-4">Question</div>
-                                <div class="text-2xl font-medium text-center leading-relaxed px-4">${frontHtml}</div>
-                                <div class="absolute bottom-6 text-xs text-slate-500 opacity-60 animate-pulse">Tap to show answer</div>
+                                <div class="text-[11px] font-bold text-ios-subtext uppercase tracking-widest mb-6">Savol</div>
+                                <div class="study-question">${front}</div>
+                                <div class="absolute bottom-8 text-[11px] text-ios-blue opacity-60 animate-pulse" data-key="show_ans">Javobni Ko'rsatish</div>
                             </div>
-                            <!-- BACK -->
+                            <!-- ANSWER SIDE -->
                             <div class="card-face card-back">
-                                <div class="text-sm text-slate-500 line-through opacity-50 mb-4">${card.type === 'basic' ? card.front : ''}</div>
-                                <div class="text-2xl font-bold text-center leading-relaxed text-white px-4">${backHtml}</div>
+                                <div class="text-[11px] font-bold text-ios-subtext uppercase tracking-widest mb-6">Javob</div>
+                                <div class="study-answer">${back}</div>
                             </div>
                         </div>
                     </div>
 
                     <!-- CONTROLS -->
-                    <div class="h-24">
-                        <button id="btn-reveal" onclick="Study.flip()" class="w-full h-14 bg-primary hover:bg-primary-hover text-white text-lg font-bold rounded-xl shadow-lg shadow-blue-500/20 btn-press transition">
-                            ${App.t('show_ans')}
+                    <div class="flex flex-col gap-3 pb-4">
+                        <button id="btn-show" onclick="Study.flip()" class="w-full py-4 bg-ios-blue hover:bg-blue-600 text-white font-bold rounded-2xl shadow-[0_5px_15px_rgba(10,132,255,0.3)] tap-scale transition text-[17px]" data-key="show_ans">
+                            Javobni Ko'rsatish
                         </button>
 
-                        <div id="grid-grading" class="hidden grid-cols-4 gap-2 h-16 animate-enter">
-                            <button onclick="Study.rate(1)" class="flex flex-col items-center justify-center bg-dark-surface border-2 border-status-again/30 text-status-again rounded-xl font-bold active:bg-status-again/10 transition">
-                                <span class="text-sm">${App.t('rate_again')}</span><span class="text-[10px] opacity-70">1m</span>
+                        <div id="grading-grid" class="hidden grid grid-cols-4 gap-2">
+                            <button onclick="Study.rate(1)" class="py-3 px-2 bg-ios-red/20 border border-ios-red text-ios-red rounded-xl font-bold text-xs active:bg-ios-red/40 transition flex flex-col items-center justify-center">
+                                <i class="fa-solid fa-arrow-rotate-left text-lg mb-1"></i>
+                                <span data-key="btn_again">Qayta</span>
+                                <span class="text-[9px] opacity-70 mt-0.5">1m</span>
                             </button>
-                            <button onclick="Study.rate(2)" class="flex flex-col items-center justify-center bg-dark-surface border-2 border-status-hard/30 text-status-hard rounded-xl font-bold active:bg-status-hard/10 transition">
-                                <span class="text-sm">${App.t('rate_hard')}</span><span class="text-[10px] opacity-70">10m</span>
+                            <button onclick="Study.rate(2)" class="py-3 px-2 bg-ios-orange/20 border border-ios-orange text-ios-orange rounded-xl font-bold text-xs active:bg-ios-orange/40 transition flex flex-col items-center justify-center">
+                                <i class="fa-solid fa-hourglass-end text-lg mb-1"></i>
+                                <span data-key="btn_hard">Qiyin</span>
+                                <span class="text-[9px] opacity-70 mt-0.5">10m</span>
                             </button>
-                            <button onclick="Study.rate(3)" class="flex flex-col items-center justify-center bg-dark-surface border-2 border-status-good/30 text-status-good rounded-xl font-bold active:bg-status-good/10 transition">
-                                <span class="text-sm">${App.t('rate_good')}</span><span class="text-[10px] opacity-70">1d</span>
+                            <button onclick="Study.rate(3)" class="py-3 px-2 bg-ios-green/20 border border-ios-green text-ios-green rounded-xl font-bold text-xs active:bg-ios-green/40 transition flex flex-col items-center justify-center">
+                                <i class="fa-solid fa-check text-lg mb-1"></i>
+                                <span data-key="btn_good">Yaxshi</span>
+                                <span class="text-[9px] opacity-70 mt-0.5">1d</span>
                             </button>
-                            <button onclick="Study.rate(4)" class="flex flex-col items-center justify-center bg-dark-surface border-2 border-status-easy/30 text-status-easy rounded-xl font-bold active:bg-status-easy/10 transition">
-                                <span class="text-sm">${App.t('rate_easy')}</span><span class="text-[10px] opacity-70">3d</span>
+                            <button onclick="Study.rate(4)" class="py-3 px-2 bg-ios-blue/20 border border-ios-blue text-ios-blue rounded-xl font-bold text-xs active:bg-ios-blue/40 transition flex flex-col items-center justify-center">
+                                <i class="fa-solid fa-star text-lg mb-1"></i>
+                                <span data-key="btn_easy">Oson</span>
+                                <span class="text-[9px] opacity-70 mt-0.5">4d</span>
                             </button>
                         </div>
                     </div>
                 `;
+                App.translateAll();
             },
 
             flip() {
                 if (this.flipped) return;
+                
                 this.flipped = true;
-                document.getElementById('active-card').classList.add('is-flipped');
-                document.getElementById('btn-reveal').classList.add('hidden');
-                document.getElementById('grid-grading').classList.remove('hidden');
-                document.getElementById('grid-grading').classList.add('grid');
+                const card = document.getElementById('active-card');
+                const btnShow = document.getElementById('btn-show');
+                const gridding = document.getElementById('grading-grid');
+
+                if (card) card.classList.add('is-flipped');
+                if (btnShow) btnShow.classList.add('hidden');
+                if (gridding) {
+                    gridding.classList.remove('hidden');
+                    gridding.classList.add('grid');
+                }
             },
 
             rate(rating) {
-                // Apply Algorithm
+                // Algorithm hisoblash
                 const updated = Brain.calc(this.current, rating);
                 
-                // Update Store
-                const idx = Store.state.cards.findIndex(c => c.id === updated.id);
-                Store.state.cards[idx] = updated;
-                
-                // Update User XP
-                Store.state.user.xp += (rating * 2);
-                
-                // Update Streak
-                const today = new Date().toDateString();
-                if (Store.state.user.lastStudy !== today) {
-                    Store.state.user.streak++;
-                    Store.state.user.lastStudy = today;
+                // DB da yangilash
+                const idx = DB.state.cards.findIndex(c => c.id === updated.id);
+                if (idx >= 0) {
+                    DB.state.cards[idx] = updated;
                 }
-                
-                Store.save();
 
-                // Queue Management
-                this.queue.shift(); // Remove current
+                // XP qo'shish
+                DB.state.user.xp += rating * 2;
+
+                // Heatmap yangilash
+                const today = new Date().toISOString().split('T')[0];
+                if (!DB.state.user.heatmap[today]) {
+                    DB.state.user.heatmap[today] = 0;
+                }
+                DB.state.user.heatmap[today]++;
+
+                // Streak yangilash
+                if (DB.state.user.lastStudy !== today) {
+                    DB.state.user.streak++;
+                    DB.state.user.lastStudy = today;
+                }
+
+                DB.save();
+
+                // Queue boshqarish
+                this.queue.shift();
                 if (rating === 1) {
-                    this.queue.push(updated); // Re-queue at end if failed
+                    // Again bo'lsa, oxiriga qo'shish
+                    this.queue.push(updated);
                 }
 
-                // Next Card
+                // Keyingi karta
                 this.next();
             },
 
-            finishSession() {
-                // 1. Show Confetti
-                confetti({ particleCount: 150, spread: 70, origin: { y: 0.6 }, colors: ['#3B82F6', '#10B981', '#F59E0B'] });
-                
-                // 2. Random Motivation Quote
-                const quotes = [
-                    { t: "Ilmdan boshqa najot yo'q va bo'lmagay.", a: "Imom Buxoriy" },
-                    { t: "Ozlarga hikmat - yomg'irdek, ko'plarga - seldek.", a: "Alisher Navoiy" },
-                    { t: "Kuch - adolatdadir.", a: "Amir Temur" },
-                    { t: "Knowledge is power.", a: "Francis Bacon" }
-                ];
-                const q = quotes[Math.floor(Math.random() * quotes.length)];
-                
-                document.getElementById('quote-text').innerText = `"${q.t}"`;
-                document.getElementById('quote-author').innerText = q.a;
+            finish() {
+                // Confetti effekti
+                confetti({
+                    particleCount: 100,
+                    spread: 60,
+                    origin: { y: 0.6 },
+                    colors: ['#0a84ff', '#30d158', '#ff9f0a', '#ff453a']
+                });
 
-                // 3. Show Modal
-                document.getElementById('modal-celebrate').classList.remove('hidden');
-                document.getElementById('modal-celebrate').classList.add('flex');
+                // Quotes ko'rsatish
+                const allQuotes = QUOTES[App.lang] || [];
+                if (allQuotes.length > 0) {
+                    const randomQuote = allQuotes[Math.floor(Math.random() * allQuotes.length)];
+                    const quoteText = document.getElementById('quote-text');
+                    const quoteAuthor = document.getElementById('quote-author');
+                    
+                    if (quoteText) quoteText.textContent = '"' + randomQuote.t + '"';
+                    if (quoteAuthor) quoteAuthor.textContent = randomQuote.a;
+                }
+
+                // Modalni ko'rsatish
+                const modal = document.getElementById('modal-finish');
+                if (modal) {
+                    modal.classList.remove('hidden');
+                    modal.classList.add('flex');
+                }
             },
 
-            closeSession() {
-                document.getElementById('modal-celebrate').classList.add('hidden');
-                document.getElementById('modal-celebrate').classList.remove('flex');
-                Router.nav('home');
+            close() {
+                const modal = document.getElementById('modal-finish');
+                if (modal) {
+                    modal.classList.add('hidden');
+                    modal.classList.remove('flex');
+                }
+                Router.go('home');
             }
         };
 
-        // --- INIT APP ---
+        // ==========================================
+        // 9. INITIALIZATION (BOSHLASH)
+        // ==========================================
         window.addEventListener('DOMContentLoaded', () => {
             App.init();
         });
-
     </script>
 </body>
 </html>
-
-
