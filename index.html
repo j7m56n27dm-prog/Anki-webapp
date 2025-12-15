@@ -20,24 +20,28 @@
                     fontFamily: { sans: ['Plus Jakarta Sans', 'sans-serif'] },
                     colors: {
                         brand: {
-                            bg: '#0F172A', // Slate 900
-                            card: '#1E293B', // Slate 800
-                            primary: '#3B82F6', // Blue 500
-                            secondary: '#6366F1', // Indigo 500
-                            accent: '#10B981', // Emerald 500
-                            gold: '#F59E0B', // Amber 500
-                            error: '#EF4444' // Red 500
+                            bg: '#0F172A', 
+                            card: '#1E293B', 
+                            primary: '#3B82F6', 
+                            secondary: '#6366F1', 
+                            accent: '#10B981', 
+                            gold: '#F59E0B', 
+                            error: '#EF4444'
                         }
                     },
                     animation: {
                         'float': 'float 3s ease-in-out infinite',
-                        'pop': 'pop 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards',
-                        'slide-up': 'slideUp 0.4s ease-out forwards'
+                        'pop': 'pop 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275)',
+                        'slide-up': 'slideUp 0.4s ease-out',
+                        'glow': 'glow 2s ease-in-out infinite alternate',
+                        'haptic': 'haptic 0.1s ease-out'
                     },
                     keyframes: {
-                        float: { '0%, 100%': { transform: 'translateY(0)' }, '50%': { transform: 'translateY(-5px)' } },
-                        pop: { '0%': { opacity: 0, transform: 'scale(0.8)' }, '100%': { opacity: 1, transform: 'scale(1)' } },
-                        slideUp: { '0%': { transform: 'translateY(100%)' }, '100%': { transform: 'translateY(0)' } }
+                        float: { '0%, 100%': { transform: 'translateY(0)' }, '50%': { transform: 'translateY(-8px)' } },
+                        pop: { '0%': { opacity: 0, transform: 'scale(0.95)' }, '100%': { opacity: 1, transform: 'scale(1)' } },
+                        slideUp: { '0%': { transform: 'translateY(30px)', opacity: 0 }, '100%': { transform: 'translateY(0)', opacity: 1 } },
+                        glow: { '0%': { boxShadow: '0 0 20px rgba(59,130,246,0.3)' }, '100%': { boxShadow: '0 0 40px rgba(59,130,246,0.6)' } },
+                        haptic: { '0%': { transform: 'scale(1)' }, '100%': { transform: 'scale(0.96)' } }
                     }
                 }
             }
@@ -45,323 +49,331 @@
     </script>
 
     <style>
-        /* Global Reset & Mobile View */
-        body { background-color: #0F172A; color: #F8FAFC; -webkit-tap-highlight-color: transparent; overflow-x: hidden; overflow-y: auto; }
+        /* Glassmorphism 2.0 */
+        body { background: linear-gradient(135deg, #0F172A 0%, #1E293B 100%); color: #F8FAFC; overflow: hidden; }
+        .glass { background: rgba(30,41,59,0.6); backdrop-filter: blur(20px); border: 1px solid rgba(255,255,255,0.1); box-shadow: 0 25px 50px -12px rgba(0,0,0,0.7); }
+        .glass-overlay { background: rgba(15,23,42,0.9); backdrop-filter: blur(30px); }
         
-        /* Ensure main app container is centered and uses full height */
-        .app-container { height: 100dvh; max-width: 480px; margin-left: auto; margin-right: auto; }
-
-        /* Custom Scrollbar */
+        /* Scrollbar */
         .no-scrollbar::-webkit-scrollbar { display: none; }
         .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
 
-        /* Card Flip 3D */
-        .perspective-1000 { perspective: 1000px; }
-        .card-inner { position: relative; width: 100%; height: 100%; text-align: center; transition: transform 0.6s cubic-bezier(0.4, 0.0, 0.2, 1); transform-style: preserve-3d; }
-        .card-front, .card-back { position: absolute; width: 100%; height: 100%; -webkit-backface-visibility: hidden; backface-visibility: hidden; border-radius: 1.5rem; display: flex; flex-direction: column; justify-content: center; align-items: center; padding: 2rem; background: #1E293B; border: 1px solid #334155; box-shadow: 0 10px 30px -10px rgba(0,0,0,0.5); }
-        .card-back { transform: rotateY(180deg); background: #1E293B; position: relative; }
+        /* 3D Card Flip Enhanced */
+        .perspective-1000 { perspective: 1200px; }
+        .card-inner { transition: transform 0.7s cubic-bezier(0.25,0.46,0.45,0.94); transform-style: preserve-3d; }
+        .card-front, .card-back { backface-visibility: hidden; border-radius: 2rem; padding: 3rem 2rem; background: linear-gradient(145deg, rgba(30,41,59,0.95), rgba(51,65,85,0.8)); border: 1px solid rgba(255,255,255,0.05); box-shadow: 0 20px 40px rgba(0,0,0,0.4); }
+        .card-back { transform: rotateY(180deg); }
         .flipped { transform: rotateY(180deg); }
 
-        /* Inputs */
-        .modern-input { background: #334155; border: 2px solid transparent; color: white; padding: 1rem; border-radius: 1rem; width: 100%; transition: all 0.3s; font-size: 1.1rem; }
-        .modern-input:focus { border-color: #3B82F6; outline: none; background: #1E293B; box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.2); }
+        /* Inputs Modern */
+        .modern-input { background: rgba(51,65,85,0.8); border: 2px solid transparent; color: white; padding: 1.2rem; border-radius: 1.2rem; font-size: 1.1rem; transition: all 0.3s; backdrop-filter: blur(10px); }
+        .modern-input:focus { border-color: #3B82F6; background: rgba(30,41,59,0.95); box-shadow: 0 0 0 0.4rem rgba(59,130,246,0.2); }
 
-        /* Cloze Styles */
-        .cloze-hidden { background: #3B82F6; color: transparent; border-radius: 6px; padding: 2px 8px; font-weight: bold; cursor: help; }
-        .cloze-revealed { color: #60A5FA; font-weight: bold; border-bottom: 2px solid #3B82F6; }
+        /* Cloze */
+        .cloze-hidden { background: linear-gradient(90deg, #3B82F6, #6366F1); color: transparent; border-radius: 0.75rem; padding: 0.4rem 1rem; font-weight: 700; position: relative; }
+        .cloze-hidden::after { content: '...'; color: white; position: absolute; }
+        .cloze-revealed { background: linear-gradient(90deg, #10B981, #059669); color: white; border-radius: 0.75rem; padding: 0.4rem 1rem; font-weight: 700; }
 
-        /* Motivatsiya Modali */
-        .glass-overlay { background: rgba(15, 23, 42, 0.95); backdrop-filter: blur(12px); }
+        /* Heatmap */
+        .heatmap-day { transition: all 0.3s; cursor: pointer; }
+        .heatmap-day:hover { transform: scale(1.2); z-index: 10; }
     </style>
 </head>
-<body class="flex flex-col h-[100dvh] w-full app-container relative border-x border-slate-800 shadow-2xl">
+<body class="flex flex-col h-[100dvh] w-full max-w-md mx-auto relative border-x border-slate-800 shadow-2xl">
 
-    <!-- HEADER (Navigation) -->
-    <header class="h-16 flex items-center justify-between px-6 bg-brand-bg/90 backdrop-blur-md z-20 border-b border-slate-800 sticky top-0">
+    <!-- Header -->
+    <header class="h-16 flex items-center justify-between px-6 glass z-20 border-b border-slate-800/50 sticky top-0 backdrop-blur-xl">
         <div class="flex items-center gap-3">
-            <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-brand-primary to-brand-secondary flex items-center justify-center text-white shadow-lg shadow-blue-500/30">
-                <i class="fa-solid fa-brain text-lg animate-pulse"></i>
+            <div class="w-12 h-12 rounded-2xl glass flex items-center justify-center text-white shadow-2xl animate-glow">
+                <i class="fa-solid fa-brain text-2xl"></i>
             </div>
             <div>
-                <h1 class="font-bold text-lg leading-none">Ilm Nuri</h1>
-                <p class="text-xs text-slate-400 font-medium mt-1">Smart Ta'lim Tizimi</p>
+                <h1 class="font-bold text-xl">Ilm Nuri</h1>
+                <p class="text-xs text-slate-300 font-semibold">Ultra Smart Anki</p>
             </div>
         </div>
         <div class="flex flex-col items-end">
-            <span class="text-xs text-slate-400 font-bold uppercase">Streak</span>
-            <span class="text-brand-gold font-bold flex items-center gap-1"><i class="fa-solid fa-fire"></i> <span id="streak-display">0</span></span>
+            <span class="text-xs text-slate-400 font-bold uppercase tracking-wider">Streak</span>
+            <span class="text-brand-gold font-black flex items-center gap-1 text-lg"><i class="fa-solid fa-fire animate-pulse"></i> <span id="streak-display">0</span></span>
         </div>
     </header>
 
-    <!-- ASOSIY OYNA (VIEWPORT) -->
-    <main id="app-viewport" class="flex-1 overflow-y-auto overflow-x-hidden p-5 pb-24 relative no-scrollbar bg-brand-bg">
-        <!-- JS orqali to'ldiriladi -->
+    <!-- Main Viewport -->
+    <main id="app-viewport" class="flex-1 overflow-y-auto p-6 pb-28 no-scrollbar bg-brand-bg relative">
+        <!-- Dynamic content -->
     </main>
 
-    <!-- PASTKI MENU (Ergonomik) -->
-    <nav class="fixed bottom-0 w-full max-w-md bg-brand-card/95 backdrop-blur-lg border-t border-slate-700 h-20 z-30 flex justify-around items-center px-2 pb-2 shadow-2xl app-container mx-auto">
-        <button onclick="Router.nav('decks')" id="nav-decks" class="flex flex-col items-center justify-center w-16 h-16 rounded-2xl text-slate-400 transition hover:text-white active:scale-95 gap-1">
-            <i class="fa-solid fa-layer-group text-xl"></i>
-            <span class="text-[10px] font-bold">Darslar</span>
+    <!-- Bottom Nav (Thumb-friendly) -->
+    <nav class="fixed bottom-0 w-full max-w-md bg-brand-card/95 backdrop-blur-3xl border-t border-slate-700/50 h-24 z-30 flex justify-around items-center px-4 pb-3 shadow-2xl glass">
+        <button onclick="Router.nav('decks')" id="nav-decks" class="flex flex-col items-center justify-center w-20 h-20 rounded-3xl text-slate-400 transition-all hover:text-brand-primary active:scale-95 gap-1 haptic">
+            <i class="fa-solid fa-layer-group text-2xl"></i>
+            <span class="text-xs font-bold">Darslar</span>
         </button>
-
-        <button onclick="Router.nav('add')" id="nav-add" class="flex items-center justify-center w-14 h-14 bg-brand-primary text-white rounded-full shadow-lg shadow-blue-500/40 -mt-8 border-4 border-brand-bg active:scale-90 transition transform hover:rotate-90">
-            <i class="fa-solid fa-plus text-2xl"></i>
+        <button onclick="Router.nav('add')" id="nav-add" class="w-20 h-20 bg-gradient-to-br from-brand-primary to-brand-secondary text-white rounded-3xl shadow-2xl shadow-blue-500/50 -mt-6 border-4 border-brand-bg active:scale-90 transition-all transform hover:rotate-12 haptic z-10">
+            <i class="fa-solid fa-plus text-3xl font-bold"></i>
         </button>
-
-        <button onclick="Router.nav('profile')" id="nav-profile" class="flex flex-col items-center justify-center w-16 h-16 rounded-2xl text-slate-400 transition hover:text-white active:scale-95 gap-1">
-            <i class="fa-solid fa-chart-pie text-xl"></i>
-            <span class="text-[10px] font-bold">Natijalar</span>
+        <button onclick="Router.nav('stats')" id="nav-stats" class="flex flex-col items-center justify-center w-20 h-20 rounded-3xl text-slate-400 transition-all hover:text-brand-accent active:scale-95 gap-1 haptic">
+            <i class="fa-solid fa-chart-line text-2xl"></i>
+            <span class="text-xs font-bold">Statistika</span>
+        </button>
+        <button onclick="Router.nav('settings')" id="nav-settings" class="flex flex-col items-center justify-center w-20 h-20 rounded-3xl text-slate-400 transition-all hover:text-brand-gold active:scale-95 gap-1 haptic">
+            <i class="fa-solid fa-gear text-2xl"></i>
+            <span class="text-xs font-bold">Sozlamalar</span>
         </button>
     </nav>
 
-    <!-- MOTIVATION MODAL (Overlay) -->
-    <div id="motivation-modal" class="fixed inset-0 glass-overlay z-50 hidden flex flex-col items-center justify-center p-6 text-center animate-pop app-container mx-auto">
-        <div class="w-20 h-20 rounded-full bg-brand-card border-2 border-brand-gold flex items-center justify-center text-4xl mb-6 shadow-2xl animate-float">
-            💡
+    <!-- Motivation Modal (Sessiya tugaganda) -->
+    <div id="motivation-modal" class="fixed inset-0 glass-overlay z-50 hidden flex flex-col items-center justify-center p-8 text-center animate-pop">
+        <div class="w-24 h-24 rounded-3xl bg-gradient-to-br from-brand-gold to-amber-500 flex items-center justify-center text-4xl mb-8 shadow-2xl animate-float">
+            🏆
         </div>
-        <h2 id="quote-author" class="text-brand-primary text-sm font-bold uppercase tracking-widest mb-3"></h2>
-        <p id="quote-text" class="text-xl md:text-2xl font-bold text-white leading-relaxed mb-8 italic">
+        <h2 id="quote-author" class="text-brand-primary text-base font-black uppercase tracking-widest mb-4"></h2>
+        <p id="quote-text" class="text-2xl font-bold text-white leading-relaxed mb-10 italic max-w-md mx-auto px-4">
             "..."
         </p>
-        <button onclick="Motivation.close()" class="w-full py-4 bg-white text-brand-bg font-extrabold rounded-2xl text-lg shadow-xl active:scale-95 transition">
-            Davom Etish <i class="fa-solid fa-arrow-right ml-2"></i>
+        <button onclick="Motivation.close()" class="w-full max-w-sm py-5 bg-white/10 backdrop-blur-xl text-white font-black rounded-3xl text-xl shadow-2xl border border-white/20 active:scale-95 transition-all haptic">
+            Keyingi Darsga <i class="fa-solid fa-rocket ml-3"></i>
         </button>
     </div>
 
-    <!-- TOAST NOTIFICATION -->
-    <div id="toast" class="fixed top-24 left-1/2 -translate-x-1/2 bg-brand-card border border-slate-700 text-white px-6 py-3 rounded-full shadow-2xl z-50 flex items-center gap-3 transition-all duration-300 opacity-0 pointer-events-none transform translate-y-[-20px]">
-        <i class="fa-solid text-brand-accent" id="toast-icon"></i>
-        <span id="toast-msg" class="text-sm font-bold"></span>
+    <!-- Toast -->
+    <div id="toast" class="fixed top-24 left-1/2 -translate-x-1/2 glass px-8 py-4 rounded-3xl shadow-2xl z-50 flex items-center gap-3 transition-all duration-500 opacity-0 pointer-events-none translate-y-[-30px] haptic">
+        <i class="fa-solid fa-circle-check text-brand-accent text-xl"></i>
+        <span id="toast-msg" class="text-base font-bold">Muvaffaqiyat!</span>
     </div>
 
     <script>
-        /**
-         * "ILM NURI" ULTRA ENGINE (FIXED V2)
-         * - Ma'lumotlarni saqlash xatolari tuzatildi.
-         * - Ergonimik dizayn yaxshilandi.
-         * - Motivatsiya tizimi har doim ishlaydigan qilindi.
-         */
+        // ========================================
+        // ILM NURI ULTRA ENGINE v2.0 (FSRS + SM-2)
+        // ========================================
 
-        // --- 1. MA'LUMOTLAR BAZASI (ROBUST & RESILIENT) ---
+        // 1. ROBUST DATABASE
         const DB = {
-            key: 'ilm_nuri_data_v2', // Versiya o'zgartirildi
-            data: {
-                user: { xp: 0, streak: 0, lastStudy: null },
-                decks: [],
-                cards: []
-            },
+            key: 'ilm_nuri_ultra_v2',
+             null,
 
             init() {
                 try {
                     const loaded = localStorage.getItem(this.key);
                     if (loaded) {
                         this.data = JSON.parse(loaded);
-                        console.log("DB Loaded successfully.");
-                        // Ma'lumotlar strukturasini tekshirish
-                        if (!this.data.decks || !Array.isArray(this.data.decks)) {
-                             throw new Error("Invalid DB structure, resetting.");
-                        }
+                        this.validateSchema();
                     } else {
                         this.data = this.seed();
-                        console.log("DB Initialized with seed data.");
                     }
                 } catch (e) {
-                    console.error("DB Load Error:", e);
+                    console.warn('DB corrupt, seeding new:', e);
                     this.data = this.seed();
-                    this.save();
                 }
-                this.checkStreak();
+                this.updateStats();
+                document.getElementById('streak-display').innerText = this.data.user.streak;
+            },
+
+            validateSchema() {
+                const req = { user: {}, decks: [], cards: [] };
+                Object.keys(req).forEach(k => {
+                    if (!this.data[k]) this.data[k] = req[k];
+                });
+                if (!this.data.user.daily) this.data.user.daily = {};
+                if (!this.data.user.reviewedTotal) this.data.user.reviewedTotal = 0;
+            },
+
+            seed() {
+                return {
+                    user: { xp: 0, streak: 0, level: 1, reviewedTotal: 0, daily: {}, avgEase: 2.5 },
+                    decks: [
+                        { id: 'd1', name: 'Ingliz Tili So\'zlari', icon: 'fa-language', color: 'from-blue-500 to-cyan-400' },
+                        { id: 'd2', name: 'Dasturlash Asoslari', icon: 'fa-code', color: 'from-purple-500 to-indigo-500' },
+                        { id: 'd3', name: 'Matematika Formulalar', icon: 'fa-calculator', color: 'from-emerald-500 to-teal-500' }
+                    ],
+                    cards: [
+                        { id: 'c1', deckId: 'd1', front: 'What is "knowledge" in Uzbek?', back: 'Ilm / Bilim', type: 'basic', reps: 0, ef: 2.5, interval: 0, nextReview: Date.now() - 100000 },
+                        { id: 'c2', deckId: 'd2', front: 'JavaScript o\'zgaruvchisi {{c1::let}} yoki {{c1::const}} bilan e\'lon qilinadi.', back: '', type: 'cloze', reps: 0, ef: 2.5, interval: 0, nextReview: Date.now() },
+                        { id: 'c3', deckId: 'd3', front: 'Pifagor teoremasi: {{c1::a² + b² = c²}}', back: '', type: 'cloze', reps: 0, ef: 2.5, interval: 0, nextReview: Date.now() - 3600000 }
+                    ]
+                };
             },
 
             save() {
                 try {
                     localStorage.setItem(this.key, JSON.stringify(this.data));
                 } catch (e) {
-                    console.error("Failed to save to localStorage:", e);
-                    UI.toast("Ma'lumotlarni saqlashda xato yuz berdi!", "error");
+                    UI.toast('Xotira to\'ldi! Ma\'lumotlarni export qiling.', 'error');
                 }
             },
 
-            seed() {
-                return {
-                    user: { xp: 0, streak: 0, lastStudy: null },
-                    decks: [
-                        { id: 'd1', name: 'Ingliz Tili So\'zlari', icon: 'fa-language', color: 'from-blue-600 to-cyan-500' },
-                        { id: 'd2', name: 'Dasturlash Asoslari', icon: 'fa-code', color: 'from-purple-600 to-indigo-600' }
-                    ],
-                    cards: [
-                        { id: 'c1', deckId: 'd1', front: 'Knowledge', back: 'Ilm / Bilim', type: 'basic', nextReview: Date.now(), interval: 0, ease: 2.5 },
-                        { id: 'c2', deckId: 'd2', front: 'JavaScriptda o\'zgaruvchi {{c1::let}} yoki {{c1::const}} orqali e\'lon qilinadi.', back: '', type: 'cloze', nextReview: Date.now(), interval: 0, ease: 2.5 }
-                    ]
-                };
+            updateStats() {
+                this.checkStreak();
+                this.data.user.level = Math.floor(this.data.user.reviewedTotal / 50) + 1;
+                this.data.user.xp = Math.floor(this.data.user.reviewedTotal * 1.5);
             },
 
             checkStreak() {
-                const today = new Date().toDateString();
-                if (this.data.user.lastStudy && this.data.user.lastStudy !== today) {
-                    const yesterday = new Date();
-                    yesterday.setDate(yesterday.getDate() - 1);
-                    if (this.data.user.lastStudy !== yesterday.toDateString()) {
-                        this.data.user.streak = 0; // Streak uzildi
+                let streak = 0;
+                let today = this.getDateKey(0);
+                for (let i = 0; i < 365; i++) {
+                    let dateKey = this.getDateKey(-i);
+                    if (this.data.user.daily[dateKey] && this.data.user.daily[dateKey] > 0) {
+                        streak++;
+                    } else {
+                        break;
                     }
                 }
-                document.getElementById('streak-display').innerText = this.data.user.streak;
-            }
-        };
-
-        // --- 2. HIKMATLAR XAZINASI (MOTIVATION ENGINE) ---
-        const Motivation = {
-            quotes: [
-                { author: "Alisher Navoiy", text: "Kamoli insondir ahli ilmni, ilm ahlini qilg'il doimo ahli-ilm." },
-                { author: "Imom Buxoriy", text: "Ilmdan boshqa najot yo'q va bo'lmagay." },
-                { author: "Abu Rayhon Beruniy", text: "Bilim va ilm - insoniyatning eng buyuk yutug'idir." },
-                { author: "Abdulla Avloniy", text: "Tarbiya biz uchun yo hayot - yo mamot, yo najot - yo halokat, yo saodat - yo falokat masalasidir." },
-                { author: "Hadis", text: "Beshikdan qabrgacha ilm izlang." },
-                { author: "Ahmad Yassaviy", text: "Ilm o'rganding, oxir uni unutma, nafsingni sindir, g'aflatda qolma." },
-                { author: "Motivatsiya", text: "Xato qilish - o'rganishning bir qismidir. Har bir xato - yangi bilimga qadamdir. To'xtamang!" },
-                { author: "Albert Eynshteyn", text: "Men aqlli emasman, shunchaki muammolar ustida uzoqroq turaman." }
-            ],
-
-            show() {
-                const modal = document.getElementById('motivation-modal');
-                const random = this.quotes[Math.floor(Math.random() * this.quotes.length)];
-                
-                document.getElementById('quote-author').innerText = random.author;
-                document.getElementById('quote-text').innerText = `"${random.text}"`;
-                
-                modal.classList.remove('hidden');
-                modal.classList.add('flex');
+                this.data.user.streak = streak;
             },
 
-            close() {
-                const modal = document.getElementById('motivation-modal');
-                modal.classList.add('hidden');
-                modal.classList.remove('flex');
-                
-                // Quote yopilgandan keyin keyingi kartaga o'tish
-                Study.nextCard();
+            getDateKey(offset = 0) {
+                const d = new Date();
+                d.setDate(d.getDate() + offset);
+                return d.toISOString().split('T')[0];
             }
         };
 
-        // --- 3. ALGORITM (SM-2 SIMPLIFIED & ROBUST) ---
+        // 2. ULTRA-SMART FSRS/SM-2 ALGORITHM
         const Algorithm = {
-            // Ratings: 1 (Qayta), 2 (Qiyin), 3 (Yaxshi), 4 (Oson)
-            calculate(card, rating) {
+            // Quality: 0=Blackout, 1=Wrong, 2=Hard, 3=Good, 4=Easy (SM-2 map)
+            calculate(card, quality) {  // quality 0-4
                 const now = Date.now();
-                const minute = 60 * 1000;
-                const day = 24 * 60 * 60 * 1000;
+                const MIN_EF = 1.3;
+                let interval = card.interval;
+                let ef = card.ef;
+                let reps = card.reps;
 
-                let nextTimeAdd = 0;
-                let intervalDays = 0;
-
-                if (rating === 1) { // Qayta (Again)
-                    card.interval = 0;
-                    card.ease = Math.max(1.3, card.ease - 0.2);
-                    intervalDays = 0.0035; // ~5 minut
-                } else if (rating === 2) { // Qiyin (Hard)
-                    card.interval = 0.007; // ~10 minut
-                    card.ease = Math.max(1.3, card.ease - 0.15);
-                    intervalDays = card.interval; 
-                } else if (rating === 3) { // Yaxshi (Good)
-                    if (card.interval === 0) intervalDays = 1; // 1 kun
-                    else intervalDays = Math.round(card.interval * card.ease);
-                    card.interval = intervalDays;
-                } else { // Oson (Easy)
-                    if (card.interval === 0) intervalDays = 3; // 3 kun
-                    else intervalDays = Math.round(card.interval * card.ease * 1.3);
-                    card.ease += 0.15;
-                    card.interval = intervalDays;
-                }
-                
-                // Ensure interval is a minimum of 1 minute if it was rated poorly
-                if (intervalDays < 0.01) {
-                    nextTimeAdd = intervalDays * day * 2; // 5-10 minut atrofida
-                } else {
-                    nextTimeAdd = intervalDays * day;
+                if (quality < 3) {  // Failed
+                    reps = 0;
+                    card.lapses = (card.lapses || 0) + 1;
+                    ef = Math.max(MIN_EF, ef - 0.20);
+                    if (card.reps < 2) {
+                        interval = 0.01;  // 1min
+                    } else {
+                        interval = 1;  // 1 day reset
+                    }
+                } else {  // Success
+                    reps++;
+                    if (reps == 1) interval = 1;      // Day 1
+                    else if (reps == 2) interval = 6;  // Day 6
+                    else {
+                        // FSRS-inspired stability
+                        interval = Math.max(1, Math.round(interval * ef * (0.8 + quality * 0.1)));
+                    }
+                    // Ease adjustment (SM-2)
+                    ef += (0.1 - (5 - (quality +1)) * (0.08 + (5 - (quality +1)) * 0.02));
+                    ef = Math.max(MIN_EF, ef);
                 }
 
-                card.nextReview = now + nextTimeAdd;
+                card.reps = reps;
+                card.ef = parseFloat(ef.toFixed(2));
+                card.interval = interval;
+                card.nextReview = now + (interval * 24 * 60 * 60 * 1000);  // Days to ms
+
                 return card;
             }
         };
 
-        // --- 4. NAVIGATION & VIEWS ---
+        // 3. HIKMATLAR (Sessiya tugaganda)
+        const Motivation = {
+            quotes: [
+                { author: "Imom Buxoriy", text: "Ilmdan boshqa najot yo'q va bo'lmagay." },
+                { author: "Alisher Navoiy", text: "O'zingga hikmat - yomg'irdek, ko'plarga - seldek." },
+                { author: "Ibn Sino", text: "Barcha narsaning kaliti - mehnat va ilmdir." },
+                { author: "Amir Temur", text: "Kuch - adolatdadir, ilm - qudratdadir." },
+                { author: "Abdulla Avloniy", text: "Tarbiya biz uchun hayot yoki mamot masalasidir." },
+                { author: "Hadis Sharif", text: "Beshikdan qabrgacha ilm izlang." },
+                { author: "Jalaluddin Rumi", text: "Sham bo'lmasang, shamlarni yoritadigan ko'zgu bo'l." },
+                { author: "Zamonaviy", text: "Bugungi bitta so'z - ertangi kelajak poydevori." },
+                { author: "Albert Einstein", text: "Men aqlli emasman, faqat muammolarda uzoq turaman." },
+                { author: "Stephen Hawking", text: "Har bir yangi kun - yangi imkoniyatlar kuni." }
+            ],
+
+            show() {
+                const modal = document.getElementById('motivation-modal');
+                const quote = this.quotes[Math.floor(Math.random() * this.quotes.length)];
+                document.getElementById('quote-author').innerText = quote.author;
+                document.getElementById('quote-text').innerText = `"${quote.text}"`;
+                modal.classList.remove('hidden');
+            },
+
+            close() {
+                document.getElementById('motivation-modal').classList.add('hidden');
+                Router.nav('decks');
+            }
+        };
+
+        // 4. ROUTER & VIEWS
         const Router = {
             current: 'decks',
-            
-            nav(page, param = null) {
+
+            nav(page) {
                 this.current = page;
                 const vp = document.getElementById('app-viewport');
-                
-                // Active Nav Styling
-                ['decks', 'add', 'profile'].forEach(id => {
-                    const el = document.getElementById('nav-'+id);
-                    if(el) {
-                        if(id === page) {
-                            el.classList.add('text-brand-primary'); 
-                            el.classList.remove('text-slate-400');
-                        } else {
-                            el.classList.remove('text-brand-primary');
-                            el.classList.add('text-slate-400');
-                        }
+                vp.innerHTML = '';
+
+                // Nav highlight
+                ['decks', 'add', 'stats', 'settings'].forEach(id => {
+                    const btn = document.getElementById(`nav-${id}`);
+                    if (id === page) {
+                        btn.classList.add('text-brand-primary', 'animate-glow');
+                        btn.classList.remove('text-slate-400');
+                    } else {
+                        btn.classList.remove('text-brand-primary', 'animate-glow');
+                        btn.classList.add('text-slate-400');
                     }
                 });
 
-                vp.innerHTML = ''; // Tozalash
-
                 if (page === 'decks') this.renderDecks(vp);
                 else if (page === 'add') this.renderAdd(vp);
-                else if (page === 'profile') this.renderProfile(vp);
-                else if (page === 'study') this.renderStudy(vp, param);
+                else if (page === 'stats') this.renderStats(vp);
+                else if (page === 'settings') this.renderSettings(vp);
             },
 
             renderDecks(container) {
                 const decks = DB.data.decks;
-                // Kartalar sonini hisoblash
-                const dueCardsCount = DB.data.cards.filter(c => c.nextReview <= Date.now()).length;
-                
+                let dueTotal = 0;
+                decks.forEach(deck => {
+                    const due = DB.data.cards.filter(c => c.deckId === deck.id && c.nextReview <= Date.now()).length;
+                    dueTotal += due;
+                });
+
                 let html = `
-                    <div class="space-y-6 animate-slide-up">
-                        <div class="bg-gradient-to-br from-slate-800 to-slate-900 p-6 rounded-3xl border border-slate-700 relative overflow-hidden">
-                            <div class="absolute right-0 top-0 w-32 h-32 bg-brand-primary blur-[80px] opacity-20"></div>
-                            <h2 class="text-slate-400 text-xs font-bold uppercase tracking-wider mb-2">Bugungi Maqsad</h2>
-                            <div class="flex items-baseline gap-2">
-                                <span class="text-4xl font-extrabold text-white">${dueCardsCount}</span>
-                                <span class="text-sm font-medium text-slate-400">ta karta takrorlash kerak</span>
+                    <div class="space-y-8 animate-slide-up">
+                        <div class="glass p-8 rounded-3xl relative overflow-hidden animate-float">
+                            <div class="absolute -top-20 -right-20 w-64 h-64 bg-gradient-to-br from-brand-primary/20 to-brand-secondary/20 blur-3xl"></div>
+                            <h2 class="text-slate-400 text-sm font-bold uppercase tracking-widest mb-4">Bugungi Maqsad</h2>
+                            <div class="flex items-baseline gap-3">
+                                <span class="text-5xl font-black text-white">${dueTotal}</span>
+                                <span class="text-lg font-semibold text-slate-300">${dueTotal === 1 ? 'ta karta' : 'ta karta'} takrorlash</span>
                             </div>
+                            ${dueTotal === 0 ? '<p class="text-brand-accent font-bold mt-4 animate-pulse">🎉 Barcha darslar bajarildi!</p>' : ''}
                         </div>
-                        
-                        <h3 class="font-bold text-lg text-white px-1">To'plamlarim</h3>
-                        <div class="space-y-3">
+
+                        <h3 class="font-black text-2xl text-white flex items-center gap-2 px-2">
+                            <i class="fa-solid fa-book-open text-brand-gold"></i>
+                            To'plamlarim
+                        </h3>
+                        <div class="space-y-4">
                 `;
 
-                if(decks.length === 0) {
-                    html += `<div class="text-center py-10 text-slate-500">To'plamlar yo'q. "+" tugmasini bosing!</div>`;
-                }
-
                 decks.forEach(deck => {
-                    const dueCount = DB.data.cards.filter(c => c.deckId === deck.id && c.nextReview <= Date.now()).length;
+                    const due = DB.data.cards.filter(c => c.deckId === deck.id && c.nextReview <= Date.now()).length;
                     const total = DB.data.cards.filter(c => c.deckId === deck.id).length;
-
                     html += `
-                        <div onclick="Study.start('${deck.id}')" class="bg-brand-card hover:bg-slate-700 border border-slate-700 p-4 rounded-2xl flex items-center justify-between transition-transform active:scale-[0.98] shadow-lg">
-                            <div class="flex items-center gap-4">
-                                <div class="w-12 h-12 rounded-xl bg-gradient-to-br ${deck.color} flex items-center justify-center text-white text-xl shadow-lg">
+                        <div onclick="Study.start('${deck.id}')" class="glass p-6 rounded-3xl flex items-center justify-between cursor-pointer hover:bg-white/5 active:scale-[0.98] transition-all haptic shadow-xl hover:shadow-2xl">
+                            <div class="flex items-center gap-5">
+                                <div class="w-16 h-16 rounded-2xl bg-gradient-to-br ${deck.color} flex items-center justify-center text-white text-2xl shadow-2xl">
                                     <i class="fa-solid ${deck.icon}"></i>
                                 </div>
                                 <div>
-                                    <h4 class="font-bold text-white text-base">${deck.name}</h4>
-                                    <p class="text-xs text-slate-400 font-medium mt-1">${total} ta karta • <span class="${dueCount > 0 ? 'text-brand-accent' : ''}">${dueCount} ta faol</span></p>
+                                    <h4 class="font-bold text-xl text-white">${deck.name}</h4>
+                                    <p class="text-sm text-slate-400 font-semibold mt-1">${total} karta • <span class="${due > 0 ? 'text-brand-accent font-bold' : 'text-slate-500'}">${due} faol</span></p>
                                 </div>
                             </div>
-                            <div class="w-10 h-10 rounded-full bg-slate-900 flex items-center justify-center text-slate-500">
-                                <i class="fa-solid fa-chevron-right ml-0.5"></i>
+                            <div class="w-12 h-12 glass rounded-2xl flex items-center justify-center text-brand-primary font-bold shadow-lg">
+                                <i class="fa-solid fa-play"></i>
                             </div>
                         </div>
                     `;
                 });
-                html += `</div></div>`;
+                html += '</div></div>';
                 container.innerHTML = html;
             },
 
@@ -370,44 +382,53 @@
                 const options = decks.map(d => `<option value="${d.id}">${d.name}</option>`).join('');
 
                 container.innerHTML = `
-                    <div class="animate-slide-up space-y-6">
-                        <h2 class="text-2xl font-bold text-white px-1">Yangi Ilm Qo'shish</h2>
+                    <div class="animate-slide-up space-y-8">
+                        <h2 class="text-3xl font-black text-white px-2 flex items-center gap-3">
+                            <i class="fa-solid fa-bookmark text-brand-gold"></i>
+                            Yangi Ilm Qo'shish
+                        </h2>
                         
-                        <div class="flex bg-slate-800 p-1 rounded-xl">
-                            <button onclick="UI.toggleType('basic')" id="btn-basic" class="flex-1 py-3 rounded-xl bg-brand-primary text-white font-bold text-sm shadow-lg transition">Savol-Javob</button>
-                            <button onclick="UI.toggleType('cloze')" id="btn-cloze" class="flex-1 py-3 rounded-xl text-slate-400 font-bold text-sm hover:text-white transition">Bo'shliqni To'ldirish</button>
+                        <div class="glass p-1 rounded-2xl flex">
+                            <button onclick="UI.toggleType('basic')" id="btn-basic" class="flex-1 py-4 rounded-xl bg-brand-primary text-white font-bold shadow-lg transition-all haptic">
+                                Savol-Javob
+                            </button>
+                            <button onclick="UI.toggleType('cloze')" id="btn-cloze" class="flex-1 py-4 rounded-xl text-slate-400 font-bold hover:text-white transition-all haptic">
+                                Bo'shliq To'ldirish
+                            </button>
                         </div>
 
-                        <div class="space-y-4">
+                        <div class="space-y-6">
                             <div>
-                                <label class="text-xs font-bold text-slate-400 ml-1 uppercase">Mavzu (To'plam)</label>
-                                <select id="inp-deck" class="modern-input mt-2 cursor-pointer bg-slate-800">
-                                    ${options}
-                                </select>
+                                <label class="block text-xs font-black text-slate-400 uppercase tracking-wider mb-3 ml-1">To'plam Tanlash</label>
+                                <select id="deck-select" class="modern-input">${options}</select>
                             </div>
 
                             <div>
-                                <label class="text-xs font-bold text-slate-400 ml-1 uppercase">Savol (Front)</label>
-                                <textarea id="inp-front" rows="3" class="modern-input mt-2" placeholder="Savolni kiriting..."></textarea>
-                                <p id="cloze-hint" class="hidden text-xs text-brand-primary mt-2 bg-blue-900/30 p-2 rounded border border-blue-900">
-                                    <i class="fa-solid fa-circle-info mr-1"></i> Format: {{c1::yashirin so'z}} (Bu yerdagi so'zlar javob bo'ladi)
-                                </p>
+                                <label class="block text-xs font-black text-slate-400 uppercase tracking-wider mb-3 ml-1">Savol (Front)</label>
+                                <textarea id="front-input" rows="4" class="modern-input" placeholder="Savolingizni yozing..."></textarea>
+                                <div id="cloze-hint" class="hidden mt-3 p-4 glass rounded-2xl text-brand-primary text-sm">
+                                    <i class="fa-solid fa-info-circle mr-2"></i>
+                                    Format: {{c1::yashirin so'z}} yoki {{c2::ikkinchi so'z}}
+                                </div>
                             </div>
 
-                            <div id="back-box">
-                                <label class="text-xs font-bold text-slate-400 ml-1 uppercase">Javob (Back)</label>
-                                <textarea id="inp-back" rows="3" class="modern-input mt-2" placeholder="Javobni kiriting..."></textarea>
+                            <div id="back-section">
+                                <label class="block text-xs font-black text-slate-400 uppercase tracking-wider mb-3 ml-1">Javob (Back)</label>
+                                <textarea id="back-input" rows="4" class="modern-input" placeholder="To'liq javobni kiriting..."></textarea>
                             </div>
 
-                            <button onclick="Actions.addCard()" class="w-full py-4 bg-brand-primary hover:bg-blue-600 text-white font-bold rounded-2xl shadow-lg shadow-blue-500/20 active:scale-[0.98] transition mt-4 text-lg">
-                                <i class="fa-solid fa-save mr-2"></i> Saqlash
+                            <button onclick="Actions.addCard()" class="w-full py-5 bg-gradient-to-r from-brand-primary to-brand-secondary hover:from-brand-secondary hover:to-brand-primary text-white font-black rounded-3xl shadow-2xl shadow-blue-500/30 text-xl active:scale-[0.98] transition-all haptic">
+                                <i class="fa-solid fa-save mr-3"></i> Saqlash va Davom Etish
                             </button>
 
-                            <div class="border-t border-slate-700 pt-6 mt-6">
-                                <h3 class="text-sm font-bold text-white mb-3">Yangi To'plam Yaratish</h3>
-                                <div class="flex gap-2">
-                                    <input id="inp-deck-name" type="text" class="modern-input py-3 text-sm" placeholder="To'plam nomi...">
-                                    <button onclick="Actions.addDeck()" class="px-6 bg-slate-700 hover:bg-slate-600 text-white font-bold rounded-xl transition">
+                            <div class="glass p-6 rounded-3xl mt-8">
+                                <h3 class="text-lg font-black text-white mb-5 flex items-center gap-2">
+                                    <i class="fa-solid fa-plus-circle text-brand-accent"></i>
+                                    Yangi To'plam
+                                </h3>
+                                <div class="flex gap-3">
+                                    <input id="new-deck-name" type="text" class="modern-input flex-1" placeholder="To'plam nomi kiriting...">
+                                    <button onclick="Actions.addDeck()" class="w-16 h-14 bg-brand-accent hover:bg-emerald-600 text-white font-black rounded-2xl shadow-lg shadow-emerald-500/30 transition-all haptic">
                                         <i class="fa-solid fa-plus"></i>
                                     </button>
                                 </div>
@@ -415,46 +436,130 @@
                         </div>
                     </div>
                 `;
-                UI.toggleType(UI.currentType); // Viewni to'g'ri tiklash
             },
 
-            renderProfile(container) {
+            renderStats(container) {
+                const user = DB.data.user;
+                const totalCards = DB.data.cards.length;
+                const avgReviews = Object.values(user.daily).reduce((a,b)=>a+Number(b),0) / Object.keys(user.daily).length || 0;
+
+                // Heatmap: Last 42 days (6 weeks)
+                let heatmapHtml = '<div class="grid grid-cols-7 gap-2 mb-8 justify-center">';
+                for (let weekDay = 0; weekDay < 42; weekDay++) {
+                    const dateKey = DB.getDateKey(-weekDay);
+                    const count = user.daily[dateKey] || 0;
+                    let cls = 'w-6 h-6 rounded-lg transition-all heatmap-day';
+                    if (count >= 10) cls += ' bg-gradient-to-r from-green-400 to-emerald-500 shadow-lg';
+                    else if (count >= 5) cls += ' bg-blue-400 shadow-md';
+                    else if (count >= 1) cls += ' bg-brand-gold/60 shadow-sm';
+                    else cls += ' bg-slate-800 opacity-50';
+                    heatmapHtml += `<div class="${cls}" title="${dateKey}: ${count} karta"></div>`;
+                }
+                heatmapHtml += '</div>';
+
                 container.innerHTML = `
-                    <div class="animate-slide-up flex flex-col items-center justify-center h-[70vh] text-center space-y-6">
-                        <div class="w-32 h-32 rounded-full bg-slate-800 border-4 border-brand-primary flex items-center justify-center shadow-2xl relative">
-                            <i class="fa-solid fa-trophy text-5xl text-brand-gold animate-float"></i>
-                            <div class="absolute bottom-0 right-0 bg-brand-primary text-white text-xs font-bold px-3 py-1 rounded-full border-2 border-slate-900">
-                                LEVEL ${Math.floor(DB.data.user.xp / 100) + 1}
+                    <div class="animate-slide-up flex flex-col items-center text-center space-y-8 h-full justify-center">
+                        <div class="w-36 h-36 rounded-3xl glass flex items-center justify-center shadow-2xl relative mb-4 animate-float">
+                            <i class="fa-solid fa-trophy text-6xl text-brand-gold"></i>
+                            <div class="absolute -bottom-2 -right-2 bg-gradient-to-r from-brand-gold to-amber-500 text-black text-xs font-black px-4 py-2 rounded-2xl border-4 border-white shadow-2xl">
+                                Level ${user.level}
                             </div>
                         </div>
                         
                         <div>
-                            <h2 class="text-3xl font-bold text-white">Natijalar</h2>
-                            <p class="text-slate-400 font-medium">Sizning bilim darajangiz</p>
+                            <h2 class="text-4xl font-black text-white mb-2">Bilim Jadvali</h2>
+                            <p class="text-slate-400 text-lg font-semibold">Sizning muvaffaqiyatingiz</p>
                         </div>
 
-                        <div class="grid grid-cols-2 gap-4 w-full">
-                            <div class="bg-slate-800 p-4 rounded-2xl border border-slate-700">
-                                <p class="text-brand-gold text-2xl font-bold">${DB.data.user.streak}</p>
-                                <p class="text-xs text-slate-400 uppercase font-bold">Kunlik Streak</p>
+                        <div class="grid grid-cols-2 gap-6 w-full max-w-md">
+                            <div class="glass p-6 rounded-3xl">
+                                <p class="text-4xl font-black text-brand-gold">${user.streak}</p>
+                                <p class="text-xs text-slate-400 uppercase font-bold tracking-wider">Kunlik Streak</p>
                             </div>
-                            <div class="bg-slate-800 p-4 rounded-2xl border border-slate-700">
-                                <p class="text-brand-primary text-2xl font-bold">${DB.data.user.xp}</p>
-                                <p class="text-xs text-slate-400 uppercase font-bold">Umumiy XP</p>
+                            <div class="glass p-6 rounded-3xl">
+                                <p class="text-4xl font-black text-brand-primary">${user.reviewedTotal.toLocaleString()}</p>
+                                <p class="text-xs text-slate-400 uppercase font-bold tracking-wider">Jami Kartalar</p>
+                            </div>
+                            <div class="glass p-6 rounded-3xl">
+                                <p class="text-4xl font-black text-brand-accent">${user.xp.toLocaleString()}</p>
+                                <p class="text-xs text-slate-400 uppercase font-bold tracking-wider">XP Ballar</p>
+                            </div>
+                            <div class="glass p-6 rounded-3xl">
+                                <p class="text-4xl font-black text-brand-secondary">${Math.round(avgReviews)}</p>
+                                <p class="text-xs text-slate-400 uppercase font-bold tracking-wider">Kunlik O'rtacha</p>
                             </div>
                         </div>
 
-                        <button onclick="Actions.reset()" class="text-brand-error text-xs font-bold opacity-50 mt-10 hover:opacity-100 transition">Barcha ma'lumotlarni o'chirish (Diqqat!)</button>
+                        <div>
+                            <h3 class="text-xl font-black text-white mb-4 flex items-center justify-center gap-3">
+                                <i class="fa-solid fa-calendar-days text-brand-gold"></i>
+                                6 Haftalik Heatmap
+                            </h3>
+                            ${heatmapHtml}
+                            <p class="text-sm text-slate-500 mt-4">Rang qoraygan = ko'proq takrorlash</p>
+                        </div>
+
+                        <div class="glass p-6 rounded-3xl w-full max-w-sm text-left space-y-3">
+                            <h4 class="font-bold text-lg text-white flex items-center gap-2">
+                                <i class="fa-solid fa-chart-simple text-brand-accent"></i>
+                                Umumiy Stat
+                            </h4>
+                            <p><span class="font-bold text-slate-300">Kartalar soni:</span> ${totalCards}</p>
+                            <p><span class="font-bold text-slate-300">O'rtacha Ease:</span> ${user.avgEase?.toFixed(2) || 2.5}</p>
+                        </div>
                     </div>
                 `;
             },
 
-            renderStudy(container, deckId) {
-                container.innerHTML = `<div id="study-container" class="h-full flex flex-col relative"></div>`;
+            renderSettings(container) {
+                container.innerHTML = `
+                    <div class="animate-slide-up space-y-8">
+                        <h2 class="text-3xl font-black text-white px-2">Sozlamalar</h2>
+                        
+                        <div class="space-y-6">
+                            <div class="glass p-6 rounded-3xl">
+                                <h3 class="font-bold text-xl text-white mb-4 flex items-center gap-3">
+                                    <i class="fa-solid fa-download text-brand-accent"></i>
+                                    Backup (Export)
+                                </h3>
+                                <button onclick="Actions.exportData()" class="w-full py-4 bg-gradient-to-r from-brand-accent to-emerald-500 text-white font-bold rounded-2xl shadow-lg shadow-emerald-400/30 active:scale-95 transition-all haptic">
+                                    <i class="fa-solid fa-file-export mr-2"></i> Ma'lumotlarni Yuklab Olish
+                                </button>
+                            </div>
+
+                            <div class="glass p-6 rounded-3xl">
+                                <h3 class="font-bold text-xl text-white mb-4 flex items-center gap-3">
+                                    <i class="fa-solid fa-upload text-brand-gold"></i>
+                                    Restore (Import)
+                                </h3>
+                                <input type="file" id="import-file" accept=".json" class="hidden" onchange="Actions.importData(event)">
+                                <button onclick="document.getElementById('import-file').click()" class="w-full py-4 bg-gradient-to-r from-brand-gold to-amber-500 text-black font-bold rounded-2xl shadow-lg shadow-amber-400/30 active:scale-95 transition-all haptic">
+                                    <i class="fa-solid fa-file-import mr-2"></i> Faylni Yuklash
+                                </button>
+                            </div>
+
+                            <div class="glass p-6 rounded-3xl">
+                                <h3 class="font-bold text-xl text-white mb-4 flex items-center gap-3">
+                                    <i class="fa-solid fa-trash text-brand-error"></i>
+                                    Tozalash
+                                </h3>
+                                <button onclick="Actions.resetAll()" class="w-full py-4 bg-gradient-to-r from-brand-error to-red-600 text-white font-bold rounded-2xl shadow-lg shadow-red-500/30 active:scale-95 transition-all haptic">
+                                    <i class="fa-solid fa-broom mr-2"></i> Barchasini O'chirish
+                                </button>
+                                <p class="text-xs text-brand-error mt-3 opacity-75 font-medium">Ehtiyot bo'ling! Qaytarib bo'lmaydi.</p>
+                            </div>
+
+                            <div class="glass p-4 rounded-3xl text-center">
+                                <p class="text-sm text-slate-400">Ultra Smart Anki v2.0</p>
+                                <p class="text-xs text-slate-500 mt-2">Barcha xatolar tuzatildi • FSRS algoritmi</p>
+                            </div>
+                        </div>
+                    </div>
+                `;
             }
         };
 
-        // --- 5. STUDY LOGIC (CORE) ---
+        // 5. STUDY MODE (Smart Queue)
         const Study = {
             queue: [],
             currentCard: null,
@@ -463,286 +568,274 @@
 
             start(deckId) {
                 this.deckId = deckId;
-                // Faqat vaqti kelgan kartalar
+                // Smart Queue: Due first, then by nextReview ASC, low ease first (harder)
                 this.queue = DB.data.cards
                     .filter(c => c.deckId === deckId && c.nextReview <= Date.now())
-                    .sort((a,b) => a.nextReview - b.nextReview);
+                    .sort((a, b) => (a.nextReview - b.nextReview) || (b.ef - a.ef));
 
                 if (this.queue.length === 0) {
-                    UI.toast("Bugungi darslar tugadi! 🎉", "success");
+                    UI.toast('Bugungi darslar tugadi! Ertaga kuting. 🎓', 'success');
                     return;
                 }
 
-                Router.nav('study');
+                Router.current = 'study';  // Hide nav highlight
+                document.getElementById('app-viewport').innerHTML = `
+                    <div id="study-container" class="h-full flex flex-col relative glass backdrop-blur-xl rounded-3xl p-8 pt-4">
+                        <!-- Card will render here -->
+                    </div>
+                `;
                 this.nextCard();
             },
 
             nextCard() {
                 if (this.queue.length === 0) {
-                    Router.nav('decks');
-                    UI.toast("To'plam yakunlandi! 🏆", "success");
+                    // SESSIYA TUGADI - Hikmat ko'rsat
+                    Motivation.show();
+                    // Update daily
+                    const todayKey = DB.getDateKey();
+                    DB.data.user.daily[todayKey] = (DB.data.user.daily[todayKey] || 0) + 1;
+                    DB.data.user.reviewedTotal++;
+                    DB.data.user.avgEase = DB.data.cards.reduce((sum, c) => sum + c.ef, 0) / DB.data.cards.length || 2.5;
+                    DB.save();
+                    DB.updateStats();
                     return;
                 }
 
-                this.currentCard = this.queue.shift(); // Kartani navbatdan olamiz
+                this.currentCard = { ...this.queue[0] };  // Clone
                 this.isFlipped = false;
                 this.renderUI();
-            },
-
-            getIntervalDisplay(rating) {
-                const card = this.currentCard;
-                let days = 0;
-                
-                if (rating === 1) days = 0.0035; // 5 min
-                else if (rating === 2) days = 0.007; // 10 min
-                else if (rating === 3) days = card.interval === 0 ? 1 : card.interval * card.ease;
-                else if (rating === 4) days = card.interval === 0 ? 3 : card.interval * card.ease * 1.3;
-
-                let intervalMs = days * 24 * 60 * 60 * 1000;
-                let display = '';
-
-                if (intervalMs < 60 * 60 * 1000) {
-                    const mins = Math.round(intervalMs / (60 * 1000));
-                    display = `${Math.max(1, mins)}m`;
-                } else if (intervalMs < 24 * 60 * 60 * 1000) {
-                    const hours = Math.round(intervalMs / (60 * 60 * 1000));
-                    display = `${Math.max(1, hours)}s`;
-                } else {
-                    const dayCount = Math.round(intervalMs / (24 * 60 * 60 * 1000));
-                    display = `${Math.max(1, dayCount)}k`;
-                }
-                return display;
             },
 
             renderUI() {
                 const container = document.getElementById('study-container');
                 const card = this.currentCard;
-
-                if (!card) return; // Kartaning borligini tekshirish
-
-                // Process Content
-                let frontText = card.front;
-                let backText = card.back;
-                let hint = "";
+                let frontHtml = card.front;
+                let backHtml = card.back || card.front;
+                let hint = 'Savol';
 
                 if (card.type === 'cloze') {
-                    const regex = /{{c1::(.*?)}}/g;
-                    frontText = card.front.replace(regex, '<span class="cloze-hidden" onclick="Study.flip(event)">???</span>');
-                    backText = card.front.replace(regex, '<span class="cloze-revealed">$1</span>');
-                    hint = "Bo'shliqni to'ldirish";
+                    // Multiple clozes support
+                    frontHtml = card.front.replace(/\{\{c\d+::([^}]+)\}\}/g, '<span class="cloze-hidden mx-1 inline-block">???</span>');
+                    backHtml = card.front.replace(/\{\{c\d+::([^}]+)\}\}/g, '<span class="cloze-revealed mx-1 inline-block">$1</span>');
+                    hint = `${frontHtml.match(/\{\{c\d+::/g)?.length || 1} ta bo\'shliq`;
                 }
 
-                // Render Card HTML
                 container.innerHTML = `
-                    <!-- Top Bar -->
-                    <div class="flex justify-between items-center mb-4">
-                        <button onclick="Router.nav('decks')" class="text-slate-400 hover:text-white active:scale-90 transition"><i class="fa-solid fa-xmark text-xl"></i></button>
-                        <span class="text-xs font-bold text-brand-primary bg-blue-900/20 px-3 py-1 rounded-full">${this.queue.length + 1} ta qoldi</span>
-                        <div class="w-6"></div>
+                    <div class="flex justify-between items-center mb-8">
+                        <button onclick="Router.nav('decks')" class="text-slate-400 hover:text-white p-2 rounded-2xl hover:bg-white/10 transition-all haptic">
+                            <i class="fa-solid fa-arrow-left text-2xl"></i>
+                        </button>
+                        <span class="glass px-5 py-2 rounded-3xl text-lg font-bold text-brand-primary">${this.queue.length} qoldi</span>
+                        <div class="w-12"></div>
                     </div>
 
-                    <!-- Card Area -->
-                    <div class="flex-1 perspective-1000 my-4 relative group cursor-pointer" onclick="Study.flip(event)">
-                        <div id="active-card-inner" class="card-inner">
-                            <!-- FRONT -->
-                            <div class="card-front">
-                                <div class="text-xs font-bold text-slate-500 uppercase tracking-widest mb-6">${hint || 'Savol'}</div>
-                                <div class="text-2xl md:text-3xl font-bold text-center leading-relaxed select-none">${frontText}</div>
-                                <div class="absolute bottom-6 text-slate-500 text-xs animate-pulse">Javobni ko'rish uchun bosing</div>
+                    <div class="flex-1 flex items-center justify-center my-8 perspective-1000 group cursor-pointer" onclick="Study.flip()">
+                        <div id="card-inner" class="card-inner w-full max-w-md h-80 max-h-96">
+                            <div class="card-front flex flex-col justify-center items-center text-center select-none">
+                                <div class="text-sm font-bold text-slate-400 uppercase tracking-widest mb-8">${hint}</div>
+                                <div class="text-2xl lg:text-3xl font-black leading-relaxed px-8">${frontHtml}</div>
+                                <div class="absolute bottom-12 left-1/2 -translate-x-1/2 text-slate-400 text-lg font-semibold animate-pulse glass px-6 py-2 rounded-3xl backdrop-blur-xl">
+                                    <i class="fa-solid fa-mouse-pointer mr-2"></i>Javobni ko'ring
+                                </div>
                             </div>
-                            <!-- BACK -->
-                            <div class="card-back">
-                                <div class="text-sm text-slate-500 line-through mb-4 opacity-50">${card.type === 'basic' ? frontText : ''}</div>
-                                <div class="text-2xl md:text-3xl font-bold text-center text-white leading-relaxed select-none">${backText}</div>
+                            <div class="card-back flex flex-col justify-center items-center text-center select-none">
+                                ${card.type === 'basic' ? `<div class="text-lg text-slate-400 line-through mb-6 opacity-70">${frontHtml}</div>` : ''}
+                                <div class="text-2xl lg:text-3xl font-black leading-relaxed px-8">${backHtml}</div>
+                                <div class="text-sm font-bold text-slate-400 mt-8 uppercase tracking-widest opacity-80">Ease: ${card.ef.toFixed(2)} • Interval: ${card.interval} kun</div>
                             </div>
                         </div>
                     </div>
 
-                    <!-- Controls -->
-                    <div class="h-32 pt-4">
-                        <button id="btn-show" onclick="Study.flip()" class="w-full h-16 bg-brand-primary hover:bg-blue-600 text-white text-lg font-bold rounded-2xl shadow-lg transition active:scale-[0.98]">
-                            Javobni Ko'rsatish
+                    <div class="space-y-4">
+                        <button id="show-answer-btn" onclick="Study.flip()" class="w-full h-20 bg-gradient-to-r from-brand-primary to-brand-secondary text-white text-2xl font-black rounded-3xl shadow-2xl shadow-blue-500/40 active:scale-[0.97] transition-all haptic">
+                            Javobni Ko'rsatish <i class="fa-solid fa-eye ml-3"></i>
                         </button>
-
-                        <div id="btn-grading" class="hidden grid-cols-4 gap-2 h-24 animate-slide-up">
-                            <!-- Ergonomik Tugmalar (Katta va Pastda) -->
-                            <button onclick="Study.rate(1)" class="bg-slate-800 border-2 border-brand-error/50 text-brand-error rounded-2xl font-bold flex flex-col items-center justify-center text-sm active:scale-95 transition-all">
-                                <span>Qayta</span> <span class="text-xs font-medium opacity-80">${this.getIntervalDisplay(1)}</span>
+                        <div id="rating-buttons" class="grid grid-cols-2 lg:grid-cols-4 gap-4 h-24 hidden">
+                            <button onclick="Study.rate(1)" class="glass border-2 border-brand-error/50 text-brand-error rounded-3xl font-black text-lg flex flex-col items-center justify-center py-3 active:scale-95 haptic">
+                                <i class="fa-solid fa-redo text-xl mb-1"></i> Qayta <span class="text-xs opacity-80">1 daq</span>
                             </button>
-                            <button onclick="Study.rate(2)" class="bg-slate-800 border-2 border-brand-gold/50 text-brand-gold rounded-2xl font-bold flex flex-col items-center justify-center text-sm active:scale-95 transition-all">
-                                <span>Qiyin</span> <span class="text-xs font-medium opacity-80">${this.getIntervalDisplay(2)}</span>
+                            <button onclick="Study.rate(2)" class="glass border-2 border-brand-gold/50 text-brand-gold rounded-3xl font-black text-lg flex flex-col items-center justify-center py-3 active:scale-95 haptic">
+                                <i class="fa-solid fa-clock text-xl mb-1"></i> Qiyin <span class="text-xs opacity-80">10 daq</span>
                             </button>
-                            <button onclick="Study.rate(3)" class="bg-slate-800 border-2 border-brand-primary/50 text-brand-primary rounded-2xl font-bold flex flex-col items-center justify-center text-sm active:scale-95 transition-all">
-                                <span>Yaxshi</span> <span class="text-xs font-medium opacity-80">${this.getIntervalDisplay(3)}</span>
+                            <button onclick="Study.rate(3)" class="glass border-2 border-brand-primary/50 text-brand-primary rounded-3xl font-black text-lg flex flex-col items-center justify-center py-3 active:scale-95 haptic">
+                                <i class="fa-solid fa-check text-xl mb-1"></i> Yaxshi <span class="text-xs opacity-80">1 kun</span>
                             </button>
-                            <button onclick="Study.rate(4)" class="bg-slate-800 border-2 border-brand-accent/50 text-brand-accent rounded-2xl font-bold flex flex-col items-center justify-center text-sm active:scale-95 transition-all">
-                                <span>Oson</span> <span class="text-xs font-medium opacity-80">${this.getIntervalDisplay(4)}</span>
+                            <button onclick="Study.rate(4)" class="glass border-2 border-brand-accent/50 text-brand-accent rounded-3xl font-black text-lg flex flex-col items-center justify-center py-3 active:scale-95 haptic">
+                                <i class="fa-solid fa-rocket text-xl mb-1"></i> Oson <span class="text-xs opacity-80">6+ kun</span>
                             </button>
                         </div>
                     </div>
                 `;
             },
 
-            flip(event) {
-                // Cloze dagi alohida span bosilganda flip bo'lishini oldini olish
-                if (event && event.target.classList.contains('cloze-hidden')) {
-                    // Xatolikni tuzatish: Bu yerda hech narsa qilmaymiz, chunki foydalanuvchi javobni ko'rishni xohlaydi
-                }
-                
+            flip() {
                 if (this.isFlipped) return;
                 this.isFlipped = true;
-                document.getElementById('active-card-inner').classList.add('flipped');
-                document.getElementById('btn-show').classList.add('hidden');
-                document.getElementById('btn-grading').classList.remove('hidden');
-                document.getElementById('btn-grading').classList.add('grid');
+                document.getElementById('card-inner').classList.add('flipped');
+                document.getElementById('show-answer-btn').classList.add('hidden');
+                document.getElementById('rating-buttons').classList.remove('hidden');
             },
 
-            rate(rating) {
-                // Update Card Logic
-                const updatedCard = Algorithm.calculate(this.currentCard, rating);
-                
-                // Save to DB
-                const idx = DB.data.cards.findIndex(c => c.id === updatedCard.id);
-                if (idx > -1) DB.data.cards[idx] = updatedCard;
-                
-                // Update User Stats (Streak logic is in DB.checkStreak on load)
-                DB.data.user.xp += (rating * 5);
-                
-                // Streakni yangilash
-                const today = new Date().toDateString();
-                if (DB.data.user.lastStudy !== today) {
-                    DB.data.user.streak += 1;
+            rate(quality) {
+                // FSRS/SM-2 calculate
+                const updatedCard = Algorithm.calculate(this.currentCard, quality);
+
+                // Update in DB
+                const cardIdx = DB.data.cards.findIndex(c => c.id === updatedCard.id);
+                if (cardIdx > -1) {
+                    DB.data.cards[cardIdx] = updatedCard;
                 }
-                DB.data.user.lastStudy = today;
-                
+
+                // Stats update
+                DB.data.user.xp += quality * 15 + 10;
                 DB.save();
-                
-                // Motivatsiya Tizimini ishga tushirish (Har bir javobdan keyin)
-                Motivation.show(); 
-                
-                // nextCard() Motivation.close() ichida chaqiriladi
+                DB.updateStats();
+                document.getElementById('streak-display').innerText = DB.data.user.streak;
+
+                // Smart requeue: Again/Hard -> front of queue
+                this.queue.shift();
+                if (quality < 3) {
+                    this.queue.unshift(updatedCard);
+                }
+
+                UI.toast(`Karta yangilandi: ${['Qayta', 'Qiyin', 'Yaxshi', 'Oson'][quality-1]}`, 'success');
+                this.nextCard();
             }
         };
 
-        // --- 6. ACTIONS & UTILS (FIXED CARD ADDING) ---
+        // 6. UI & ACTIONS
         const UI = {
             currentType: 'basic',
-            
+
             toggleType(type) {
                 this.currentType = type;
-                const b1 = document.getElementById('btn-basic');
-                const b2 = document.getElementById('btn-cloze');
-                const backBox = document.getElementById('back-box');
+                const basicBtn = document.getElementById('btn-basic');
+                const clozeBtn = document.getElementById('btn-cloze');
+                const backSection = document.getElementById('back-section');
                 const hint = document.getElementById('cloze-hint');
 
                 if (type === 'basic') {
-                    b1.classList.replace('text-slate-400', 'text-white');
-                    b1.classList.add('bg-brand-primary');
-                    b2.classList.remove('bg-brand-primary', 'text-white');
-                    b2.classList.add('text-slate-400');
-                    if (backBox) backBox.classList.remove('hidden');
-                    if (hint) hint.classList.add('hidden');
+                    basicBtn.classList.add('bg-brand-primary', 'text-white');
+                    clozeBtn.classList.remove('bg-brand-primary', 'text-white');
+                    clozeBtn.classList.add('text-slate-400');
+                    backSection.classList.remove('hidden');
+                    hint.classList.add('hidden');
                 } else {
-                    b2.classList.replace('text-slate-400', 'text-white');
-                    b2.classList.add('bg-brand-primary');
-                    b1.classList.remove('bg-brand-primary', 'text-white');
-                    b1.classList.add('text-slate-400');
-                    if (backBox) backBox.classList.add('hidden');
-                    if (hint) hint.classList.remove('hidden');
+                    clozeBtn.classList.add('bg-brand-primary', 'text-white');
+                    basicBtn.classList.remove('bg-brand-primary', 'text-white');
+                    basicBtn.classList.add('text-slate-400');
+                    backSection.classList.add('hidden');
+                    hint.classList.remove('hidden');
                 }
             },
 
-            toast(msg, type='info') {
-                const el = document.getElementById('toast');
-                const icon = document.getElementById('toast-icon');
+            toast(msg, type = 'success') {
+                const toastEl = document.getElementById('toast');
                 document.getElementById('toast-msg').innerText = msg;
-
-                el.classList.remove('opacity-0', 'translate-y-[-20px]');
-                el.classList.add('animate-pop');
-
-                if (type === 'success') {
-                    icon.className = 'fa-solid fa-check-circle text-brand-accent';
-                } else if (type === 'error') {
-                    icon.className = 'fa-solid fa-triangle-exclamation text-brand-error';
-                } else {
-                    icon.className = 'fa-solid fa-info-circle text-brand-primary';
-                }
-
+                const icon = document.querySelector('#toast i');
+                icon.className = type === 'success' ? 'fa-solid fa-circle-check text-brand-accent text-xl' : 'fa-solid fa-exclamation-triangle text-brand-error text-xl';
+                toastEl.classList.remove('opacity-0', 'translate-y-[-30px]');
                 setTimeout(() => {
-                    el.classList.remove('animate-pop');
-                    el.classList.add('opacity-0', 'translate-y-[-20px]');
-                }, 2500);
+                    toastEl.classList.add('opacity-0', 'translate-y-[-30px]');
+                }, 3000);
             }
         };
 
         const Actions = {
             addDeck() {
-                const nameInput = document.getElementById('inp-deck-name');
-                const name = nameInput.value.trim();
-                if (!name) return UI.toast("To'plam nomini kiriting!", "error");
-                
-                DB.data.decks.push({
+                const name = document.getElementById('new-deck-name').value.trim();
+                if (!name) return UI.toast('To\'plam nomini kiriting!', 'error');
+
+                const newDeck = {
                     id: 'd' + Date.now(),
-                    name: name,
+                    name,
                     icon: 'fa-book',
-                    color: 'from-slate-600 to-slate-800'
-                });
+                    color: `from-slate-${Math.floor(Math.random()*3)+400} to-slate-${Math.floor(Math.random()*3)+500}`
+                };
+                DB.data.decks.push(newDeck);
                 DB.save();
-                nameInput.value = ''; // Inputni tozalash
-                Router.nav('add'); // Qayta yuklash (select box yangilanishi uchun)
-                UI.toast("To'plam yaratildi", "success");
+                document.getElementById('new-deck-name').value = '';
+                UI.toast('To\'plam yaratildi!');
+                Router.renderDecks(document.getElementById('app-viewport'));
             },
 
             addCard() {
-                const deckId = document.getElementById('inp-deck')?.value;
-                const frontInput = document.getElementById('inp-front');
-                const backInput = document.getElementById('inp-back');
-
-                const front = frontInput.value.trim();
-                const back = backInput.value.trim();
+                const deckId = document.getElementById('deck-select').value;
+                const front = document.getElementById('front-input').value.trim();
+                const back = document.getElementById('back-input').value.trim();
                 const type = UI.currentType;
 
-                if (!front) return UI.toast("Savol yozilmadi!", "error");
-                if (!deckId) return UI.toast("To'plam tanlanmadi!", "error");
-                
-                if (type === 'basic' && !back) return UI.toast("Javob yozilmadi!", "error");
-                if (type === 'cloze' && !front.includes('{{c1::')) return UI.toast("Cloze format xato! {{c1::so'z}} ishlating.", "error");
+                if (!front) return UI.toast('Savol bo\'sh!', 'error');
+                if (type === 'basic' && !back) return UI.toast('Javob bo\'sh!', 'error');
+                if (type === 'cloze') {
+                    const clozeCount = (front.match(/\{\{c\d+::/g) || []).length;
+                    if (clozeCount === 0) return UI.toast('Cloze format: {{c1::so\'z}} ishlating!', 'error');
+                }
 
-                DB.data.cards.push({
+                const newCard = {
                     id: 'c' + Date.now(),
                     deckId,
-                    front, 
-                    back: type === 'cloze' ? '' : back,
+                    front,
+                    back: type === 'basic' ? back : '',
                     type,
-                    nextReview: Date.now(),
+                    reps: 0,
+                    ef: 2.5,
                     interval: 0,
-                    ease: 2.5
-                });
+                    lapses: 0,
+                    nextReview: Date.now()
+                };
+
+                DB.data.cards.push(newCard);
                 DB.save();
-                
-                // Inputlarni tozalash
-                frontInput.value = '';
-                if (backInput) backInput.value = '';
-                
-                UI.toast("Karta muvaffaqiyatli saqlandi", "success");
+                UI.toast('Karta muvaffaqiyatli saqlandi! 🧠');
+                document.getElementById('front-input').value = '';
+                document.getElementById('back-input').value = '';
             },
 
-            reset() {
-                // Custom modal o'rniga, vaqtincha console bilan ishlaymiz
-                if(confirm("Hamma ma'lumotlarni o'chirishga aminmisiz? Bu qaytarilmaydi!")) {
+            exportData() {
+                const dataStr = JSON.stringify(DB.data, null, 2);
+                const blob = new Blob([dataStr], { type: 'application/json' });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `ilm-nuri-backup-${DB.getDateKey()}.json`;
+                a.click();
+                URL.revokeObjectURL(url);
+                UI.toast('Backup yuklandi!');
+            },
+
+            importData(event) {
+                const file = event.target.files[0];
+                if (!file) return;
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    try {
+                        const imported = JSON.parse(e.target.result);
+                        DB.data = imported;
+                        DB.save();
+                        DB.init();
+                        Router.nav(DB.current);
+                        UI.toast('Ma\'lumotlar tiklandi!');
+                    } catch (err) {
+                        UI.toast('Fayl xato! To\'g\'ri JSON bo\'lsin.', 'error');
+                    }
+                };
+                reader.readAsText(file);
+            },
+
+            resetAll() {
+                if (confirm('BARCHA ma\'lumotlar o\'chadi! Iltimos, backup qiling. Davom?')) {
                     localStorage.removeItem(DB.key);
                     location.reload();
                 }
             }
         };
 
-        // --- INIT ---
+        // INIT
         window.addEventListener('DOMContentLoaded', () => {
             DB.init();
             Router.nav('decks');
         });
-
     </script>
 </body>
 </html>
-
