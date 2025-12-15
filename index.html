@@ -1,200 +1,810 @@
 <!DOCTYPE html>
 <html lang="uz" class="dark">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Ilm Nuri Premium | Made by ©️Muhammad Daler</title>
-<script src="https://cdn.tailwindcss.com"></script>
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-<script>
-tailwind.config = {
-darkMode: 'class',
-theme: {extend: {fontFamily: {sans: ['Inter']},colors: {brand: {bg: '#0f0f23',card: '#1a1a2e',primary: '#0ea5e9',secondary: '#3b82f6',accent: '#10b981',gold: '#f59e0b',error: '#ef4444'}}}}
-}
-</script>
-<style>
-body {background: linear-gradient(135deg, #0f0f23 0%, #1a1a2e 100%);color: #f1f5f9;font-family: 'Inter', sans-serif;overflow-x: hidden;}
-.glass {background: rgba(26,26,46,0.8);backdrop-filter: blur(20px);border: 1px solid rgba(255,255,255,0.1);}
-.no-scrollbar::-webkit-scrollbar {display: none;}
-.perspective-1200 {perspective: 1200px;}
-.card-inner {transition: transform 0.7s ease-out;transform-style: preserve-3d;}
-.flipped {transform: rotateY(180deg);}
-.card-face {backface-visibility: hidden;border-radius: 20px;padding: 2rem;box-shadow: 0 20px 40px rgba(0,0,0,0.3);}
-.card-front {background: linear-gradient(145deg, #1a1a2e, #16213e);}
-.card-back {transform: rotateY(180deg);background: linear-gradient(145deg, #16213e, #0f0f23);}
-.btn-small {h-14 w-14 p-3 rounded-xl active:scale-95;}
-.haptic:active {transform: scale(0.96);}
-.cloze-hidden {background: linear-gradient(#3b82f6,#6366f1);color: transparent;border-radius: 8px;padding: 4px 8px;font-weight: bold;}
-.cloze-revealed {color: #60a5fa;font-weight: bold;border-radius: 8px;padding: 4px 8px;background: rgba(59,130,246,0.2);}
-.sidebar {transform: translateX(-100%);transition: 0.4s;}
-.sidebar.open {transform: translateX(0);}
-</style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Ultra Smart Anki Pro</title>
+    
+    <!-- TAILWIND CSS (Full CDN) -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- FONTAWESOME -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    
+    <!-- GOOGLE FONTS (Inter & Outfit for Premium Look) -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@500;700;800&display=swap" rel="stylesheet">
+    
+    <!-- CONFETTI JS (For Celebration) -->
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+
+    <!-- CONFIGURATION -->
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    fontFamily: { 
+                        sans: ['Inter', 'sans-serif'],
+                        heading: ['Outfit', 'sans-serif']
+                    },
+                    colors: {
+                        dark: {
+                            bg: '#0B1120',      // Ultra dark blue
+                            surface: '#151F32', // Lighter blue
+                            card: '#1E293B',    // Card bg
+                            border: '#334155'   // Borders
+                        },
+                        primary: {
+                            DEFAULT: '#3B82F6', // Blue 500
+                            hover: '#2563EB',   // Blue 600
+                            glow: 'rgba(59, 130, 246, 0.5)'
+                        },
+                        status: {
+                            again: '#EF4444', // Red
+                            hard: '#F59E0B',  // Orange
+                            good: '#10B981',  // Emerald
+                            easy: '#06B6D4'   // Cyan
+                        }
+                    },
+                    animation: {
+                        'enter': 'enter 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards',
+                        'leave': 'leave 0.2s cubic-bezier(0.16, 1, 0.3, 1) forwards',
+                        'flip': 'flip 0.6s cubic-bezier(0.4, 0.0, 0.2, 1)',
+                        'pulse-slow': 'pulse 3s infinite',
+                    },
+                    keyframes: {
+                        enter: { '0%': { opacity: 0, transform: 'scale(0.95) translateY(10px)' }, '100%': { opacity: 1, transform: 'scale(1) translateY(0)' } },
+                        leave: { '0%': { opacity: 1, transform: 'scale(1)' }, '100%': { opacity: 0, transform: 'scale(0.95)' } },
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        /* --- GLOBAL STYLES --- */
+        body {
+            background-color: #0B1120;
+            color: #F8FAFC;
+            -webkit-tap-highlight-color: transparent;
+            overflow: hidden; /* App-like feel */
+        }
+        
+        /* Smooth Scrollbar */
+        .scroller {
+            scrollbar-width: thin;
+            scrollbar-color: #334155 transparent;
+        }
+        .scroller::-webkit-scrollbar { width: 4px; }
+        .scroller::-webkit-scrollbar-thumb { background: #334155; border-radius: 10px; }
+
+        /* 3D Card Engine */
+        .scene { perspective: 1000px; }
+        .card-object {
+            position: relative; width: 100%; height: 100%;
+            transform-style: preserve-3d;
+            transition: transform 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+        .card-face {
+            position: absolute; width: 100%; height: 100%;
+            -webkit-backface-visibility: hidden; backface-visibility: hidden;
+            border-radius: 1.5rem;
+            display: flex; flex-direction: column; justify-content: center; align-items: center;
+            background: #1E293B; border: 1px solid #334155;
+            box-shadow: 0 10px 40px -10px rgba(0,0,0,0.5);
+        }
+        .card-back { transform: rotateY(180deg); background: #1E293B; }
+        .is-flipped { transform: rotateY(180deg); }
+
+        /* Glassmorphism Utilities */
+        .glass { background: rgba(15, 23, 42, 0.8); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px); border-top: 1px solid rgba(255,255,255,0.05); }
+        .glass-panel { background: rgba(30, 41, 59, 0.5); backdrop-filter: blur(8px); border: 1px solid rgba(255,255,255,0.05); }
+
+        /* Cloze Styles */
+        .cloze-mask {
+            background: #3B82F6; color: transparent; border-radius: 6px; padding: 2px 8px;
+            font-weight: 700; cursor: pointer; transition: all 0.2s;
+        }
+        .cloze-mask:active { transform: scale(0.95); }
+        .cloze-reveal {
+            color: #60A5FA; font-weight: 700; border-bottom: 2px solid #3B82F6;
+        }
+
+        /* Interactive Elements */
+        .btn-press:active { transform: scale(0.96); opacity: 0.9; }
+        .input-pro {
+            background: #0F172A; border: 1px solid #334155; color: white;
+            border-radius: 0.75rem; padding: 1rem; width: 100%;
+            transition: all 0.2s; font-family: 'Inter', sans-serif;
+        }
+        .input-pro:focus { border-color: #3B82F6; outline: none; box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2); }
+
+        /* Footer Fixed */
+        .footer-fixed {
+            position: fixed; bottom: 85px; width: 100%; text-align: center;
+            font-size: 10px; color: #475569; pointer-events: none; z-index: 0;
+        }
+    </style>
 </head>
-<body class="flex flex-col h-screen max-w-md mx-auto">
-<header class="glass h-16 flex items-center justify-between px-4 z-40 border-b border-slate-700">
-<div class="flex items-center gap-3">
-<i class="fa-solid fa-brain w-10 h-10 bg-gradient-to-r from-primary to-secondary text-white rounded-xl flex-center text-xl animate-pulse-glow p-2"></i>
-<div>
-<h1 class="font-bold text-lg">Ilm Nuri</h1>
-<p class="text-xs text-slate-400">Premium Smart Anki</p>
-</div>
-</div>
-<div class="flex items-center gap-2">
-<div class="text-right">
-<span class="text-xs text-slate-400 uppercase font-bold">Streak</span>
-<span id="streak" class="text-gold font-bold flex items-center gap-1">
-<i class="fa-solid fa-fire"></i><span>0</span>
-</span>
-</div>
-<button onclick="Router.nav('settings')" class="haptic p-2 rounded-lg hover:bg-white/10">
-<i class="fa-solid fa-gear text-slate-400"></i>
-</button>
-</div>
-</header>
+<body class="h-[100dvh] w-full flex flex-col max-w-md mx-auto relative border-x border-dark-border shadow-2xl bg-dark-bg">
 
-<main id="viewport" class="flex-1 overflow-auto p-6 pb-28 no-scrollbar">
-<!-- Content -->
-</main>
+    <!-- 1. HEADER (Dynamic) -->
+    <header class="h-16 flex items-center justify-between px-5 z-20 glass sticky top-0 shrink-0">
+        <div class="flex items-center gap-3">
+            <div class="w-9 h-9 rounded-xl bg-gradient-to-br from-blue-600 to-indigo-600 flex items-center justify-center shadow-lg shadow-blue-500/20 text-white">
+                <i class="fa-solid fa-brain text-sm"></i>
+            </div>
+            <div>
+                <h1 class="font-heading font-bold text-lg leading-tight tracking-tight">Ultra Smart</h1>
+                <div class="flex items-center gap-1.5">
+                    <div class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></div>
+                    <span class="text-[10px] font-medium text-slate-400 uppercase tracking-widest">Pro Version</span>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Language Switcher & Settings -->
+        <button onclick="App.toggleLang()" class="w-9 h-9 rounded-full bg-dark-surface border border-dark-border text-slate-400 flex items-center justify-center btn-press hover:text-white transition">
+            <span id="lang-display" class="text-xs font-bold">UZ</span>
+        </button>
+    </header>
 
-<nav class="fixed bottom-0 w-full max-w-md mx-auto h-20 flex items-end justify-around px-4 pt-2 z-30 glass rounded-t-2xl shadow-2xl backdrop-blur-xl">
-<button onclick="Router.nav('decks')" id="nav-decks" class="btn-small text-slate-400 hover:text-primary flex flex-col items-center gap-1 haptic">
-<i class="fa-solid fa-layer-group text-lg"></i>
-<span class="text-xs font-bold">Darslar</span>
-</button>
-<button onclick="Router.nav('study')" id="nav-study" class="btn-small text-slate-400 hover:text-accent flex flex-col items-center gap-1 haptic">
-<i class="fa-solid fa-play text-lg"></i>
-<span class="text-xs font-bold">O'qish</span>
-</button>
-<button onclick="Router.nav('add')" id="nav-add" class="h-16 w-16 bg-gradient-to-br from-primary to-secondary text-white rounded-2xl shadow-2xl shadow-primary/30 hover:shadow-primary/50 active:scale-90 haptic mx-1 z-10">
-<i class="fa-solid fa-plus text-2xl font-bold"></i>
-</button>
-<button onclick="Router.nav('profile')" id="nav-profile" class="btn-small text-slate-400 hover:text-gold flex flex-col items-center gap-1 haptic">
-<i class="fa-solid fa-chart-pie text-lg"></i>
-<span class="text-xs font-bold">Stats</span>
-</button>
-</nav>
+    <!-- 2. MAIN VIEWPORT -->
+    <main id="app-viewport" class="flex-1 overflow-y-auto overflow-x-hidden p-5 pb-32 scroller relative">
+        <!-- Content Injected via JavaScript -->
+    </main>
 
-<!-- Sidebar -->
-<div id="sidebar" class="sidebar fixed left-0 top-0 h-full w-64 glass z-50 p-8 pt-20">
-<h2 class="font-bold text-xl mb-6 flex items-center gap-3">
-<i class="fa-solid fa-bars text-primary"></i>
-Darslar
-</h2>
-<div id="deck-list" class="space-y-3 overflow-auto h-96 no-scrollbar">
-<!-- Decks list -->
-</div>
-<button onclick="Sidebar.close()" class="absolute top-6 right-4 text-slate-400 hover:text-white">
-<i class="fa-solid fa-xmark"></i>
-</button>
-</div>
+    <!-- 3. FOOTER (Mandatory) -->
+    <div class="footer-fixed">
+        <p class="font-medium tracking-wide opacity-50">Made by ©️Muhammad Daler</p>
+    </div>
 
-<!-- Overlay -->
-<div id="overlay" class="fixed inset-0 bg-black/50 backdrop-blur-sm z-40 hidden" onclick="Sidebar.close()"></div>
+    <!-- 4. BOTTOM NAVIGATION (Dock Style) -->
+    <nav class="h-[75px] w-full max-w-md fixed bottom-0 z-30 glass flex justify-around items-center px-4 pb-2 border-t border-white/5">
+        <button onclick="Router.nav('home')" id="nav-home" class="flex flex-col items-center justify-center w-16 h-full gap-1 text-primary transition-all btn-press">
+            <i class="fa-solid fa-layer-group text-xl mb-0.5"></i>
+            <span class="text-[10px] font-bold" data-key="nav_home">Asosiy</span>
+        </button>
 
-<!-- Motivation Modal -->
-<div id="motivation" class="fixed inset-0 glass z-50 hidden flex items-center justify-center p-8">
-<div class="max-w-sm w-full mx-4 text-center glass-card p-12 rounded-3xl shadow-2xl animate-float">
-<i class="fa-solid fa-star text-6xl text-gold mb-4"></i>
-<h2 class="text-2xl font-black mb-2">Sessiya Tugadi!</h2>
-<p class="text-lg text-slate-300 mb-6">Hikmat: <strong id="hikmat"></strong></p>
-<button onclick="Motivation.close()" class="w-full py-4 bg-primary text-white font-bold rounded-2xl shadow-lg hover:shadow-primary/50 haptic">
-Davom Et
-</button>
-</div>
-</div>
+        <button onclick="Router.nav('add')" id="nav-add" class="flex items-center justify-center w-14 h-14 rounded-full bg-primary hover:bg-primary-hover text-white shadow-lg shadow-blue-500/30 -mt-8 border-4 border-dark-bg btn-press transition-transform">
+            <i class="fa-solid fa-plus text-xl"></i>
+        </button>
 
-<!-- Toast -->
-<div id="toast" class="fixed bottom-28 left-1/2 -translate-x-1/2 bg-card text-white px-6 py-3 rounded-2xl shadow-2xl z-40 hidden flex items-center gap-3">
-<i class="fa-solid fa-check text-accent"></i>
-<span id="toast-text"></span>
-</div>
+        <button onclick="Router.nav('profile')" id="nav-profile" class="flex flex-col items-center justify-center w-16 h-full gap-1 text-slate-500 transition-all btn-press">
+            <i class="fa-solid fa-chart-pie text-xl mb-0.5"></i>
+            <span class="text-[10px] font-bold" data-key="nav_profile">Profil</span>
+        </button>
+    </nav>
 
-<script>
-LANG = localStorage.getItem('lang') || 'uz';
-const T = {
-uz: {decks: 'Darslar', study: 'O\'qish', add: 'Qoshish', profile: 'Stats', settings: 'Sozlamalar', ...}, // full map from previous
-en: {...}
-};
-function _(k) { return T[LANG][k] || k; }
+    <!-- 5. MODALS & OVERLAYS -->
+    
+    <!-- Celebration/Motivation Modal (Only at session end) -->
+    <div id="modal-celebrate" class="fixed inset-0 z-50 hidden flex-col items-center justify-center bg-dark-bg/95 backdrop-blur-xl p-6 text-center animate-enter">
+        <div class="w-24 h-24 rounded-full bg-dark-surface border-4 border-primary flex items-center justify-center text-5xl mb-6 shadow-2xl relative">
+            🏆
+            <div class="absolute -bottom-2 bg-primary text-white text-xs font-bold px-3 py-1 rounded-full">Completed</div>
+        </div>
+        <h2 class="font-heading text-2xl font-bold text-white mb-2" data-key="session_done">Ajoyib natija!</h2>
+        <p class="text-slate-400 text-sm mb-8" data-key="session_subtitle">Bugungi reja bajarildi.</p>
+        
+        <!-- Hikmatli So'z -->
+        <div class="bg-dark-card border border-dark-border p-6 rounded-2xl w-full max-w-sm mb-8 relative overflow-hidden">
+            <div class="absolute top-0 left-0 w-1 h-full bg-gradient-to-b from-blue-500 to-purple-500"></div>
+            <i class="fa-solid fa-quote-left text-primary/20 text-4xl absolute top-2 right-4"></i>
+            <p id="quote-text" class="text-lg font-medium text-white italic mb-4 relative z-10">"..."</p>
+            <p id="quote-author" class="text-xs font-bold text-primary uppercase tracking-widest text-right">AUTHOR</p>
+        </div>
 
-const DB = {
- JSON.parse(localStorage.getItem('db') || '{}'),
-load() { 
-try { this.data = JSON.parse(localStorage.getItem('db') || '{}'); } catch { this.seed(); }
-},
-save() { localStorage.setItem('db', JSON.stringify(this.data)); },
-seed() { this.data = {user: {streak:0, xp:0}, decks: [], cards: []}; this.save(); },
-updateStreak() { document.getElementById('streak').innerText = this.data.user.streak || 0; }
-};
+        <button onclick="Study.closeSession()" class="w-full max-w-xs py-3.5 bg-primary hover:bg-primary-hover text-white font-bold rounded-xl shadow-lg btn-press">
+            <span data-key="btn_continue">Davom etish</span>
+        </button>
+    </div>
 
-DB.load();
+    <!-- Toast Notification -->
+    <div id="toast" class="fixed top-20 left-1/2 -translate-x-1/2 bg-dark-surface border border-dark-border text-white px-5 py-3 rounded-full shadow-2xl z-50 flex items-center gap-3 opacity-0 pointer-events-none transition-all duration-300 transform translate-y-[-20px]">
+        <div class="w-2 h-2 rounded-full bg-emerald-500"></div>
+        <span id="toast-msg" class="text-xs font-bold">Notification</span>
+    </div>
 
-// Full Router
-window.Router = {
-nav(page) {
-Router.current = page;
-const vp = document.getElementById('viewport');
-Router.updateNav(page);
-if (page === 'decks') Router.renderDecks(vp);
-else if (page === 'study') Router.renderStudy(vp);
-else if (page === 'add') Router.renderAdd(vp);
-else if (page === 'profile') Router.renderProfile(vp);
-else if (page === 'settings') Router.renderSettings(vp);
-},
-// implementations for each render...
-};
+    <!-- JAVASCRIPT ENGINE -->
+    <script>
+        /**
+         * -------------------------------------------------------------------
+         * ULTRA SMART ANKI PRO - CORE ENGINE
+         * Architecture: MVC (Model-View-Controller)
+         * Algorithm: Modified SM-2 (Quantum Variation)
+         * -------------------------------------------------------------------
+         */
 
-window.Study = {
-queue: [], 
-start(deckId) {
-this.queue = DB.data.cards.filter(c => c.deckId === deckId && c.nextReview <= Date.now()).sort((a,b) => a.nextReview - b.nextReview);
-if (this.queue.length === 0) { showToast('Darslar tugadi!'); return; }
-Router.nav('study-mode'); // custom
-this.renderCard();
-},
-rate(r) {
-if (this.queue.length === 0) { Motivation.show(); return; }
-const card = this.queue.shift();
-card.nextReview = fsrsNextInterval(card, r);
-DB.data.cards = DB.data.cards.map(c => c.id === card.id ? card : c);
-DB.save();
-DB.data.user.xp += r * 25;
-DB.data.user.streak++;
-DB.updateStreak();
-this.renderCard();
-},
-// full flip, renderCard...
-};
+        // --- 1. LOCALIZATION (i18n) ---
+        const TRANSLATIONS = {
+            uz: {
+                nav_home: "Asosiy", nav_profile: "Profil",
+                hero_title: "Bugungi Reja", hero_sub: "ta karta kutmoqda",
+                decks_title: "To'plamlarim", no_decks: "Hozircha to'plam yo'q. Yangi qo'shing!",
+                add_title: "Yangi Karta", add_tab_card: "Karta Qo'shish", add_tab_deck: "To'plam Yaratish",
+                lbl_deck: "To'plamni tanlang", lbl_front: "Savol (Front)", lbl_back: "Javob (Back)",
+                lbl_name: "Nomi", placeholder_q: "Savolni kiriting...", placeholder_a: "Javobni kiriting...",
+                hint_cloze: "Format: {{c1::yashirin so'z}}", btn_save: "Saqlash", btn_create: "Yaratish",
+                study_left: "qoldi", show_ans: "Javobni Ko'rsatish",
+                rate_again: "Qayta", rate_hard: "Qiyin", rate_good: "Yaxshi", rate_easy: "Oson",
+                session_done: "Sessiya Yakunlandi!", session_subtitle: "Siz bugungi maqsadga erishdingiz.",
+                btn_continue: "Bosh Menyuga", msg_saved: "Muvaffaqiyatli saqlandi!", msg_error: "Xatolik! Ma'lumot to'liq emas.",
+                profile_stats: "Statistika", lvl: "LEVEL", total_xp: "Umumiy XP", streak: "Kunlik Streak"
+            },
+            en: {
+                nav_home: "Home", nav_profile: "Profile",
+                hero_title: "Daily Goal", hero_sub: "cards due today",
+                decks_title: "My Decks", no_decks: "No decks found. Create one!",
+                add_title: "New Item", add_tab_card: "Add Card", add_tab_deck: "Create Deck",
+                lbl_deck: "Select Deck", lbl_front: "Question (Front)", lbl_back: "Answer (Back)",
+                lbl_name: "Name", placeholder_q: "Enter question...", placeholder_a: "Enter answer...",
+                hint_cloze: "Format: {{c1::hidden word}}", btn_save: "Save Item", btn_create: "Create",
+                study_left: "left", show_ans: "Show Answer",
+                rate_again: "Again", rate_hard: "Hard", rate_good: "Good", rate_easy: "Easy",
+                session_done: "Session Complete!", session_subtitle: "You crushed your goals today.",
+                btn_continue: "Back to Home", msg_saved: "Saved successfully!", msg_error: "Error! Missing fields.",
+                profile_stats: "Statistics", lvl: "LEVEL", total_xp: "Total XP", streak: "Daily Streak"
+            }
+        };
 
-window.Motivation = {
-quotes: ['Ilmdan boshqa najot yo\'q - Buxoriy', ...],
-show() {
-document.getElementById('hikmat').innerText = this.quotes[Math.random()*this.quotes.length];
-document.getElementById('motivation').classList.remove('hidden');
-},
-close() { document.getElementById('motivation').classList.add('hidden'); Router.nav('decks'); }
-};
+        // --- 2. DATA STORE (LocalStorage Manager) ---
+        const Store = {
+            key: 'ultra_anki_pro_v1',
+            state: {
+                lang: 'uz',
+                user: { xp: 0, streak: 0, lastStudy: null },
+                decks: [],
+                cards: []
+            },
 
-// Sidebar
-window.Sidebar = {
-open() { document.getElementById('sidebar').classList.add('open'); document.getElementById('overlay').classList.remove('hidden'); },
-close() { document.getElementById('sidebar').classList.remove('open'); document.getElementById('overlay').classList.add('hidden'); }
-};
+            init() {
+                try {
+                    const raw = localStorage.getItem(this.key);
+                    if (raw) {
+                        const parsed = JSON.parse(raw);
+                        // Deep merge to prevent crash on new version structure
+                        this.state = { ...this.state, ...parsed };
+                    } else {
+                        this.seed(); // First time user
+                    }
+                } catch (e) {
+                    console.error("DB Error", e);
+                    this.seed();
+                }
+                this.checkStreak();
+            },
 
-// Settings lang toggle
-function toggleLang() {
-LANG = LANG === 'uz' ? 'en' : 'uz';
-localStorage.setItem('lang', LANG);
-DB.data.settings.lang = LANG;
-DB.save();
-location.reload();
-}
+            save() {
+                localStorage.setItem(this.key, JSON.stringify(this.state));
+            },
 
-// Init
-DB.updateStreak();
-Router.nav('decks');
-showToast('Ilm Nuri Premium yuklandi!');
-</script>
+            seed() {
+                const d1 = 'deck_' + Date.now();
+                this.state.decks = [
+                    { id: d1, name: 'Ingliz Tili (Demo)', color: 'from-blue-600 to-cyan-500', icon: 'fa-language' }
+                ];
+                this.state.cards = [
+                    { id: 'c1', deckId: d1, type: 'basic', front: 'Apple', back: 'Olma', interval: 0, ease: 2.5, nextReview: Date.now() },
+                    { id: 'c2', deckId: d1, type: 'cloze', front: 'London is the capital of {{c1::Great Britain}}.', back: '', interval: 0, ease: 2.5, nextReview: Date.now() }
+                ];
+                this.save();
+            },
+
+            checkStreak() {
+                const today = new Date().toDateString();
+                if (this.state.user.lastStudy && this.state.user.lastStudy !== today) {
+                    const yesterday = new Date();
+                    yesterday.setDate(yesterday.getDate() - 1);
+                    if (this.state.user.lastStudy !== yesterday.toDateString()) {
+                        this.state.user.streak = 0; // Reset if missed a day
+                    }
+                }
+            }
+        };
+
+        // --- 3. ALGORITHM (Quantum SM-2) ---
+        const Brain = {
+            calc(card, rating) {
+                // Ratings: 1 (Fail), 2 (Hard), 3 (Good), 4 (Easy)
+                const oneDay = 24 * 60 * 60 * 1000;
+                let interval = 0;
+
+                if (rating === 1) {
+                    // Reset
+                    card.interval = 0;
+                    card.ease = Math.max(1.3, card.ease - 0.2);
+                    interval = 1 * 60 * 1000; // 1 min (immediate review)
+                } else {
+                    // Success logic
+                    if (card.interval === 0) {
+                        card.interval = 1; // 1 day
+                    } else if (card.interval === 1) {
+                        card.interval = (rating === 4) ? 4 : 3;
+                    } else {
+                        let mod = (rating === 4) ? 1.3 : (rating === 2 ? 0.8 : 1.0);
+                        card.interval = Math.ceil(card.interval * card.ease * mod);
+                    }
+
+                    // Ease adjustment
+                    if (rating === 2) card.ease -= 0.15;
+                    if (rating === 4) card.ease += 0.15;
+                    if (card.ease < 1.3) card.ease = 1.3;
+
+                    interval = card.interval * oneDay;
+                }
+
+                card.nextReview = Date.now() + interval;
+                return card;
+            }
+        };
+
+        // --- 4. UI RENDERER & ROUTER ---
+        const App = {
+            view: 'home',
+            
+            init() {
+                Store.init();
+                this.lang = Store.state.lang;
+                this.updateLangDisplay();
+                this.render();
+            },
+
+            t(key) {
+                return TRANSLATIONS[this.lang][key] || key;
+            },
+
+            toggleLang() {
+                this.lang = this.lang === 'uz' ? 'en' : 'uz';
+                Store.state.lang = this.lang;
+                Store.save();
+                this.updateLangDisplay();
+                this.render(); // Re-render current view
+            },
+
+            updateLangDisplay() {
+                document.getElementById('lang-display').innerText = this.lang.toUpperCase();
+            },
+
+            render() {
+                const container = document.getElementById('app-viewport');
+                container.innerHTML = '';
+                
+                // Update Nav Active State
+                ['home', 'add', 'profile'].forEach(v => {
+                    const el = document.getElementById(`nav-${v}`);
+                    if (v === this.view) {
+                        el.classList.add('text-primary');
+                        el.classList.remove('text-slate-500');
+                    } else {
+                        el.classList.remove('text-primary');
+                        el.classList.add('text-slate-500');
+                    }
+                });
+
+                if (this.view === 'home') Views.home(container);
+                else if (this.view === 'add') Views.add(container);
+                else if (this.view === 'profile') Views.profile(container);
+                else if (this.view === 'study') Views.study(container);
+                
+                // Translate static UI elements
+                document.querySelectorAll('[data-key]').forEach(el => {
+                    el.innerText = this.t(el.getAttribute('data-key'));
+                });
+            }
+        };
+
+        const Router = {
+            nav(view, params = null) {
+                App.view = view;
+                App.params = params;
+                App.render();
+            }
+        };
+
+        // --- 5. VIEWS (Components) ---
+        const Views = {
+            home(el) {
+                const dueCount = Store.state.cards.filter(c => c.nextReview <= Date.now()).length;
+                
+                let html = `
+                    <div class="animate-enter space-y-6">
+                        <!-- Hero Stats -->
+                        <div class="w-full p-6 rounded-3xl bg-gradient-to-br from-dark-surface to-dark-card border border-dark-border relative overflow-hidden shadow-2xl">
+                            <div class="absolute -right-6 -top-6 w-32 h-32 bg-primary blur-[60px] opacity-20"></div>
+                            <h2 class="text-xs font-bold text-primary uppercase tracking-widest mb-1">${App.t('hero_title')}</h2>
+                            <div class="flex items-end gap-2">
+                                <span class="text-4xl font-heading font-extrabold text-white">${dueCount}</span>
+                                <span class="text-sm font-medium text-slate-400 mb-1.5">${App.t('hero_sub')}</span>
+                            </div>
+                            <div class="mt-4 w-full h-1.5 bg-dark-bg rounded-full overflow-hidden">
+                                <div class="h-full bg-primary rounded-full transition-all duration-1000" style="width: ${Math.min(100, (Store.state.user.xp % 100))}%"></div>
+                            </div>
+                        </div>
+
+                        <!-- Decks List -->
+                        <div>
+                            <h3 class="font-heading font-bold text-lg text-white mb-3 px-1">${App.t('decks_title')}</h3>
+                            <div class="space-y-3">
+                `;
+
+                if (Store.state.decks.length === 0) {
+                    html += `<div class="p-8 text-center border border-dashed border-dark-border rounded-2xl text-slate-500 text-sm">${App.t('no_decks')}</div>`;
+                }
+
+                Store.state.decks.forEach(deck => {
+                    const total = Store.state.cards.filter(c => c.deckId === deck.id).length;
+                    const due = Store.state.cards.filter(c => c.deckId === deck.id && c.nextReview <= Date.now()).length;
+
+                    html += `
+                        <div onclick="Study.init('${deck.id}')" class="group relative bg-dark-surface hover:bg-dark-card border border-dark-border p-4 rounded-2xl flex items-center justify-between transition-all btn-press shadow-md cursor-pointer">
+                            <div class="flex items-center gap-4">
+                                <div class="w-12 h-12 rounded-xl bg-gradient-to-br ${deck.color} flex items-center justify-center text-white text-xl shadow-lg group-hover:scale-110 transition-transform">
+                                    <i class="fa-solid ${deck.icon}"></i>
+                                </div>
+                                <div>
+                                    <h4 class="font-heading font-bold text-white text-base">${deck.name}</h4>
+                                    <p class="text-xs text-slate-400 font-medium mt-0.5">${total} Cards • <span class="${due > 0 ? 'text-emerald-400 font-bold' : ''}">${due} Due</span></p>
+                                </div>
+                            </div>
+                            <div class="w-8 h-8 rounded-full bg-dark-bg flex items-center justify-center text-slate-500 group-hover:text-white transition">
+                                <i class="fa-solid fa-chevron-right text-xs"></i>
+                            </div>
+                        </div>
+                    `;
+                });
+
+                html += `</div></div></div>`;
+                el.innerHTML = html;
+            },
+
+            add(el) {
+                const decks = Store.state.decks.map(d => `<option value="${d.id}">${d.name}</option>`).join('');
+                
+                el.innerHTML = `
+                    <div class="animate-enter space-y-6">
+                        <h2 class="font-heading font-bold text-2xl text-white px-1">${App.t('add_title')}</h2>
+                        
+                        <!-- Toggle Type -->
+                        <div class="grid grid-cols-2 gap-2 p-1 bg-dark-surface rounded-xl border border-dark-border">
+                            <button onclick="UI.setAddType('card')" id="tab-card" class="py-2.5 rounded-lg text-xs font-bold bg-primary text-white shadow-md transition">${App.t('add_tab_card')}</button>
+                            <button onclick="UI.setAddType('deck')" id="tab-deck" class="py-2.5 rounded-lg text-xs font-bold text-slate-400 hover:text-white transition">${App.t('add_tab_deck')}</button>
+                        </div>
+
+                        <!-- Card Form -->
+                        <div id="form-card" class="space-y-4">
+                            <div>
+                                <label class="text-xs font-bold text-slate-500 uppercase ml-1 mb-1 block">${App.t('lbl_deck')}</label>
+                                <div class="relative">
+                                    <select id="inp-deck" class="input-pro appearance-none">${decks}</select>
+                                    <i class="fa-solid fa-chevron-down absolute right-4 top-4 text-slate-500 pointer-events-none"></i>
+                                </div>
+                            </div>
+
+                            <div>
+                                <label class="text-xs font-bold text-slate-500 uppercase ml-1 mb-1 block">${App.t('lbl_front')}</label>
+                                <textarea id="inp-front" rows="3" class="input-pro text-lg" placeholder="${App.t('placeholder_q')}"></textarea>
+                                <p class="text-[10px] text-primary mt-1.5 ml-1 opacity-80 bg-blue-500/10 p-1.5 rounded inline-block"><i class="fa-solid fa-circle-info mr-1"></i> ${App.t('hint_cloze')}</p>
+                            </div>
+
+                            <div id="box-back">
+                                <label class="text-xs font-bold text-slate-500 uppercase ml-1 mb-1 block">${App.t('lbl_back')}</label>
+                                <textarea id="inp-back" rows="3" class="input-pro text-lg" placeholder="${App.t('placeholder_a')}"></textarea>
+                            </div>
+
+                            <button onclick="Actions.saveCard()" class="w-full py-4 bg-primary hover:bg-primary-hover text-white font-bold rounded-xl shadow-lg shadow-blue-500/20 btn-press flex items-center justify-center gap-2 mt-2">
+                                <i class="fa-solid fa-check"></i> ${App.t('btn_save')}
+                            </button>
+                        </div>
+
+                        <!-- Deck Form -->
+                        <div id="form-deck" class="space-y-4 hidden">
+                            <div>
+                                <label class="text-xs font-bold text-slate-500 uppercase ml-1 mb-1 block">${App.t('lbl_name')}</label>
+                                <input id="inp-deck-name" type="text" class="input-pro" placeholder="M: Dasturlash...">
+                            </div>
+                            <button onclick="Actions.saveDeck()" class="w-full py-4 bg-dark-surface hover:bg-dark-card border border-dark-border text-white font-bold rounded-xl shadow-lg btn-press flex items-center justify-center gap-2 mt-2">
+                                <i class="fa-solid fa-plus"></i> ${App.t('btn_create')}
+                            </button>
+                        </div>
+                    </div>
+                `;
+            },
+
+            study(el) {
+                // Skeleton container, content filled by Study Controller
+                el.innerHTML = `<div id="study-container" class="h-full flex flex-col relative"></div>`;
+            },
+
+            profile(el) {
+                const user = Store.state.user;
+                const totalCards = Store.state.cards.length;
+                
+                el.innerHTML = `
+                    <div class="animate-enter flex flex-col items-center justify-center min-h-[50vh] text-center space-y-8">
+                        
+                        <div class="relative">
+                            <div class="w-28 h-28 rounded-full bg-dark-surface border-4 border-primary flex items-center justify-center shadow-[0_0_30px_rgba(59,130,246,0.3)]">
+                                <i class="fa-solid fa-user-astronaut text-4xl text-slate-300"></i>
+                            </div>
+                            <div class="absolute -bottom-3 left-1/2 -translate-x-1/2 bg-primary text-white text-[10px] font-bold px-3 py-1 rounded-full border-2 border-dark-bg uppercase tracking-wide whitespace-nowrap">
+                                ${App.t('lvl')} ${Math.floor(user.xp / 100) + 1}
+                            </div>
+                        </div>
+
+                        <div>
+                            <h2 class="font-heading font-bold text-3xl text-white mb-1">${App.t('profile_stats')}</h2>
+                            <p class="text-slate-500 text-sm">Keep pushing forward!</p>
+                        </div>
+
+                        <div class="grid grid-cols-2 gap-4 w-full">
+                            <div class="bg-dark-surface p-5 rounded-2xl border border-dark-border">
+                                <div class="text-amber-500 text-2xl mb-1"><i class="fa-solid fa-fire"></i></div>
+                                <div class="font-heading font-bold text-2xl text-white">${user.streak}</div>
+                                <div class="text-[10px] font-bold text-slate-500 uppercase">${App.t('streak')}</div>
+                            </div>
+                            <div class="bg-dark-surface p-5 rounded-2xl border border-dark-border">
+                                <div class="text-emerald-500 text-2xl mb-1"><i class="fa-solid fa-bolt"></i></div>
+                                <div class="font-heading font-bold text-2xl text-white">${user.xp}</div>
+                                <div class="text-[10px] font-bold text-slate-500 uppercase">${App.t('total_xp')}</div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }
+        };
+
+        // --- 6. ACTIONS & CONTROLLERS ---
+        const UI = {
+            toast(msg, type = 'success') {
+                const t = document.getElementById('toast');
+                t.querySelector('#toast-msg').innerText = msg;
+                t.querySelector('div').className = `w-2 h-2 rounded-full ${type === 'error' ? 'bg-red-500' : 'bg-emerald-500'}`;
+                
+                t.classList.remove('opacity-0', 'translate-y-[-20px]');
+                setTimeout(() => {
+                    t.classList.add('opacity-0', 'translate-y-[-20px]');
+                }, 2000);
+            },
+
+            setAddType(type) {
+                const bCard = document.getElementById('tab-card');
+                const bDeck = document.getElementById('tab-deck');
+                const fCard = document.getElementById('form-card');
+                const fDeck = document.getElementById('form-deck');
+
+                if (type === 'card') {
+                    bCard.className = "py-2.5 rounded-lg text-xs font-bold bg-primary text-white shadow-md transition";
+                    bDeck.className = "py-2.5 rounded-lg text-xs font-bold text-slate-400 hover:text-white transition";
+                    fCard.classList.remove('hidden');
+                    fDeck.classList.add('hidden');
+                } else {
+                    bDeck.className = "py-2.5 rounded-lg text-xs font-bold bg-primary text-white shadow-md transition";
+                    bCard.className = "py-2.5 rounded-lg text-xs font-bold text-slate-400 hover:text-white transition";
+                    fDeck.classList.remove('hidden');
+                    fCard.classList.add('hidden');
+                }
+            }
+        };
+
+        const Actions = {
+            saveDeck() {
+                const name = document.getElementById('inp-deck-name').value.trim();
+                if (!name) return UI.toast(App.t('msg_error'), 'error');
+
+                const colors = ['from-purple-600 to-indigo-600', 'from-pink-500 to-rose-500', 'from-amber-500 to-orange-500'];
+                const icons = ['fa-book', 'fa-code', 'fa-globe', 'fa-atom'];
+
+                Store.state.decks.push({
+                    id: 'd_' + Date.now(),
+                    name,
+                    color: colors[Math.floor(Math.random() * colors.length)],
+                    icon: icons[Math.floor(Math.random() * icons.length)]
+                });
+                Store.save();
+                Router.nav('home');
+                UI.toast(App.t('msg_saved'));
+            },
+
+            saveCard() {
+                const deckId = document.getElementById('inp-deck').value;
+                const front = document.getElementById('inp-front').value.trim();
+                const back = document.getElementById('inp-back').value.trim();
+                
+                let type = 'basic';
+                if (front.includes('{{c1::')) type = 'cloze';
+
+                if (!front || (!back && type === 'basic')) return UI.toast(App.t('msg_error'), 'error');
+
+                Store.state.cards.push({
+                    id: 'c_' + Date.now(),
+                    deckId,
+                    type,
+                    front,
+                    back: type === 'cloze' ? '' : back,
+                    interval: 0,
+                    ease: 2.5,
+                    nextReview: Date.now()
+                });
+                Store.save();
+                
+                // Reset inputs
+                document.getElementById('inp-front').value = '';
+                document.getElementById('inp-back').value = '';
+                UI.toast(App.t('msg_saved'));
+            }
+        };
+
+        // --- 7. STUDY LOGIC (Complex) ---
+        const Study = {
+            queue: [],
+            current: null,
+            flipped: false,
+
+            init(deckId) {
+                // Filter due cards
+                this.queue = Store.state.cards
+                    .filter(c => c.deckId === deckId && c.nextReview <= Date.now())
+                    .sort((a,b) => a.nextReview - b.nextReview);
+
+                if (this.queue.length === 0) {
+                    UI.toast("Hozircha darslar yo'q", 'error');
+                    return;
+                }
+
+                Router.nav('study');
+                this.next();
+            },
+
+            next() {
+                if (this.queue.length === 0) {
+                    this.finishSession();
+                    return;
+                }
+
+                this.current = this.queue[0]; // Peek
+                this.flipped = false;
+                this.renderUI();
+            },
+
+            renderUI() {
+                const container = document.getElementById('study-container');
+                const card = this.current;
+                
+                // Parse Content
+                let frontHtml = card.front;
+                let backHtml = card.back;
+                
+                if (card.type === 'cloze') {
+                    // Regex to hide text
+                    frontHtml = card.front.replace(/{{c1::(.*?)}}/g, '<span class="cloze-mask" onclick="event.stopPropagation()">...</span>');
+                    backHtml = card.front.replace(/{{c1::(.*?)}}/g, '<span class="cloze-reveal">$1</span>');
+                }
+
+                container.innerHTML = `
+                    <div class="flex items-center justify-between mb-4">
+                        <button onclick="Router.nav('home')" class="text-slate-400 hover:text-white"><i class="fa-solid fa-xmark text-lg"></i></button>
+                        <div class="px-3 py-1 rounded-full bg-dark-surface border border-dark-border text-xs font-bold text-primary">
+                            ${this.queue.length} ${App.t('study_left')}
+                        </div>
+                        <div class="w-6"></div>
+                    </div>
+
+                    <!-- 3D CARD CONTAINER -->
+                    <div class="flex-1 scene mb-6 cursor-pointer group" onclick="Study.flip()">
+                        <div id="active-card" class="card-object">
+                            <!-- FRONT -->
+                            <div class="card-face card-front">
+                                <div class="text-xs font-bold text-slate-500 uppercase tracking-widest mb-4">Question</div>
+                                <div class="text-2xl font-medium text-center leading-relaxed px-4">${frontHtml}</div>
+                                <div class="absolute bottom-6 text-xs text-slate-500 opacity-60 animate-pulse">Tap to show answer</div>
+                            </div>
+                            <!-- BACK -->
+                            <div class="card-face card-back">
+                                <div class="text-sm text-slate-500 line-through opacity-50 mb-4">${card.type === 'basic' ? card.front : ''}</div>
+                                <div class="text-2xl font-bold text-center leading-relaxed text-white px-4">${backHtml}</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- CONTROLS -->
+                    <div class="h-24">
+                        <button id="btn-reveal" onclick="Study.flip()" class="w-full h-14 bg-primary hover:bg-primary-hover text-white text-lg font-bold rounded-xl shadow-lg shadow-blue-500/20 btn-press transition">
+                            ${App.t('show_ans')}
+                        </button>
+
+                        <div id="grid-grading" class="hidden grid-cols-4 gap-2 h-16 animate-enter">
+                            <button onclick="Study.rate(1)" class="flex flex-col items-center justify-center bg-dark-surface border-2 border-status-again/30 text-status-again rounded-xl font-bold active:bg-status-again/10 transition">
+                                <span class="text-sm">${App.t('rate_again')}</span><span class="text-[10px] opacity-70">1m</span>
+                            </button>
+                            <button onclick="Study.rate(2)" class="flex flex-col items-center justify-center bg-dark-surface border-2 border-status-hard/30 text-status-hard rounded-xl font-bold active:bg-status-hard/10 transition">
+                                <span class="text-sm">${App.t('rate_hard')}</span><span class="text-[10px] opacity-70">10m</span>
+                            </button>
+                            <button onclick="Study.rate(3)" class="flex flex-col items-center justify-center bg-dark-surface border-2 border-status-good/30 text-status-good rounded-xl font-bold active:bg-status-good/10 transition">
+                                <span class="text-sm">${App.t('rate_good')}</span><span class="text-[10px] opacity-70">1d</span>
+                            </button>
+                            <button onclick="Study.rate(4)" class="flex flex-col items-center justify-center bg-dark-surface border-2 border-status-easy/30 text-status-easy rounded-xl font-bold active:bg-status-easy/10 transition">
+                                <span class="text-sm">${App.t('rate_easy')}</span><span class="text-[10px] opacity-70">3d</span>
+                            </button>
+                        </div>
+                    </div>
+                `;
+            },
+
+            flip() {
+                if (this.flipped) return;
+                this.flipped = true;
+                document.getElementById('active-card').classList.add('is-flipped');
+                document.getElementById('btn-reveal').classList.add('hidden');
+                document.getElementById('grid-grading').classList.remove('hidden');
+                document.getElementById('grid-grading').classList.add('grid');
+            },
+
+            rate(rating) {
+                // Apply Algorithm
+                const updated = Brain.calc(this.current, rating);
+                
+                // Update Store
+                const idx = Store.state.cards.findIndex(c => c.id === updated.id);
+                Store.state.cards[idx] = updated;
+                
+                // Update User XP
+                Store.state.user.xp += (rating * 2);
+                
+                // Update Streak
+                const today = new Date().toDateString();
+                if (Store.state.user.lastStudy !== today) {
+                    Store.state.user.streak++;
+                    Store.state.user.lastStudy = today;
+                }
+                
+                Store.save();
+
+                // Queue Management
+                this.queue.shift(); // Remove current
+                if (rating === 1) {
+                    this.queue.push(updated); // Re-queue at end if failed
+                }
+
+                // Next Card
+                this.next();
+            },
+
+            finishSession() {
+                // 1. Show Confetti
+                confetti({ particleCount: 150, spread: 70, origin: { y: 0.6 }, colors: ['#3B82F6', '#10B981', '#F59E0B'] });
+                
+                // 2. Random Motivation Quote
+                const quotes = [
+                    { t: "Ilmdan boshqa najot yo'q va bo'lmagay.", a: "Imom Buxoriy" },
+                    { t: "Ozlarga hikmat - yomg'irdek, ko'plarga - seldek.", a: "Alisher Navoiy" },
+                    { t: "Kuch - adolatdadir.", a: "Amir Temur" },
+                    { t: "Knowledge is power.", a: "Francis Bacon" }
+                ];
+                const q = quotes[Math.floor(Math.random() * quotes.length)];
+                
+                document.getElementById('quote-text').innerText = `"${q.t}"`;
+                document.getElementById('quote-author').innerText = q.a;
+
+                // 3. Show Modal
+                document.getElementById('modal-celebrate').classList.remove('hidden');
+                document.getElementById('modal-celebrate').classList.add('flex');
+            },
+
+            closeSession() {
+                document.getElementById('modal-celebrate').classList.add('hidden');
+                document.getElementById('modal-celebrate').classList.remove('flex');
+                Router.nav('home');
+            }
+        };
+
+        // --- INIT APP ---
+        window.addEventListener('DOMContentLoaded', () => {
+            App.init();
+        });
+
+    </script>
 </body>
 </html>
+
+
