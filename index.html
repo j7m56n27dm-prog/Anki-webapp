@@ -1,2910 +1,748 @@
 <!DOCTYPE html>
-<html lang="uz" class="dark-mode">
+<html lang="uz" class="dark">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Smart Anki Pro - Aqlli O'qitish Tizimi</title>
+    <title>Ilm Nuri - Ultra Smart Anki</title>
     
-    <!-- Google Fonts -->
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600&family=Amiri:wght@400;700&display=swap" rel="stylesheet">
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
     <!-- FontAwesome -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    fontFamily: { sans: ['Plus Jakarta Sans', 'sans-serif'] },
+                    colors: {
+                        brand: {
+                            bg: '#0F172A', // Slate 900
+                            card: '#1E293B', // Slate 800
+                            primary: '#3B82F6', // Blue 500
+                            secondary: '#6366F1', // Indigo 500
+                            accent: '#10B981', // Emerald 500
+                            gold: '#F59E0B', // Amber 500
+                            error: '#EF4444' // Red 500
+                        }
+                    },
+                    animation: {
+                        'float': 'float 3s ease-in-out infinite',
+                        'pop': 'pop 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards',
+                        'slide-up': 'slideUp 0.4s ease-out forwards'
+                    },
+                    keyframes: {
+                        float: { '0%, 100%': { transform: 'translateY(0)' }, '50%': { transform: 'translateY(-5px)' } },
+                        pop: { '0%': { opacity: 0, transform: 'scale(0.8)' }, '100%': { opacity: 1, transform: 'scale(1)' } },
+                        slideUp: { '0%': { transform: 'translateY(100%)' }, '100%': { transform: 'translateY(0)' } }
+                    }
+                }
+            }
+        }
+    </script>
+
     <style>
-        /* ===== CORE VARIABLES ===== */
-        :root {
-            /* Dark Theme */
-            --primary-color: #4f46e5;
-            --primary-light: #6366f1;
-            --success-color: #10b981;
-            --warning-color: #f59e0b;
-            --danger-color: #ef4444;
-            --info-color: #3b82f6;
-            
-            --bg-color: #0f172a;
-            --surface-color: #1e293b;
-            --surface2-color: #334155;
-            --text-color: #f8fafc;
-            --text-secondary: #94a3b8;
-            --border-color: #475569;
-            
-            /* Gradients */
-            --gradient-primary: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
-            --gradient-success: linear-gradient(135deg, #10b981 0%, #34d399 100%);
-            --gradient-warning: linear-gradient(135deg, #f59e0b 0%, #fbbf24 100%);
-            --gradient-danger: linear-gradient(135deg, #ef4444 0%, #f87171 100%);
-            
-            /* Shadows */
-            --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.1);
-            --shadow-md: 0 4px 16px rgba(0, 0, 0, 0.2);
-            --shadow-lg: 0 8px 32px rgba(0, 0, 0, 0.3);
-            --shadow-glow: 0 0 20px rgba(79, 70, 229, 0.4);
-            
-            /* Border Radius */
-            --radius-sm: 8px;
-            --radius-md: 12px;
-            --radius-lg: 16px;
-            --radius-xl: 24px;
-            
-            /* Transitions */
-            --transition-fast: 150ms ease;
-            --transition-normal: 300ms ease;
-            --transition-slow: 500ms ease;
-        }
-
-        /* Light Theme Variables */
-        .light-mode {
-            --primary-color: #4f46e5;
-            --primary-light: #6366f1;
-            --success-color: #059669;
-            --warning-color: #d97706;
-            --danger-color: #dc2626;
-            --info-color: #2563eb;
-            
-            --bg-color: #f8fafc;
-            --surface-color: #ffffff;
-            --surface2-color: #f1f5f9;
-            --text-color: #0f172a;
-            --text-secondary: #64748b;
-            --border-color: #e2e8f0;
-        }
-
-        /* ===== RESET & BASE STYLES ===== */
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            -webkit-tap-highlight-color: transparent;
-        }
-
-        body {
-            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-            background-color: var(--bg-color);
-            color: var(--text-color);
-            line-height: 1.6;
-            height: 100vh;
-            overflow: hidden;
-            -webkit-font-smoothing: antialiased;
-            -moz-osx-font-smoothing: grayscale;
-        }
-
-        #app {
-            max-width: 500px;
-            margin: 0 auto;
-            height: 100vh;
-            display: flex;
-            flex-direction: column;
-            position: relative;
-            background: var(--bg-color);
-            overflow: hidden;
-        }
-
-        /* ===== TYPOGRAPHY ===== */
-        h1, h2, h3, h4, h5, h6 {
-            font-weight: 700;
-            line-height: 1.2;
-        }
-
-        .text-gradient {
-            background: var(--gradient-primary);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-        }
-
-        /* ===== UTILITY CLASSES ===== */
-        .hidden {
-            display: none !important;
-        }
-
-        .flex {
-            display: flex;
-        }
-
-        .flex-col {
-            flex-direction: column;
-        }
-
-        .items-center {
-            align-items: center;
-        }
-
-        .justify-center {
-            justify-content: center;
-        }
-
-        .justify-between {
-            justify-content: space-between;
-        }
-
-        .gap-1 { gap: 4px; }
-        .gap-2 { gap: 8px; }
-        .gap-3 { gap: 12px; }
-        .gap-4 { gap: 16px; }
-        .gap-5 { gap: 20px; }
-
-        .p-2 { padding: 8px; }
-        .p-3 { padding: 12px; }
-        .p-4 { padding: 16px; }
-        .p-5 { padding: 20px; }
-        .p-6 { padding: 24px; }
-
-        .m-2 { margin: 8px; }
-        .m-3 { margin: 12px; }
-        .m-4 { margin: 16px; }
-        .m-5 { margin: 20px; }
-
-        .text-center { text-align: center; }
-        .text-right { text-align: right; }
-
-        .w-full { width: 100%; }
-        .h-full { height: 100%; }
-
-        .rounded-sm { border-radius: var(--radius-sm); }
-        .rounded-md { border-radius: var(--radius-md); }
-        .rounded-lg { border-radius: var(--radius-lg); }
-        .rounded-xl { border-radius: var(--radius-xl); }
-
-        /* ===== SCROLLBAR ===== */
-        ::-webkit-scrollbar {
-            width: 6px;
-        }
-
-        ::-webkit-scrollbar-track {
-            background: transparent;
-        }
-
-        ::-webkit-scrollbar-thumb {
-            background: var(--border-color);
-            border-radius: 3px;
-        }
-
-        ::-webkit-scrollbar-thumb:hover {
-            background: var(--text-secondary);
-        }
-
-        /* ===== ANIMATIONS ===== */
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(10px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-
-        @keyframes slideIn {
-            from { transform: translateX(-20px); opacity: 0; }
-            to { transform: translateX(0); opacity: 1; }
-        }
-
-        @keyframes slideUp {
-            from { transform: translateY(30px); opacity: 0; }
-            to { transform: translateY(0); opacity: 1; }
-        }
-
-        @keyframes scaleIn {
-            from { transform: scale(0.9); opacity: 0; }
-            to { transform: scale(1); opacity: 1; }
-        }
-
-        @keyframes pulse {
-            0%, 100% { opacity: 1; }
-            50% { opacity: 0.7; }
-        }
-
-        @keyframes float {
-            0%, 100% { transform: translateY(0); }
-            50% { transform: translateY(-10px); }
-        }
-
-        @keyframes cardFlip {
-            0% { transform: rotateY(0); }
-            100% { transform: rotateY(180deg); }
-        }
-
-        .animate-fadeIn {
-            animation: fadeIn 0.3s ease forwards;
-        }
-
-        .animate-slideIn {
-            animation: slideIn 0.3s ease forwards;
-        }
-
-        .animate-slideUp {
-            animation: slideUp 0.3s ease forwards;
-        }
-
-        .animate-scaleIn {
-            animation: scaleIn 0.3s ease forwards;
-        }
-
-        .animate-pulse {
-            animation: pulse 2s infinite;
-        }
-
-        .animate-float {
-            animation: float 3s ease-in-out infinite;
-        }
-
-        /* ===== HEADER ===== */
-        .app-header {
-            padding: 12px 16px;
-            background: var(--surface-color);
-            border-bottom: 1px solid var(--border-color);
-            backdrop-filter: blur(10px);
-            position: sticky;
-            top: 0;
-            z-index: 100;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .header-title {
-            font-size: 20px;
-            font-weight: 800;
-            background: var(--gradient-primary);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-        }
-
-        .header-actions {
-            display: flex;
-            gap: 8px;
-        }
-
-        /* ===== BUTTONS ===== */
-        .btn {
-            padding: 12px 24px;
-            border-radius: var(--radius-md);
-            border: none;
-            font-family: 'Inter', sans-serif;
-            font-size: 16px;
-            font-weight: 600;
-            cursor: pointer;
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            gap: 8px;
-            transition: all var(--transition-fast);
-            position: relative;
-            overflow: hidden;
-        }
-
-        .btn::after {
-            content: '';
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            width: 0;
-            height: 0;
-            border-radius: 50%;
-            background: rgba(255, 255, 255, 0.2);
-            transform: translate(-50%, -50%);
-            transition: width 0.6s, height 0.6s;
-        }
-
-        .btn:active::after {
-            width: 200px;
-            height: 200px;
-        }
-
-        .btn-primary {
-            background: var(--gradient-primary);
-            color: white;
-        }
-
-        .btn-primary:hover {
-            transform: translateY(-2px);
-            box-shadow: var(--shadow-glow);
-        }
-
-        .btn-secondary {
-            background: var(--surface2-color);
-            color: var(--text-color);
-            border: 1px solid var(--border-color);
-        }
-
-        .btn-secondary:hover {
-            background: var(--surface-color);
-            transform: translateY(-1px);
-        }
-
-        .btn-success {
-            background: var(--gradient-success);
-            color: white;
-        }
-
-        .btn-warning {
-            background: var(--gradient-warning);
-            color: white;
-        }
-
-        .btn-danger {
-            background: var(--gradient-danger);
-            color: white;
-        }
-
-        .btn-outline {
-            background: transparent;
-            color: var(--primary-color);
-            border: 2px solid var(--primary-color);
-        }
-
-        .btn-outline:hover {
-            background: var(--primary-color);
-            color: white;
-        }
-
-        .btn-icon {
-            width: 40px;
-            height: 40px;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            background: var(--surface2-color);
-            border: none;
-            color: var(--text-color);
-            font-size: 16px;
-            cursor: pointer;
-            transition: all var(--transition-fast);
-        }
-
-        .btn-icon:hover {
-            transform: scale(1.1);
-            background: var(--surface-color);
-        }
-
-        .btn-small {
-            padding: 8px 16px;
-            font-size: 14px;
-        }
-
-        /* ===== MAIN VIEWPORT ===== */
-        .viewport {
-            flex: 1;
-            overflow-y: auto;
-            padding: 16px;
-            padding-bottom: 80px;
-        }
-
-        .view {
-            display: none;
-            animation: fadeIn 0.3s ease;
-        }
-
-        .view.active {
-            display: block;
-        }
-
-        /* ===== DASHBOARD ===== */
-        .stats-grid {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 12px;
-            margin-bottom: 24px;
-        }
-
-        .stat-card {
-            background: var(--surface-color);
-            border-radius: var(--radius-lg);
-            padding: 16px;
-            text-align: center;
-            border: 1px solid var(--border-color);
-            transition: all var(--transition-normal);
-            position: relative;
-            overflow: hidden;
-        }
-
-        .stat-card:hover {
-            transform: translateY(-4px);
-            box-shadow: var(--shadow-md);
-        }
-
-        .stat-card::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            height: 4px;
-            background: var(--gradient-primary);
-        }
-
-        .stat-value {
-            font-size: 32px;
-            font-weight: 800;
-            margin-bottom: 4px;
-            background: var(--gradient-primary);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-        }
-
-        .stat-label {
-            font-size: 14px;
-            color: var(--text-secondary);
-            font-weight: 500;
-        }
-
-        .deck-list {
-            display: flex;
-            flex-direction: column;
-            gap: 12px;
-        }
-
-        .deck-card {
-            background: var(--surface-color);
-            border-radius: var(--radius-lg);
-            padding: 16px;
-            border: 1px solid var(--border-color);
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            cursor: pointer;
-            transition: all var(--transition-normal);
-            position: relative;
-            overflow: hidden;
-        }
-
-        .deck-card:hover {
-            transform: translateX(4px);
-            border-color: var(--primary-color);
-        }
-
-        .deck-card::before {
-            content: '';
-            position: absolute;
-            left: 0;
-            top: 0;
-            bottom: 0;
-            width: 4px;
-            background: var(--gradient-primary);
-        }
-
-        .deck-info {
-            flex: 1;
-        }
-
-        .deck-name {
-            font-size: 18px;
-            font-weight: 600;
-            margin-bottom: 4px;
-        }
-
-        .deck-stats {
-            display: flex;
-            gap: 12px;
-            font-size: 14px;
-            color: var(--text-secondary);
-        }
-
-        .deck-due {
-            color: var(--warning-color);
-            font-weight: 600;
-        }
-
-        /* ===== BOTTOM NAVIGATION ===== */
-        .bottom-nav {
-            position: fixed;
-            bottom: 0;
-            left: 0;
-            right: 0;
-            background: var(--surface-color);
-            border-top: 1px solid var(--border-color);
-            padding: 12px 20px;
-            display: flex;
-            justify-content: space-around;
-            align-items: center;
-            z-index: 100;
-            max-width: 500px;
-            margin: 0 auto;
-            padding-bottom: max(12px, env(safe-area-inset-bottom));
-        }
-
-        .nav-btn {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 4px;
-            background: none;
-            border: none;
-            color: var(--text-secondary);
-            font-size: 12px;
-            cursor: pointer;
-            padding: 8px;
-            border-radius: var(--radius-md);
-            transition: all var(--transition-fast);
-        }
-
-        .nav-btn.active {
-            color: var(--primary-color);
-        }
-
-        .nav-btn i {
-            font-size: 20px;
-            margin-bottom: 2px;
-        }
-
-        .add-btn {
-            margin-top: -20px;
-        }
-
-        .add-icon {
-            width: 56px;
-            height: 56px;
-            background: var(--gradient-primary);
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: white;
-            font-size: 24px;
-            box-shadow: var(--shadow-glow);
-            transition: all var(--transition-normal);
-        }
-
-        .add-icon:hover {
-            transform: scale(1.1) rotate(90deg);
-        }
-
-        /* ===== MODALS ===== */
-        .modal-overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: rgba(0, 0, 0, 0.7);
-            backdrop-filter: blur(5px);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            z-index: 1000;
-            padding: 20px;
-            animation: fadeIn 0.3s ease;
-        }
-
-        .modal-content {
-            background: var(--surface-color);
-            border-radius: var(--radius-xl);
-            width: 100%;
-            max-width: 400px;
-            max-height: 80vh;
-            overflow-y: auto;
-            animation: slideUp 0.3s ease;
-            border: 1px solid var(--border-color);
-            box-shadow: var(--shadow-lg);
-        }
-
-        .modal-header {
-            padding: 20px;
-            border-bottom: 1px solid var(--border-color);
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .modal-header h2 {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            font-size: 20px;
-        }
-
-        .close-btn {
-            background: none;
-            border: none;
-            color: var(--text-secondary);
-            font-size: 20px;
-            cursor: pointer;
-            width: 40px;
-            height: 40px;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            transition: all var(--transition-fast);
-        }
-
-        .close-btn:hover {
-            background: var(--surface2-color);
-            color: var(--danger-color);
-        }
-
-        .modal-body {
-            padding: 20px;
-        }
-
-        .modal-footer {
-            padding: 20px;
-            border-top: 1px solid var(--border-color);
-            display: flex;
-            gap: 12px;
-            justify-content: flex-end;
-        }
-
-        /* ===== FORMS ===== */
-        .form-group {
-            margin-bottom: 20px;
-        }
-
-        .form-group label {
-            display: block;
-            margin-bottom: 8px;
-            font-weight: 600;
-            color: var(--text-color);
-            font-size: 14px;
-        }
-
-        .form-input,
-        .form-select,
-        .form-textarea {
-            width: 100%;
-            padding: 14px;
-            background: var(--surface2-color);
-            border: 2px solid var(--border-color);
-            border-radius: var(--radius-md);
-            color: var(--text-color);
-            font-family: 'Inter', sans-serif;
-            font-size: 16px;
-            transition: all var(--transition-fast);
-        }
-
-        .form-input:focus,
-        .form-select:focus,
-        .form-textarea:focus {
-            outline: none;
-            border-color: var(--primary-color);
-            box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
-        }
-
-        .form-textarea {
-            resize: vertical;
-            min-height: 100px;
-            line-height: 1.5;
-        }
-
-        /* ===== CARD TYPES ===== */
-        .card-type-selector {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 10px;
-            margin-bottom: 20px;
-        }
-
-        .card-type-btn {
-            padding: 16px 8px;
-            background: var(--surface2-color);
-            border: 2px solid var(--border-color);
-            border-radius: var(--radius-md);
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 8px;
-            cursor: pointer;
-            transition: all var(--transition-fast);
-            color: var(--text-color);
-        }
-
-        .card-type-btn.active {
-            border-color: var(--primary-color);
-            background: rgba(79, 70, 229, 0.1);
-            color: var(--primary-color);
-        }
-
-        .card-type-btn i {
-            font-size: 24px;
-        }
-
-        .card-type-btn span {
-            font-size: 12px;
-            font-weight: 600;
-        }
-
-        /* ===== STUDY SESSION ===== */
-        .study-session {
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: var(--bg-color);
-            z-index: 1000;
-            display: flex;
-            flex-direction: column;
-            animation: fadeIn 0.3s ease;
-        }
-
-        .study-header {
-            padding: 16px;
-            background: var(--surface-color);
-            border-bottom: 1px solid var(--border-color);
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .study-progress {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            flex: 1;
-            margin: 0 16px;
-        }
-
-        .progress-bar {
-            flex: 1;
-            height: 6px;
-            background: var(--surface2-color);
-            border-radius: 3px;
-            overflow: hidden;
-        }
-
-        .progress-fill {
-            height: 100%;
-            background: var(--gradient-primary);
-            transition: width 0.3s ease;
-        }
-
-        .progress-text {
-            font-size: 14px;
-            font-weight: 600;
-            min-width: 40px;
-            text-align: center;
-        }
-
-        .study-card-container {
-            flex: 1;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            padding: 20px;
-            perspective: 1000px;
-        }
-
-        .study-card {
-            width: 100%;
-            max-width: 400px;
-            height: 300px;
-            position: relative;
-            transform-style: preserve-3d;
-            transition: transform 0.6s;
-            cursor: pointer;
-            border-radius: var(--radius-xl);
-        }
-
-        .study-card.flipped {
-            transform: rotateY(180deg);
-        }
-
-        .card-side {
-            position: absolute;
-            width: 100%;
-            height: 100%;
-            backface-visibility: hidden;
-            background: var(--surface-color);
-            border-radius: var(--radius-xl);
-            padding: 32px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            text-align: center;
-            border: 1px solid var(--border-color);
-            box-shadow: var(--shadow-lg);
-            overflow: hidden;
-        }
-
-        .card-front {
-            z-index: 2;
-        }
-
-        .card-back {
-            transform: rotateY(180deg);
-            background: var(--surface2-color);
-        }
-
-        .card-content {
-            font-size: 24px;
-            font-weight: 500;
-            line-height: 1.5;
-            width: 100%;
-            word-wrap: break-word;
-        }
-
-        .card-hint {
-            position: absolute;
-            bottom: 20px;
-            color: var(--text-secondary);
-            font-size: 14px;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            animation: pulse 2s infinite;
-        }
-
-        .card-answer-controls {
-            margin-top: 40px;
-            text-align: center;
-        }
-
-        .card-answer-controls p {
-            margin-bottom: 20px;
-            color: var(--text-secondary);
-            font-size: 14px;
-        }
-
-        .study-controls {
-            padding: 20px;
-            background: var(--surface-color);
-            border-top: 1px solid var(--border-color);
-        }
-
-        .answer-buttons {
-            display: grid;
-            grid-template-columns: repeat(4, 1fr);
-            gap: 12px;
-        }
-
-        .answer-btn {
-            padding: 16px 8px;
-            border: none;
-            border-radius: var(--radius-md);
-            color: white;
-            font-weight: 600;
-            cursor: pointer;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 4px;
-            transition: all var(--transition-fast);
-            position: relative;
-            overflow: hidden;
-        }
-
-        .answer-btn::after {
-            content: '';
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            width: 0;
-            height: 0;
-            border-radius: 50%;
-            background: rgba(255, 255, 255, 0.2);
-            transform: translate(-50%, -50%);
-            transition: width 0.3s, height 0.3s;
-        }
-
-        .answer-btn:active::after {
-            width: 100px;
-            height: 100px;
-        }
-
-        .answer-btn:hover {
-            transform: translateY(-2px);
-            box-shadow: var(--shadow-md);
-        }
-
-        .answer-btn.again {
-            background: var(--gradient-danger);
-        }
-
-        .answer-btn.hard {
-            background: var(--gradient-warning);
-        }
-
-        .answer-btn.good {
-            background: var(--gradient-success);
-        }
-
-        .answer-btn.easy {
-            background: var(--gradient-primary);
-        }
-
-        .answer-btn small {
-            font-size: 11px;
-            opacity: 0.8;
-            font-weight: 400;
-        }
-
-        /* ===== CLOZE STYLES ===== */
-        .cloze-blank {
-            background: var(--primary-color);
-            color: white;
-            padding: 2px 8px;
-            border-radius: 4px;
-            margin: 0 2px;
-            font-weight: 600;
-        }
-
-        /* ===== MOTIVATION MESSAGES ===== */
-        .motivation-message {
-            background: var(--surface-color);
-            border-radius: var(--radius-lg);
-            padding: 20px;
-            margin: 20px 0;
-            border-left: 4px solid var(--primary-color);
-            text-align: center;
-            font-family: 'Amiri', serif;
-            font-size: 18px;
-            line-height: 1.6;
-            color: var(--text-color);
-            animation: slideIn 0.5s ease;
-        }
-
-        .quote-author {
-            margin-top: 10px;
-            font-size: 14px;
-            color: var(--text-secondary);
-            font-style: italic;
-        }
-
-        /* ===== TOAST NOTIFICATION ===== */
-        .toast {
-            position: fixed;
-            bottom: 100px;
-            left: 50%;
-            transform: translateX(-50%);
-            background: var(--surface-color);
-            border-radius: var(--radius-md);
-            padding: 16px 24px;
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            box-shadow: var(--shadow-lg);
-            border: 1px solid var(--border-color);
-            z-index: 2000;
-            animation: slideUp 0.3s ease;
-            max-width: 90%;
-        }
-
-        .toast.hidden {
-            animation: fadeIn 0.3s ease reverse forwards;
-        }
-
-        .toast-icon {
-            font-size: 20px;
-        }
-
-        .toast-success .toast-icon {
-            color: var(--success-color);
-        }
-
-        .toast-error .toast-icon {
-            color: var(--danger-color);
-        }
-
-        .toast-warning .toast-icon {
-            color: var(--warning-color);
-        }
-
-        .toast-info .toast-icon {
-            color: var(--primary-color);
-        }
-
-        .toast-message {
-            font-size: 14px;
-            font-weight: 500;
-        }
-
-        /* ===== EMPTY STATES ===== */
-        .empty-state {
-            text-align: center;
-            padding: 40px 20px;
-        }
-
-        .empty-state i {
-            font-size: 64px;
-            color: var(--text-secondary);
-            margin-bottom: 16px;
-            opacity: 0.5;
-        }
-
-        .empty-state h3 {
-            margin-bottom: 8px;
-            color: var(--text-color);
-        }
-
-        .empty-state p {
-            color: var(--text-secondary);
-            margin-bottom: 24px;
-        }
-
-        /* ===== RESPONSIVE ===== */
-        @media (max-width: 480px) {
-            .viewport {
-                padding: 12px;
-                padding-bottom: 80px;
-            }
-            
-            .stats-grid {
-                grid-template-columns: 1fr;
-            }
-            
-            .study-card {
-                height: 250px;
-            }
-            
-            .card-content {
-                font-size: 20px;
-            }
-            
-            .answer-buttons {
-                grid-template-columns: repeat(2, 1fr);
-            }
-            
-            .answer-btn {
-                padding: 14px 4px;
-                font-size: 14px;
-            }
-        }
-
-        /* ===== FOOTER ===== */
-        .app-footer {
-            text-align: center;
-            padding: 16px;
-            color: var(--text-secondary);
-            font-size: 14px;
-            border-top: 1px solid var(--border-color);
-            background: var(--surface-color);
-            position: absolute;
-            bottom: 60px;
-            left: 0;
-            right: 0;
-            z-index: 1;
-        }
-
-        /* ===== SETTINGS ===== */
-        .settings-group {
-            margin-bottom: 32px;
-        }
-
-        .settings-group h3 {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            margin-bottom: 16px;
-            font-size: 18px;
-        }
-
-        .theme-switcher {
-            display: flex;
-            gap: 12px;
-            margin-bottom: 20px;
-        }
-
-        .theme-btn {
-            flex: 1;
-            padding: 16px;
-            background: var(--surface2-color);
-            border: 2px solid var(--border-color);
-            border-radius: var(--radius-md);
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 8px;
-            cursor: pointer;
-            transition: all var(--transition-fast);
-            color: var(--text-color);
-        }
-
-        .theme-btn.active {
-            border-color: var(--primary-color);
-            background: rgba(79, 70, 229, 0.1);
-            color: var(--primary-color);
-        }
-
-        .theme-btn i {
-            font-size: 24px;
-        }
-
-        .setting-item {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 12px 0;
-            border-bottom: 1px solid var(--border-color);
-        }
-
-        .setting-item:last-child {
-            border-bottom: none;
-        }
-
-        /* Switch Toggle */
-        .switch {
-            position: relative;
-            display: inline-block;
-            width: 50px;
-            height: 26px;
-        }
-
-        .switch input {
-            opacity: 0;
-            width: 0;
-            height: 0;
-        }
-
-        .slider {
-            position: absolute;
-            cursor: pointer;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background-color: var(--border-color);
-            transition: .4s;
-            border-radius: 34px;
-        }
-
-        .slider:before {
-            position: absolute;
-            content: "";
-            height: 18px;
-            width: 18px;
-            left: 4px;
-            bottom: 4px;
-            background-color: white;
-            transition: .4s;
-            border-radius: 50%;
-        }
-
-        input:checked + .slider {
-            background: var(--gradient-primary);
-        }
-
-        input:checked + .slider:before {
-            transform: translateX(24px);
-        }
-
-        /* ===== HEATMAP ===== */
-        .heatmap-grid {
-            display: grid;
-            grid-template-columns: repeat(12, 1fr);
-            grid-auto-rows: 12px;
-            gap: 3px;
-            margin-bottom: 8px;
-        }
-
-        .heatmap-cell {
-            border-radius: 2px;
-            background-color: var(--surface2-color);
-            transition: background-color 0.3s ease;
-        }
-
-        .heatmap-cell[data-level="1"] { background-color: rgba(16, 185, 129, 0.3); }
-        .heatmap-cell[data-level="2"] { background-color: rgba(16, 185, 129, 0.5); }
-        .heatmap-cell[data-level="3"] { background-color: rgba(16, 185, 129, 0.7); }
-        .heatmap-cell[data-level="4"] { background-color: rgba(16, 185, 129, 0.9); }
-
-        /* ===== WISDOM QUOTES ===== */
-        .wisdom-quote {
-            font-family: 'Amiri', serif;
-            font-size: 18px;
-            line-height: 1.6;
-            text-align: center;
-            padding: 20px;
-            color: var(--text-color);
-            background: linear-gradient(135deg, rgba(79, 70, 229, 0.1), rgba(16, 185, 129, 0.1));
-            border-radius: var(--radius-lg);
-            margin: 20px 0;
-            border: 1px solid rgba(79, 70, 229, 0.2);
-        }
-
-        .quote-author {
-            margin-top: 10px;
-            font-size: 14px;
-            color: var(--text-secondary);
-            font-style: italic;
-            text-align: right;
-        }
+        /* Global Reset & Mobile View */
+        body { background-color: #0F172A; color: #F8FAFC; -webkit-tap-highlight-color: transparent; overflow-x: hidden; overflow-y: auto; }
+        
+        /* Ensure main app container is centered and uses full height */
+        .app-container { height: 100dvh; max-width: 480px; margin-left: auto; margin-right: auto; }
+
+        /* Custom Scrollbar */
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+
+        /* Card Flip 3D */
+        .perspective-1000 { perspective: 1000px; }
+        .card-inner { position: relative; width: 100%; height: 100%; text-align: center; transition: transform 0.6s cubic-bezier(0.4, 0.0, 0.2, 1); transform-style: preserve-3d; }
+        .card-front, .card-back { position: absolute; width: 100%; height: 100%; -webkit-backface-visibility: hidden; backface-visibility: hidden; border-radius: 1.5rem; display: flex; flex-direction: column; justify-content: center; align-items: center; padding: 2rem; background: #1E293B; border: 1px solid #334155; box-shadow: 0 10px 30px -10px rgba(0,0,0,0.5); }
+        .card-back { transform: rotateY(180deg); background: #1E293B; position: relative; }
+        .flipped { transform: rotateY(180deg); }
+
+        /* Inputs */
+        .modern-input { background: #334155; border: 2px solid transparent; color: white; padding: 1rem; border-radius: 1rem; width: 100%; transition: all 0.3s; font-size: 1.1rem; }
+        .modern-input:focus { border-color: #3B82F6; outline: none; background: #1E293B; box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.2); }
+
+        /* Cloze Styles */
+        .cloze-hidden { background: #3B82F6; color: transparent; border-radius: 6px; padding: 2px 8px; font-weight: bold; cursor: help; }
+        .cloze-revealed { color: #60A5FA; font-weight: bold; border-bottom: 2px solid #3B82F6; }
+
+        /* Motivatsiya Modali */
+        .glass-overlay { background: rgba(15, 23, 42, 0.95); backdrop-filter: blur(12px); }
     </style>
 </head>
-<body>
-    <div id="app">
-        <!-- Dynamic Header -->
-        <header id="app-header" class="app-header">
-            <div id="header-title" class="header-title">Smart Anki Pro</div>
-            <div id="header-actions" class="header-actions">
-                <button class="btn-icon" onclick="app.showSettings()">
-                    <i class="fas fa-cog"></i>
-                </button>
+<body class="flex flex-col h-[100dvh] w-full app-container relative border-x border-slate-800 shadow-2xl">
+
+    <!-- HEADER (Navigation) -->
+    <header class="h-16 flex items-center justify-between px-6 bg-brand-bg/90 backdrop-blur-md z-20 border-b border-slate-800 sticky top-0">
+        <div class="flex items-center gap-3">
+            <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-brand-primary to-brand-secondary flex items-center justify-center text-white shadow-lg shadow-blue-500/30">
+                <i class="fa-solid fa-brain text-lg animate-pulse"></i>
             </div>
-        </header>
-
-        <!-- Main Viewport -->
-        <main id="viewport" class="viewport">
-            <!-- Views will be rendered here -->
-        </main>
-
-        <!-- Bottom Navigation -->
-        <nav class="bottom-nav">
-            <button class="nav-btn active" data-view="dashboard" onclick="app.renderView('dashboard')">
-                <i class="fas fa-home"></i>
-                <span>Asosiy</span>
-            </button>
-            <button class="nav-btn" data-view="decks" onclick="app.renderView('decks')">
-                <i class="fas fa-layer-group"></i>
-                <span>To'plamlar</span>
-            </button>
-            <button class="nav-btn add-btn" onclick="app.showAddCardModal()">
-                <div class="add-icon">
-                    <i class="fas fa-plus"></i>
-                </div>
-                <span>Qo'shish</span>
-            </button>
-            <button class="nav-btn" data-view="study" onclick="app.renderView('study')">
-                <i class="fas fa-graduation-cap"></i>
-                <span>O'qish</span>
-            </button>
-            <button class="nav-btn" data-view="profile" onclick="app.renderView('profile')">
-                <i class="fas fa-user"></i>
-                <span>Profil</span>
-            </button>
-        </nav>
-
-        <!-- Footer -->
-        <footer class="app-footer">
-            <p>© Muhammad Daler tomonidan yasalgan</p>
-        </footer>
-
-        <!-- Modals -->
-        <div id="settings-modal" class="modal-overlay hidden">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h2><i class="fas fa-cog"></i> Sozlamalar</h2>
-                    <button class="close-btn" onclick="app.closeModal()">
-                        <i class="fas fa-times"></i>
-                    </button>
-                </div>
-                <div class="modal-body">
-                    <div class="settings-group">
-                        <h3><i class="fas fa-palette"></i> Mavzu</h3>
-                        <div class="theme-switcher">
-                            <button class="theme-btn active" data-theme="dark" onclick="app.changeTheme('dark')">
-                                <i class="fas fa-moon"></i>
-                                <span>Dark</span>
-                            </button>
-                            <button class="theme-btn" data-theme="light" onclick="app.changeTheme('light')">
-                                <i class="fas fa-sun"></i>
-                                <span>Light</span>
-                            </button>
-                        </div>
-                    </div>
-
-                    <div class="settings-group">
-                        <h3><i class="fas fa-brain"></i> O'qish sozlamalari</h3>
-                        <div class="setting-item">
-                            <span>Kunlik maqsad</span>
-                            <input type="number" id="daily-goal" value="20" min="5" max="100" style="width: 60px; padding: 5px;">
-                        </div>
-                        <div class="setting-item">
-                            <span>Aqlli SRS</span>
-                            <label class="switch">
-                                <input type="checkbox" id="smart-srs" checked>
-                                <span class="slider"></span>
-                            </label>
-                        </div>
-                    </div>
-
-                    <div class="settings-group">
-                        <h3><i class="fas fa-language"></i> Til</h3>
-                        <div class="setting-item">
-                            <select id="language-select" onchange="app.changeLanguage(this.value)" style="width: 100%; padding: 8px; border-radius: 8px; background: var(--surface2-color); color: var(--text-color); border: 1px solid var(--border-color);">
-                                <option value="uz">O'zbekcha</option>
-                                <option value="en">English</option>
-                            </select>
-                        </div>
-                    </div>
-
-                    <div class="settings-group">
-                        <h3><i class="fas fa-database"></i> Ma'lumotlar</h3>
-                        <button class="btn btn-outline w-full" style="margin-bottom: 8px;" onclick="app.exportData()">
-                            <i class="fas fa-download"></i> Eksport qilish
-                        </button>
-                        <button class="btn btn-outline w-full" style="margin-bottom: 8px;" onclick="app.importData()">
-                            <i class="fas fa-upload"></i> Import qilish
-                        </button>
-                        <button class="btn btn-danger w-full" onclick="app.clearAllData()">
-                            <i class="fas fa-trash"></i> Barchasini tozalash
-                        </button>
-                    </div>
-
-                    <div class="settings-group">
-                        <h3><i class="fas fa-info-circle"></i> Haqida</h3>
-                        <p style="color: var(--text-secondary); font-size: 14px; line-height: 1.6;">
-                            <strong>Smart Anki Pro v3.0</strong><br>
-                            Ultra Aqlli O'qitish Tizimi<br>
-                            Aqlli SRS Algoritmi<br>
-                            © Muhammad Daler tomonidan yasalgan
-                        </p>
-                    </div>
-                </div>
+            <div>
+                <h1 class="font-bold text-lg leading-none">Ilm Nuri</h1>
+                <p class="text-xs text-slate-400 font-medium mt-1">Smart Ta'lim Tizimi</p>
             </div>
         </div>
-
-        <!-- Add Card Modal -->
-        <div id="add-card-modal" class="modal-overlay hidden">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h2><i class="fas fa-plus-circle"></i> Yangi Karta</h2>
-                    <button class="close-btn" onclick="app.closeModal()">
-                        <i class="fas fa-times"></i>
-                    </button>
-                </div>
-                <div class="modal-body">
-                    <div class="card-type-selector">
-                        <button class="card-type-btn active" data-type="basic" onclick="app.selectCardType('basic')">
-                            <i class="fas fa-file-alt"></i>
-                            <span>Basic</span>
-                        </button>
-                        <button class="card-type-btn" data-type="reverse" onclick="app.selectCardType('reverse')">
-                            <i class="fas fa-exchange-alt"></i>
-                            <span>Reverse</span>
-                        </button>
-                        <button class="card-type-btn" data-type="cloze" onclick="app.selectCardType('cloze')">
-                            <i class="fas fa-ellipsis-h"></i>
-                            <span>Cloze</span>
-                        </button>
-                        <button class="card-type-btn" data-type="multi" onclick="app.selectCardType('multi')">
-                            <i class="fas fa-th-large"></i>
-                            <span>Multi</span>
-                        </button>
-                    </div>
-
-                    <div class="form-group">
-                        <label for="card-deck">To'plam</label>
-                        <select id="card-deck" class="form-select">
-                            <!-- Options will be populated -->
-                        </select>
-                    </div>
-
-                    <div class="form-group">
-                        <label for="card-front">Savol / Old tomon</label>
-                        <textarea id="card-front" class="form-textarea" placeholder="Savolni kiriting..." rows="3"></textarea>
-                        <small id="cloze-hint" class="hidden" style="color: var(--primary-color); font-size: 12px; margin-top: 4px;">
-                            Cloze yaratish: {{c1::yashiriladigan matn}}
-                        </small>
-                    </div>
-
-                    <div class="form-group">
-                        <label for="card-back">Javob / Orqa tomon</label>
-                        <textarea id="card-back" class="form-textarea" placeholder="Javobni kiriting..." rows="3"></textarea>
-                    </div>
-
-                    <div class="form-group" id="multi-fields-container" style="display: none;">
-                        <label>Qo'shimcha maydonlar</label>
-                        <div id="multi-fields">
-                            <!-- Dynamic fields will be added here -->
-                        </div>
-                        <button type="button" class="btn btn-small" onclick="app.addMultiField()" style="margin-top: 8px;">
-                            <i class="fas fa-plus"></i> Maydon qo'shish
-                        </button>
-                    </div>
-
-                    <div class="form-group">
-                        <label for="card-tags">Teglar (vergul bilan ajrating)</label>
-                        <input type="text" id="card-tags" class="form-input" placeholder="masalan: fizika, formulalar, test">
-                    </div>
-
-                    <div class="modal-footer">
-                        <button class="btn btn-secondary" onclick="app.closeModal()">Bekor qilish</button>
-                        <button class="btn btn-primary" onclick="app.saveCard()">
-                            <i class="fas fa-save"></i> Saqlash
-                        </button>
-                    </div>
-                </div>
-            </div>
+        <div class="flex flex-col items-end">
+            <span class="text-xs text-slate-400 font-bold uppercase">Streak</span>
+            <span class="text-brand-gold font-bold flex items-center gap-1"><i class="fa-solid fa-fire"></i> <span id="streak-display">0</span></span>
         </div>
+    </header>
 
-        <!-- Add Deck Modal -->
-        <div id="add-deck-modal" class="modal-overlay hidden">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h2><i class="fas fa-folder-plus"></i> Yangi To'plam</h2>
-                    <button class="close-btn" onclick="app.closeModal()">
-                        <i class="fas fa-times"></i>
-                    </button>
-                </div>
-                <div class="modal-body">
-                    <div class="form-group">
-                        <label for="deck-name">To'plam nomi</label>
-                        <input type="text" id="deck-name" class="form-input" placeholder="Masalan: Ingliz tili">
-                    </div>
-                    <div class="form-group">
-                        <label for="deck-description">Tavsif (ixtiyoriy)</label>
-                        <textarea id="deck-description" class="form-textarea" rows="2" placeholder="To'plam haqida qisqacha..."></textarea>
-                    </div>
-                    <div class="form-group">
-                        <label for="deck-color">Rang</label>
-                        <div style="display: flex; gap: 8px; flex-wrap: wrap;">
-                            <button class="color-btn" style="background: #4f46e5;" onclick="app.selectDeckColor('#4f46e5')"></button>
-                            <button class="color-btn" style="background: #10b981;" onclick="app.selectDeckColor('#10b981')"></button>
-                            <button class="color-btn" style="background: #f59e0b;" onclick="app.selectDeckColor('#f59e0b')"></button>
-                            <button class="color-btn" style="background: #ef4444;" onclick="app.selectDeckColor('#ef4444')"></button>
-                            <button class="color-btn" style="background: #8b5cf6;" onclick="app.selectDeckColor('#8b5cf6')"></button>
-                            <button class="color-btn" style="background: #3b82f6;" onclick="app.selectDeckColor('#3b82f6')"></button>
-                        </div>
-                    </div>
-                    <div class="modal-footer">
-                        <button class="btn btn-secondary" onclick="app.closeModal()">Bekor qilish</button>
-                        <button class="btn btn-primary" onclick="app.saveDeck()">
-                            <i class="fas fa-save"></i> Saqlash
-                        </button>
-                    </div>
-                </div>
-            </div>
+    <!-- ASOSIY OYNA (VIEWPORT) -->
+    <main id="app-viewport" class="flex-1 overflow-y-auto overflow-x-hidden p-5 pb-24 relative no-scrollbar bg-brand-bg">
+        <!-- JS orqali to'ldiriladi -->
+    </main>
+
+    <!-- PASTKI MENU (Ergonomik) -->
+    <nav class="fixed bottom-0 w-full max-w-md bg-brand-card/95 backdrop-blur-lg border-t border-slate-700 h-20 z-30 flex justify-around items-center px-2 pb-2 shadow-2xl app-container mx-auto">
+        <button onclick="Router.nav('decks')" id="nav-decks" class="flex flex-col items-center justify-center w-16 h-16 rounded-2xl text-slate-400 transition hover:text-white active:scale-95 gap-1">
+            <i class="fa-solid fa-layer-group text-xl"></i>
+            <span class="text-[10px] font-bold">Darslar</span>
+        </button>
+
+        <button onclick="Router.nav('add')" id="nav-add" class="flex items-center justify-center w-14 h-14 bg-brand-primary text-white rounded-full shadow-lg shadow-blue-500/40 -mt-8 border-4 border-brand-bg active:scale-90 transition transform hover:rotate-90">
+            <i class="fa-solid fa-plus text-2xl"></i>
+        </button>
+
+        <button onclick="Router.nav('profile')" id="nav-profile" class="flex flex-col items-center justify-center w-16 h-16 rounded-2xl text-slate-400 transition hover:text-white active:scale-95 gap-1">
+            <i class="fa-solid fa-chart-pie text-xl"></i>
+            <span class="text-[10px] font-bold">Natijalar</span>
+        </button>
+    </nav>
+
+    <!-- MOTIVATION MODAL (Overlay) -->
+    <div id="motivation-modal" class="fixed inset-0 glass-overlay z-50 hidden flex flex-col items-center justify-center p-6 text-center animate-pop app-container mx-auto">
+        <div class="w-20 h-20 rounded-full bg-brand-card border-2 border-brand-gold flex items-center justify-center text-4xl mb-6 shadow-2xl animate-float">
+            💡
         </div>
+        <h2 id="quote-author" class="text-brand-primary text-sm font-bold uppercase tracking-widest mb-3"></h2>
+        <p id="quote-text" class="text-xl md:text-2xl font-bold text-white leading-relaxed mb-8 italic">
+            "..."
+        </p>
+        <button onclick="Motivation.close()" class="w-full py-4 bg-white text-brand-bg font-extrabold rounded-2xl text-lg shadow-xl active:scale-95 transition">
+            Davom Etish <i class="fa-solid fa-arrow-right ml-2"></i>
+        </button>
+    </div>
 
-        <!-- Study Session -->
-        <div id="study-session" class="study-session hidden">
-            <div class="study-header">
-                <button class="btn-icon" onclick="app.endStudySession()">
-                    <i class="fas fa-times"></i>
-                </button>
-                <div class="study-progress">
-                    <div class="progress-bar">
-                        <div class="progress-fill" id="progress-fill" style="width: 0%"></div>
-                    </div>
-                    <span class="progress-text" id="progress-text">0/0</span>
-                </div>
-                <button class="btn-icon" onclick="app.showHint()">
-                    <i class="fas fa-lightbulb"></i>
-                </button>
-            </div>
-
-            <div class="study-card-container">
-                <div class="study-card" id="study-card" onclick="app.flipCard()">
-                    <div class="card-side card-front">
-                        <div class="card-content" id="card-front-content"></div>
-                        <div class="card-hint">
-                            <i class="fas fa-hand-point-up"></i> Javobni ko'rish uchun bosing
-                        </div>
-                    </div>
-                    <div class="card-side card-back">
-                        <div class="card-content" id="card-back-content"></div>
-                        <div class="card-answer-controls">
-                            <p>Qanchalik yaxshi eslaysiz?</p>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <div class="study-controls">
-                <div class="answer-buttons" id="answer-buttons">
-                    <button class="answer-btn again" onclick="app.rateCard(1)">
-                        <i class="fas fa-redo"></i>
-                        <span>Yana</span>
-                        <small>1m</small>
-                    </button>
-                    <button class="answer-btn hard" onclick="app.rateCard(2)">
-                        <i class="fas fa-hard-hat"></i>
-                        <span>Qiyin</span>
-                        <small>10m</small>
-                    </button>
-                    <button class="answer-btn good" onclick="app.rateCard(3)">
-                        <i class="fas fa-check-circle"></i>
-                        <span>Yaxshi</span>
-                        <small>1 kun</small>
-                    </button>
-                    <button class="answer-btn easy" onclick="app.rateCard(4)">
-                        <i class="fas fa-bolt"></i>
-                        <span>Oson</span>
-                        <small>4 kun</small>
-                    </button>
-                </div>
-            </div>
-        </div>
-
-        <!-- Toast Notification -->
-        <div id="toast" class="toast hidden">
-            <i class="toast-icon"></i>
-            <span class="toast-message"></span>
-        </div>
+    <!-- TOAST NOTIFICATION -->
+    <div id="toast" class="fixed top-24 left-1/2 -translate-x-1/2 bg-brand-card border border-slate-700 text-white px-6 py-3 rounded-full shadow-2xl z-50 flex items-center gap-3 transition-all duration-300 opacity-0 pointer-events-none transform translate-y-[-20px]">
+        <i class="fa-solid text-brand-accent" id="toast-icon"></i>
+        <span id="toast-msg" class="text-sm font-bold"></span>
     </div>
 
     <script>
-        // ===== SMART ANKI PRO CORE ENGINE =====
-        const SmartAnkiPro = {
-            // App state
-            state: {
-                version: '3.0',
-                user: {
-                    name: 'Foydalanuvchi',
-                    level: 1,
-                    xp: 0,
-                    streak: 0,
-                    lastStudy: null,
-                    heatmap: {},
-                    settings: {
-                        dailyGoal: 20,
-                        smartSRS: true,
-                        theme: 'dark',
-                        language: 'uz',
-                        vibration: true,
-                        animations: true
-                    }
-                },
+        /**
+         * "ILM NURI" ULTRA ENGINE (FIXED V2)
+         * - Ma'lumotlarni saqlash xatolari tuzatildi.
+         * - Ergonimik dizayn yaxshilandi.
+         * - Motivatsiya tizimi har doim ishlaydigan qilindi.
+         */
+
+        // --- 1. MA'LUMOTLAR BAZASI (ROBUST & RESILIENT) ---
+        const DB = {
+            key: 'ilm_nuri_data_v2', // Versiya o'zgartirildi
+            data: {
+                user: { xp: 0, streak: 0, lastStudy: null },
                 decks: [],
-                cards: [],
-                studySessions: [],
-                wisdomQuotes: [
-                    {
-                        text: "Bilim - bu qudratdir. Har bir karta senga yangi qudrat qo'shadi.",
-                        author: "Francis Bacon"
-                    },
-                    {
-                        text: "O'qish - ruhni oziqlantirish, yurakni quvvatlash, miyani o'stirish.",
-                        author: "Joseph Addison"
-                    },
-                    {
-                        text: "Muvaffaqiyat - kichik kuchlarning yig'indisi, kun sayin qayta-qayta takrorlangan.",
-                        author: "Robert Collier"
-                    },
-                    {
-                        text: "Har bir og'ir ish, uni odatga aylantirganingda, oson bo'ladi.",
-                        author: "Aristotle"
-                    },
-                    {
-                        text: "Bilim yo'lida birinchi qadam - nodonlikni tan olishdir.",
-                        author: "Sokrat"
-                    },
-                    {
-                        text: "O'qish orzularingni amalga oshirishga olib boradigan samolyotning qanotidir.",
-                        author: "Mary McLeod Bethune"
-                    }
-                ],
-                motivationMessages: {
-                    again: [
-                        "Qiyinchiliklar - o'sish imkoniyatidir. Davom eting!",
-                        "Har bir xato yangi narsa o'rganish imkoniyatidir.",
-                        "Katta odamlar ham birinchi marta g'olib bo'lmagan."
-                    ],
-                    hard: [
-                        "Qiyin bo'lsa ham, davom eting. Siz rivojlanmoqdasiz!",
-                        "Har bir qiyinchilik sizni kuchliroq qiladi.",
-                        "Taqdir eng chidamlilarga yordam beradi."
-                    ],
-                    good: [
-                        "Ajoyib! Siz yaxshi rivojlanmoqdasiz!",
-                        "Davom eting, siz to'g'ri yo'ldasiz!",
-                        "Har bir to'g'ri javob sizni yanada kuchliroq qiladi."
-                    ],
-                    easy: [
-                        "A'lo! Siz bu mavzuni mukammal o'zlashtirgansiz!",
-                        "Sizning mehnatingiz meva bermoqda!",
-                        "Bilimingizning kuchini his qilyapsizmi? Davom eting!"
-                    ]
-                }
+                cards: []
             },
 
-            // Current state
-            currentView: 'dashboard',
-            currentDeck: null,
-            currentCard: null,
-            studyQueue: [],
-            currentCardIndex: 0,
-            selectedDeckColor: '#4f46e5',
-            selectedCardType: 'basic',
-            isCardFlipped: false,
-
-            // Initialize app
             init() {
-                this.loadData();
-                this.setupEventListeners();
-                this.applyTheme(this.state.user.settings.theme);
-                this.applyLanguage(this.state.user.settings.language);
-                this.updateStreak();
-                this.renderView('dashboard');
-                console.log('Smart Anki Pro v3.0 initialized');
-            },
-
-            // ===== DATA MANAGEMENT =====
-            loadData() {
-                const saved = localStorage.getItem('smartAnkiPro');
-                if (saved) {
-                    try {
-                        const parsed = JSON.parse(saved);
-                        this.state = { ...this.state, ...parsed };
-                        this.state.user.settings = { 
-                            ...this.state.user.settings, 
-                            ...(parsed.user?.settings || {}) 
-                        };
-                    } catch (e) {
-                        console.error('Error loading data:', e);
-                        this.createSampleData();
-                    }
-                } else {
-                    this.createSampleData();
-                }
-            },
-
-            saveData() {
                 try {
-                    localStorage.setItem('smartAnkiPro', JSON.stringify(this.state));
-                } catch (e) {
-                    console.error('Error saving data:', e);
-                    this.showToast('Ma\'lumot saqlashda xatolik', 'error');
-                }
-            },
-
-            createSampleData() {
-                // Create sample decks
-                this.state.decks = [
-                    {
-                        id: 'deck1',
-                        name: 'Ingliz tili (A1)',
-                        description: 'Boshlang\'ich so\'zlar',
-                        color: '#4f46e5',
-                        created: Date.now(),
-                        cardCount: 3,
-                        lastStudied: null
-                    },
-                    {
-                        id: 'deck2',
-                        name: 'Tarix',
-                        description: 'Muhim sanalar va shaxslar',
-                        color: '#10b981',
-                        created: Date.now(),
-                        cardCount: 2,
-                        lastStudied: null
-                    }
-                ];
-
-                // Create sample cards with proper SRS data
-                this.state.cards = [
-                    {
-                        id: 'card1',
-                        deckId: 'deck1',
-                        type: 'basic',
-                        front: 'Hello',
-                        back: 'Salom',
-                        tags: ['asosiy', 'salomlashish'],
-                        created: Date.now(),
-                        srs: {
-                            interval: 1,
-                            ease: 2.5,
-                            due: Date.now(),
-                            reps: 0,
-                            lapses: 0,
-                            nextInterval: 1,
-                            state: 'new'
+                    const loaded = localStorage.getItem(this.key);
+                    if (loaded) {
+                        this.data = JSON.parse(loaded);
+                        console.log("DB Loaded successfully.");
+                        // Ma'lumotlar strukturasini tekshirish
+                        if (!this.data.decks || !Array.isArray(this.data.decks)) {
+                             throw new Error("Invalid DB structure, resetting.");
                         }
-                    },
-                    {
-                        id: 'card2',
-                        deckId: 'deck1',
-                        type: 'basic',
-                        front: 'Book',
-                        back: 'Kitob',
-                        tags: ['asosiy', 'narsalar'],
-                        created: Date.now(),
-                        srs: {
-                            interval: 1,
-                            ease: 2.5,
-                            due: Date.now() + 60000, // 1 minute from now
-                            reps: 1,
-                            lapses: 0,
-                            nextInterval: 1,
-                            state: 'learning'
-                        }
-                    },
-                    {
-                        id: 'card3',
-                        deckId: 'deck1',
-                        type: 'cloze',
-                        front: 'O\'zbekiston poytaxti {{c1::Toshkent}} shahridir.',
-                        back: 'Toshkent',
-                        tags: ['geografiya', 'poytaxt'],
-                        created: Date.now(),
-                        srs: {
-                            interval: 1,
-                            ease: 2.5,
-                            due: Date.now(),
-                            reps: 0,
-                            lapses: 0,
-                            nextInterval: 1,
-                            state: 'new'
-                        }
-                    },
-                    {
-                        id: 'card4',
-                        deckId: 'deck2',
-                        type: 'basic',
-                        front: 'Mustaqillik kuni',
-                        back: '1-sentyabr, 1991-yil',
-                        tags: ['sana', 'milliy bayram'],
-                        created: Date.now(),
-                        srs: {
-                            interval: 1,
-                            ease: 2.5,
-                            due: Date.now(),
-                            reps: 0,
-                            lapses: 0,
-                            nextInterval: 1,
-                            state: 'new'
-                        }
-                    },
-                    {
-                        id: 'card5',
-                        deckId: 'deck2',
-                        type: 'reverse',
-                        front: 'Amir Temur',
-                        back: 'Sohibqiron, 1336-1405',
-                        tags: ['shaxs', 'tarix'],
-                        created: Date.now(),
-                        srs: {
-                            interval: 1,
-                            ease: 2.5,
-                            due: Date.now() + 120000, // 2 minutes from now
-                            reps: 1,
-                            lapses: 0,
-                            nextInterval: 1,
-                            state: 'learning'
-                        }
-                    }
-                ];
-
-                this.saveData();
-            },
-
-            // ===== VIEW RENDERING =====
-            renderView(view) {
-                this.currentView = view;
-                
-                // Update active nav button
-                document.querySelectorAll('.nav-btn').forEach(btn => {
-                    btn.classList.toggle('active', btn.dataset.view === view);
-                });
-                
-                // Update header
-                this.updateHeader(view);
-                
-                // Render the view
-                const viewport = document.getElementById('viewport');
-                
-                switch(view) {
-                    case 'dashboard':
-                        this.renderDashboard();
-                        break;
-                    case 'decks':
-                        this.renderDecks();
-                        break;
-                    case 'study':
-                        this.renderStudyView();
-                        break;
-                    case 'profile':
-                        this.renderProfile();
-                        break;
-                }
-            },
-
-            renderDashboard() {
-                const dueCards = this.getDueCards().length;
-                const totalCards = this.state.cards.length;
-                const totalDecks = this.state.decks.length;
-                const streak = this.state.user.streak;
-                
-                // Get random wisdom quote
-                const randomQuote = this.state.wisdomQuotes[Math.floor(Math.random() * this.state.wisdomQuotes.length)];
-                
-                let decksHTML = '';
-                this.state.decks.forEach(deck => {
-                    const deckCards = this.state.cards.filter(c => c.deckId === deck.id);
-                    const deckDue = deckCards.filter(c => c.srs.due <= Date.now()).length;
-                    
-                    decksHTML += `
-                        <div class="deck-card" onclick="SmartAnkiPro.openDeck('${deck.id}')">
-                            <div class="deck-info">
-                                <div class="deck-name">${deck.name}</div>
-                                <div class="deck-stats">
-                                    <span>${deckCards.length} karta</span>
-                                    <span class="deck-due">${deckDue} takrorlash</span>
-                                </div>
-                            </div>
-                            <i class="fas fa-chevron-right"></i>
-                        </div>
-                    `;
-                });
-                
-                document.getElementById('viewport').innerHTML = `
-                    <div class="view active">
-                        <div class="wisdom-quote animate-fadeIn">
-                            "${randomQuote.text}"
-                            <div class="quote-author">— ${randomQuote.author}</div>
-                        </div>
-                        
-                        <div class="stats-grid animate-slideUp">
-                            <div class="stat-card">
-                                <div class="stat-value">${dueCards}</div>
-                                <div class="stat-label">Takrorlash uchun</div>
-                            </div>
-                            <div class="stat-card">
-                                <div class="stat-value">${totalCards}</div>
-                                <div class="stat-label">Jami kartalar</div>
-                            </div>
-                            <div class="stat-card">
-                                <div class="stat-value">${streak}</div>
-                                <div class="stat-label">Kunlik Streak</div>
-                            </div>
-                            <div class="stat-card">
-                                <div class="stat-value">${totalDecks}</div>
-                                <div class="stat-label">To'plamlar</div>
-                            </div>
-                        </div>
-                        
-                        <h2 style="margin: 24px 0 16px; font-size: 20px;">To'plamlar</h2>
-                        
-                        <div class="deck-list">
-                            ${decksHTML || `
-                                <div class="empty-state">
-                                    <i class="fas fa-layer-group"></i>
-                                    <h3>To'plamlar yo'q</h3>
-                                    <p>Birinchi to'plamingizni yarating</p>
-                                    <button class="btn btn-primary" onclick="SmartAnkiPro.showAddDeckModal()">
-                                        <i class="fas fa-plus"></i> To'plam yaratish
-                                    </button>
-                                </div>
-                            `}
-                        </div>
-                        
-                        ${dueCards > 0 ? `
-                            <button class="btn btn-primary" style="width: 100%; margin-top: 24px;" onclick="SmartAnkiPro.startStudySession()">
-                                <i class="fas fa-graduation-cap"></i> O'qishni boshlash (${dueCards} ta)
-                            </button>
-                        ` : ''}
-                    </div>
-                `;
-            },
-
-            renderDecks() {
-                let decksHTML = '';
-                
-                this.state.decks.forEach(deck => {
-                    const deckCards = this.state.cards.filter(c => c.deckId === deck.id);
-                    const deckDue = deckCards.filter(c => c.srs.due <= Date.now()).length;
-                    
-                    decksHTML += `
-                        <div class="deck-card" onclick="SmartAnkiPro.openDeck('${deck.id}')">
-                            <div class="deck-info">
-                                <div class="deck-name">${deck.name}</div>
-                                <div class="deck-stats">
-                                    <span>${deckCards.length} karta</span>
-                                    <span class="deck-due">${deckDue} takrorlash</span>
-                                </div>
-                                <small style="color: var(--text-secondary); margin-top: 4px;">${deck.description || ''}</small>
-                            </div>
-                            <div style="display: flex; gap: 8px;">
-                                <button class="btn-icon" onclick="event.stopPropagation(); SmartAnkiPro.editDeck('${deck.id}')">
-                                    <i class="fas fa-edit"></i>
-                                </button>
-                                <button class="btn-icon" onclick="event.stopPropagation(); SmartAnkiPro.deleteDeck('${deck.id}')">
-                                    <i class="fas fa-trash"></i>
-                                </button>
-                            </div>
-                        </div>
-                    `;
-                });
-                
-                document.getElementById('viewport').innerHTML = `
-                    <div class="view active">
-                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px;">
-                            <h2 style="font-size: 24px; font-weight: 700;">To'plamlar</h2>
-                            <button class="btn btn-primary" onclick="SmartAnkiPro.showAddDeckModal()">
-                                <i class="fas fa-plus"></i> Yangi to'plam
-                            </button>
-                        </div>
-                        
-                        <div class="deck-list">
-                            ${decksHTML || `
-                                <div class="empty-state">
-                                    <i class="fas fa-layer-group"></i>
-                                    <h3>To'plamlar yo'q</h3>
-                                    <p>Birinchi to'plamingizni yarating</p>
-                                    <button class="btn btn-primary" onclick="SmartAnkiPro.showAddDeckModal()">
-                                        <i class="fas fa-plus"></i> To'plam yaratish
-                                    </button>
-                                </div>
-                            `}
-                        </div>
-                    </div>
-                `;
-            },
-
-            renderStudyView() {
-                const dueCards = this.getDueCards();
-                
-                if (dueCards.length === 0) {
-                    document.getElementById('viewport').innerHTML = `
-                        <div class="view active" style="text-align: center; padding: 48px 20px;">
-                            <div style="width: 120px; height: 120px; background: var(--gradient-success); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 32px;">
-                                <i class="fas fa-check" style="font-size: 48px; color: white;"></i>
-                            </div>
-                            <h2 style="margin-bottom: 12px; font-size: 28px;">Barcha kartalar takrorlandi! 🎉</h2>
-                            <p style="color: var(--text-secondary); margin-bottom: 32px;">
-                                Siz bugungi barcha takrorlashlarni yakunladingiz. Yangi kartalar qo'shing yoki keyinroq davom eting.
-                            </p>
-                            <button class="btn btn-primary" onclick="SmartAnkiPro.showAddCardModal()" style="margin-bottom: 12px;">
-                                <i class="fas fa-plus"></i> Yangi karta qo'shish
-                            </button>
-                            <button class="btn btn-outline" onclick="SmartAnkiPro.renderView('dashboard')">
-                                Asosiy sahifaga qaytish
-                            </button>
-                        </div>
-                    `;
-                } else {
-                    document.getElementById('viewport').innerHTML = `
-                        <div class="view active" style="text-align: center; padding: 48px 20px;">
-                            <div style="width: 120px; height: 120px; background: var(--gradient-primary); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 32px;">
-                                <i class="fas fa-graduation-cap" style="font-size: 48px; color: white;"></i>
-                            </div>
-                            <h2 style="margin-bottom: 12px; font-size: 28px;">O'qishni boshlash</h2>
-                            <p style="color: var(--text-secondary); margin-bottom: 8px;">
-                                Sizda <strong>${dueCards.length} ta</strong> karta takrorlashga tayyor
-                            </p>
-                            <p style="color: var(--text-secondary); margin-bottom: 32px; font-size: 14px;">
-                                Taxminiy vaqt: ${Math.ceil(dueCards.length * 0.5)} daqiqa
-                            </p>
-                            <button class="btn btn-primary" style="padding: 16px 32px; font-size: 18px; margin-bottom: 16px;" onclick="SmartAnkiPro.startStudySession()">
-                                <i class="fas fa-play"></i> Boshlash
-                            </button>
-                            <br>
-                            <button class="btn btn-outline" onclick="SmartAnkiPro.renderView('dashboard')">
-                                <i class="fas fa-arrow-left"></i> Keyinroq
-                            </button>
-                        </div>
-                    `;
-                }
-            },
-
-            renderProfile() {
-                const user = this.state.user;
-                const totalCards = this.state.cards.length;
-                const totalDecks = this.state.decks.length;
-                const totalStudyTime = this.state.studySessions.reduce((total, session) => total + (session.duration || 0), 0);
-                
-                // Generate heatmap
-                let heatmapHTML = '';
-                const today = new Date();
-                for (let i = 83; i >= 0; i--) {
-                    const date = new Date(today);
-                    date.setDate(date.getDate() - i);
-                    const dateStr = date.toISOString().split('T')[0];
-                    const count = user.heatmap[dateStr] || 0;
-                    const level = count > 10 ? 4 : count > 5 ? 3 : count > 2 ? 2 : count > 0 ? 1 : 0;
-                    
-                    heatmapHTML += `<div class="heatmap-cell" data-level="${level}" title="${dateStr}: ${count} ta"></div>`;
-                }
-                
-                document.getElementById('viewport').innerHTML = `
-                    <div class="view active">
-                        <div style="display: flex; align-items: center; gap: 20px; margin-bottom: 32px;">
-                            <div style="width: 80px; height: 80px; background: var(--gradient-primary); border-radius: 50%; display: flex; align-items: center; justify-content: center;">
-                                <i class="fas fa-user" style="font-size: 32px; color: white;"></i>
-                            </div>
-                            <div>
-                                <h2 style="margin-bottom: 4px;">${user.name}</h2>
-                                <p style="color: var(--text-secondary);">Daraja ${user.level} • ${user.xp} XP</p>
-                            </div>
-                        </div>
-                        
-                        <div style="background: var(--surface-color); border-radius: var(--radius-lg); padding: 20px; margin-bottom: 24px;">
-                            <h3 style="margin-bottom: 16px; display: flex; align-items: center; gap: 8px;">
-                                <i class="fas fa-calendar-alt"></i> 84 kunlik faollik
-                            </h3>
-                            <div class="heatmap-grid">
-                                ${heatmapHTML}
-                            </div>
-                            <div style="display: flex; justify-content: space-between; font-size: 12px; color: var(--text-secondary); margin-top: 8px;">
-                                <span>Kam</span>
-                                <span>Ko'p</span>
-                            </div>
-                        </div>
-                        
-                        <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px; margin-bottom: 24px;">
-                            <div style="background: var(--surface-color); border-radius: var(--radius-lg); padding: 20px; text-align: center;">
-                                <div style="font-size: 24px; font-weight: 700; color: var(--primary-color); margin-bottom: 4px;">${totalCards}</div>
-                                <div style="font-size: 14px; color: var(--text-secondary);">Jami kartalar</div>
-                            </div>
-                            <div style="background: var(--surface-color); border-radius: var(--radius-lg); padding: 20px; text-align: center;">
-                                <div style="font-size: 24px; font-weight: 700; color: var(--success-color); margin-bottom: 4px;">${totalDecks}</div>
-                                <div style="font-size: 14px; color: var(--text-secondary);">To'plamlar</div>
-                            </div>
-                            <div style="background: var(--surface-color); border-radius: var(--radius-lg); padding: 20px; text-align: center;">
-                                <div style="font-size: 24px; font-weight: 700; color: var(--warning-color); margin-bottom: 4px;">${Math.floor(totalStudyTime / 60)}</div>
-                                <div style="font-size: 14px; color: var(--text-secondary);">O'qilgan daqiqalar</div>
-                            </div>
-                            <div style="background: var(--surface-color); border-radius: var(--radius-lg); padding: 20px; text-align: center;">
-                                <div style="font-size: 24px; font-weight: 700; color: var(--danger-color); margin-bottom: 4px;">${user.streak}</div>
-                                <div style="font-size: 14px; color: var(--text-secondary);">Kunlik Streak</div>
-                            </div>
-                        </div>
-                        
-                        <button class="btn btn-primary w-full" style="margin-bottom: 12px;" onclick="SmartAnkiPro.showSettings()">
-                            <i class="fas fa-cog"></i> Sozlamalar
-                        </button>
-                        <button class="btn btn-outline w-full" style="margin-bottom: 12px;" onclick="SmartAnkiPro.exportData()">
-                            <i class="fas fa-download"></i> Ma'lumotlarni eksport qilish
-                        </button>
-                        <button class="btn btn-danger w-full" onclick="SmartAnkiPro.clearAllData()">
-                            <i class="fas fa-trash"></i> Barchasini tozalash
-                        </button>
-                    </div>
-                `;
-            },
-
-            // ===== DECK MANAGEMENT =====
-            openDeck(deckId) {
-                const deck = this.state.decks.find(d => d.id === deckId);
-                if (!deck) return;
-                
-                this.currentDeck = deck;
-                const deckCards = this.state.cards.filter(c => c.deckId === deckId);
-                const dueCards = deckCards.filter(c => c.srs.due <= Date.now()).length;
-                
-                let cardsHTML = '';
-                deckCards.forEach(card => {
-                    const dueDate = new Date(card.srs.due);
-                    const isDue = card.srs.due <= Date.now();
-                    
-                    cardsHTML += `
-                        <div class="deck-card" style="padding: 16px;">
-                            <div class="deck-info">
-                                <div class="deck-name" style="font-size: 16px;">${card.front.substring(0, 50)}${card.front.length > 50 ? '...' : ''}</div>
-                                <div class="deck-stats">
-                                    <span style="color: ${isDue ? 'var(--warning-color)' : 'var(--text-secondary)'};">
-                                        ${isDue ? 'Takrorlash kerak' : dueDate.toLocaleDateString()}
-                                    </span>
-                                </div>
-                            </div>
-                            <div style="display: flex; gap: 8px;">
-                                <button class="btn-icon" onclick="event.stopPropagation(); SmartAnkiPro.editCard('${card.id}')">
-                                    <i class="fas fa-edit"></i>
-                                </button>
-                                <button class="btn-icon" onclick="event.stopPropagation(); SmartAnkiPro.deleteCard('${card.id}')">
-                                    <i class="fas fa-trash"></i>
-                                </button>
-                            </div>
-                        </div>
-                    `;
-                });
-                
-                document.getElementById('viewport').innerHTML = `
-                    <div class="view active">
-                        <div style="margin-bottom: 24px;">
-                            <button class="btn btn-icon" onclick="SmartAnkiPro.renderView('decks')" style="margin-bottom: 16px;">
-                                <i class="fas fa-arrow-left"></i>
-                            </button>
-                            <div style="background: linear-gradient(135deg, ${deck.color}20, ${deck.color}10); border-radius: var(--radius-lg); padding: 24px; border: 1px solid ${deck.color}40;">
-                                <h2 style="margin-bottom: 8px; font-size: 24px;">${deck.name}</h2>
-                                <p style="color: var(--text-secondary); margin-bottom: 16px;">${deck.description || ''}</p>
-                                <div style="display: flex; gap: 16px;">
-                                    <span style="background: ${deck.color}20; color: ${deck.color}; padding: 4px 12px; border-radius: 20px; font-size: 14px;">
-                                        ${deckCards.length} karta
-                                    </span>
-                                    <span style="background: ${dueCards > 0 ? '#f59e0b20' : '#10b98120'}; color: ${dueCards > 0 ? '#f59e0b' : '#10b981'}; padding: 4px 12px; border-radius: 20px; font-size: 14px;">
-                                        ${dueCards} takrorlash
-                                    </span>
-                                </div>
-                            </div>
-                        </div>
-                        
-                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
-                            <h3 style="font-size: 18px;">Kartalar</h3>
-                            <button class="btn btn-primary" onclick="SmartAnkiPro.showAddCardModal('${deck.id}')">
-                                <i class="fas fa-plus"></i> Karta qo'shish
-                            </button>
-                        </div>
-                        
-                        <div class="deck-list">
-                            ${cardsHTML || `
-                                <div class="empty-state" style="text-align: center; padding: 32px 20px;">
-                                    <i class="fas fa-sticky-note"></i>
-                                    <p style="color: var(--text-secondary);">Bu to'plamda kartalar yo'q</p>
-                                </div>
-                            `}
-                        </div>
-                        
-                        ${dueCards > 0 ? `
-                            <button class="btn btn-primary" style="width: 100%; margin-top: 24px;" onclick="SmartAnkiPro.startDeckStudy('${deck.id}')">
-                                <i class="fas fa-graduation-cap"></i> O'qishni boshlash (${dueCards} ta)
-                            </button>
-                        ` : ''}
-                    </div>
-                `;
-                
-                this.updateHeader(deck.name, 'deck');
-            },
-
-            showAddDeckModal() {
-                this.selectedDeckColor = '#4f46e5';
-                document.getElementById('add-deck-modal').classList.remove('hidden');
-                document.getElementById('deck-name').value = '';
-                document.getElementById('deck-description').value = '';
-            },
-
-            saveDeck() {
-                const name = document.getElementById('deck-name').value;
-                const description = document.getElementById('deck-description').value;
-                
-                if (!name.trim()) {
-                    this.showToast('To\'plam nomi kerak', 'error');
-                    return;
-                }
-                
-                const deck = {
-                    id: 'deck_' + Date.now(),
-                    name: name.trim(),
-                    description: description.trim(),
-                    color: this.selectedDeckColor,
-                    created: Date.now(),
-                    cardCount: 0,
-                    lastStudied: null
-                };
-                
-                this.state.decks.push(deck);
-                this.saveData();
-                this.closeModal();
-                this.renderView('decks');
-                this.showToast('To\'plam yaratildi', 'success');
-            },
-
-            editDeck(deckId) {
-                const deck = this.state.decks.find(d => d.id === deckId);
-                if (!deck) return;
-                
-                this.selectedDeckColor = deck.color;
-                document.getElementById('add-deck-modal').classList.remove('hidden');
-                document.getElementById('deck-name').value = deck.name;
-                document.getElementById('deck-description').value = deck.description || '';
-                
-                // Change save button to update
-                const saveBtn = document.querySelector('#add-deck-modal .btn-primary');
-                saveBtn.innerHTML = '<i class="fas fa-save"></i> Yangilash';
-                saveBtn.onclick = () => this.updateDeck(deckId);
-            },
-
-            updateDeck(deckId) {
-                const deck = this.state.decks.find(d => d.id === deckId);
-                if (!deck) return;
-                
-                deck.name = document.getElementById('deck-name').value;
-                deck.description = document.getElementById('deck-description').value;
-                deck.color = this.selectedDeckColor;
-                
-                this.saveData();
-                this.closeModal();
-                this.openDeck(deckId);
-                this.showToast('To\'plam yangilandi', 'success');
-            },
-
-            deleteDeck(deckId) {
-                if (!confirm('To\'plamni o\'chirishni tasdiqlaysizmi? Barcha kartalar ham o\'chib ketadi.')) {
-                    return;
-                }
-                
-                this.state.decks = this.state.decks.filter(d => d.id !== deckId);
-                this.state.cards = this.state.cards.filter(c => c.deckId !== deckId);
-                this.saveData();
-                this.renderView('decks');
-                this.showToast('To\'plam o\'chirildi', 'success');
-            },
-
-            selectDeckColor(color) {
-                this.selectedDeckColor = color;
-                // Update UI to show selected color
-                document.querySelectorAll('.color-btn').forEach(btn => {
-                    btn.style.border = btn.style.background.includes(color) ? '3px solid white' : 'none';
-                });
-            },
-
-            // ===== CARD MANAGEMENT =====
-            showAddCardModal(deckId = null) {
-                this.selectedCardType = 'basic';
-                document.getElementById('add-card-modal').classList.remove('hidden');
-                
-                // Populate deck select
-                const deckSelect = document.getElementById('card-deck');
-                deckSelect.innerHTML = this.state.decks.map(deck => 
-                    `<option value="${deck.id}" ${deckId === deck.id ? 'selected' : ''}>${deck.name}</option>`
-                ).join('');
-                
-                // Reset form
-                document.getElementById('card-front').value = '';
-                document.getElementById('card-back').value = '';
-                document.getElementById('card-tags').value = '';
-                document.getElementById('cloze-hint').classList.add('hidden');
-                document.getElementById('multi-fields-container').style.display = 'none';
-                
-                // Update card type buttons
-                document.querySelectorAll('.card-type-btn').forEach(btn => {
-                    btn.classList.toggle('active', btn.dataset.type === 'basic');
-                });
-            },
-
-            selectCardType(type) {
-                this.selectedCardType = type;
-                
-                // Update UI
-                document.querySelectorAll('.card-type-btn').forEach(btn => {
-                    btn.classList.toggle('active', btn.dataset.type === type);
-                });
-                
-                const clozeHint = document.getElementById('cloze-hint');
-                const multiContainer = document.getElementById('multi-fields-container');
-                const backTextarea = document.getElementById('card-back');
-                
-                if (type === 'cloze') {
-                    clozeHint.classList.remove('hidden');
-                    backTextarea.disabled = true;
-                    backTextarea.placeholder = "Cloze turida orqa tomon avtomatik to'ldiriladi";
-                    multiContainer.style.display = 'none';
-                } else if (type === 'multi') {
-                    clozeHint.classList.add('hidden');
-                    backTextarea.disabled = false;
-                    backTextarea.placeholder = "Asosiy javob...";
-                    multiContainer.style.display = 'block';
-                    this.renderMultiFields();
-                } else {
-                    clozeHint.classList.add('hidden');
-                    backTextarea.disabled = false;
-                    backTextarea.placeholder = "Javob...";
-                    multiContainer.style.display = 'none';
-                }
-            },
-
-            renderMultiFields() {
-                const container = document.getElementById('multi-fields');
-                container.innerHTML = `
-                    <div style="display: flex; gap: 8px; margin-bottom: 8px;">
-                        <input type="text" class="form-input" placeholder="Maydon nomi" value="Qo'shimcha 1">
-                        <textarea class="form-textarea" placeholder="Qiymat" rows="2"></textarea>
-                    </div>
-                `;
-            },
-
-            addMultiField() {
-                const container = document.getElementById('multi-fields');
-                const count = container.children.length + 1;
-                container.innerHTML += `
-                    <div style="display: flex; gap: 8px; margin-bottom: 8px;">
-                        <input type="text" class="form-input" placeholder="Maydon nomi" value="Qo'shimcha ${count}">
-                        <textarea class="form-textarea" placeholder="Qiymat" rows="2"></textarea>
-                    </div>
-                `;
-            },
-
-            saveCard() {
-                const deckId = document.getElementById('card-deck').value;
-                const front = document.getElementById('card-front').value.trim();
-                const back = document.getElementById('card-back').value.trim();
-                const tags = document.getElementById('card-tags').value.split(',').map(t => t.trim()).filter(t => t);
-                
-                if (!deckId || !front) {
-                    this.showToast('Majburiy maydonlar to\'ldirilmagan', 'error');
-                    return;
-                }
-                
-                let processedBack = back;
-                if (this.selectedCardType === 'cloze') {
-                    // Extract cloze answer
-                    const matches = front.match(/{{c\d+::(.*?)}}/g);
-                    processedBack = matches ? matches.map(m => m.replace(/{{c\d+::(.*?)}}/, '$1')).join(', ') : '';
-                }
-                
-                const card = {
-                    id: 'card_' + Date.now(),
-                    deckId,
-                    type: this.selectedCardType,
-                    front,
-                    back: processedBack,
-                    tags,
-                    created: Date.now(),
-                    srs: {
-                        interval: 1,
-                        ease: 2.5,
-                        due: Date.now(),
-                        reps: 0,
-                        lapses: 0,
-                        nextInterval: 1,
-                        state: 'new'
-                    }
-                };
-                
-                this.state.cards.push(card);
-                
-                // Update deck card count
-                const deck = this.state.decks.find(d => d.id === deckId);
-                if (deck) {
-                    deck.cardCount = this.state.cards.filter(c => c.deckId === deckId).length;
-                }
-                
-                this.saveData();
-                this.closeModal();
-                this.showToast('Karta yaratildi', 'success');
-                
-                // Update view if needed
-                if (this.currentDeck && this.currentDeck.id === deckId) {
-                    this.openDeck(deckId);
-                }
-            },
-
-            editCard(cardId) {
-                const card = this.state.cards.find(c => c.id === cardId);
-                if (!card) return;
-                
-                this.showAddCardModal(card.deckId);
-                this.selectCardType(card.type);
-                
-                document.getElementById('card-front').value = card.front;
-                document.getElementById('card-back').value = card.back;
-                document.getElementById('card-tags').value = card.tags.join(', ');
-                
-                // Change save button to update
-                const saveBtn = document.querySelector('#add-card-modal .btn-primary');
-                saveBtn.innerHTML = '<i class="fas fa-save"></i> Yangilash';
-                saveBtn.onclick = () => this.updateCard(cardId);
-            },
-
-            updateCard(cardId) {
-                const cardIndex = this.state.cards.findIndex(c => c.id === cardId);
-                if (cardIndex === -1) return;
-                
-                const deckId = document.getElementById('card-deck').value;
-                const front = document.getElementById('card-front').value.trim();
-                const back = document.getElementById('card-back').value.trim();
-                const tags = document.getElementById('card-tags').value.split(',').map(t => t.trim()).filter(t => t);
-                
-                this.state.cards[cardIndex] = {
-                    ...this.state.cards[cardIndex],
-                    deckId,
-                    type: this.selectedCardType,
-                    front,
-                    back: this.selectedCardType === 'cloze' ? this.extractClozeAnswer(front) : back,
-                    tags
-                };
-                
-                this.saveData();
-                this.closeModal();
-                this.showToast('Karta yangilandi', 'success');
-                
-                if (this.currentDeck) {
-                    this.openDeck(this.currentDeck.id);
-                }
-            },
-
-            extractClozeAnswer(text) {
-                const matches = text.match(/{{c\d+::(.*?)}}/g);
-                if (matches) {
-                    return matches.map(m => m.replace(/{{c\d+::(.*?)}}/, '$1')).join(', ');
-                }
-                return '';
-            },
-
-            deleteCard(cardId) {
-                if (!confirm('Kartani o\'chirishni tasdiqlaysizmi?')) {
-                    return;
-                }
-                
-                const card = this.state.cards.find(c => c.id === cardId);
-                if (card) {
-                    // Update deck card count
-                    const deck = this.state.decks.find(d => d.id === card.deckId);
-                    if (deck) {
-                        deck.cardCount = Math.max(0, deck.cardCount - 1);
-                    }
-                }
-                
-                this.state.cards = this.state.cards.filter(c => c.id !== cardId);
-                this.saveData();
-                
-                if (this.currentDeck) {
-                    this.openDeck(this.currentDeck.id);
-                }
-                
-                this.showToast('Karta o\'chirildi', 'success');
-            },
-
-            // ===== STUDY SYSTEM =====
-            getDueCards() {
-                const now = Date.now();
-                return this.state.cards.filter(card => {
-                    return card.srs.due <= now;
-                }).sort((a, b) => a.srs.due - b.srs.due);
-            },
-
-            startStudySession() {
-                this.studyQueue = this.getDueCards();
-                this.currentCardIndex = 0;
-                
-                if (this.studyQueue.length === 0) {
-                    this.showToast('Takrorlash uchun kartalar yo\'q', 'warning');
-                    return;
-                }
-                
-                // Hide main app and show study session
-                document.getElementById('app').classList.add('hidden');
-                document.getElementById('study-session').classList.remove('hidden');
-                
-                this.showNextCard();
-            },
-
-            startDeckStudy(deckId) {
-                this.studyQueue = this.getDueCards().filter(card => card.deckId === deckId);
-                this.currentCardIndex = 0;
-                
-                if (this.studyQueue.length === 0) {
-                    this.showToast('Bu to'plamda takrorlash uchun kartalar yo'q', 'warning');
-                    return;
-                }
-                
-                document.getElementById('app').classList.add('hidden');
-                document.getElementById('study-session').classList.remove('hidden');
-                this.showNextCard();
-            },
-
-            showNextCard() {
-                if (this.currentCardIndex >= this.studyQueue.length) {
-                    this.endStudySession();
-                    return;
-                }
-                
-                this.currentCard = this.studyQueue[this.currentCardIndex];
-                this.isCardFlipped = false;
-                
-                const cardElement = document.getElementById('study-card');
-                cardElement.classList.remove('flipped');
-                
-                // Update front content
-                let frontContent = this.currentCard.front;
-                if (this.currentCard.type === 'cloze') {
-                    frontContent = frontContent.replace(/{{c\d+::(.*?)}}/g, '<span class="cloze-blank">[.....]</span>');
-                }
-                
-                document.getElementById('card-front-content').innerHTML = frontContent;
-                document.getElementById('card-back-content').textContent = this.currentCard.back;
-                
-                // Hide answer buttons
-                document.getElementById('answer-buttons').style.display = 'none';
-                
-                // Update progress
-                const progress = ((this.currentCardIndex + 1) / this.studyQueue.length) * 100;
-                document.getElementById('progress-fill').style.width = `${progress}%`;
-                document.getElementById('progress-text').textContent = `${this.currentCardIndex + 1}/${this.studyQueue.length}`;
-            },
-
-            flipCard() {
-                if (this.isCardFlipped) return;
-                
-                this.isCardFlipped = true;
-                const cardElement = document.getElementById('study-card');
-                cardElement.classList.add('flipped');
-                
-                // Show answer buttons
-                document.getElementById('answer-buttons').style.display = 'grid';
-                
-                // Show motivational message
-                this.showMotivationalMessage();
-            },
-
-            rateCard(rating) {
-                // Update SRS data
-                this.updateSRS(this.currentCard, rating);
-                
-                // Add XP based on rating
-                this.addXP(rating * 10);
-                
-                // Update streak
-                this.updateStreak();
-                
-                // Log study session
-                this.logStudySession(this.currentCard, rating);
-                
-                // Show motivational message based on rating
-                this.showRatingMessage(rating);
-                
-                // Move to next card with animation
-                this.currentCardIndex++;
-                
-                setTimeout(() => {
-                    this.showNextCard();
-                }, 800);
-            },
-
-            updateSRS(card, rating) {
-                // Enhanced SM-2 algorithm with intelligent adjustments
-                const srs = card.srs;
-                const now = Date.now();
-                
-                // Convert rating to quality (0-5 scale)
-                let quality = 0;
-                switch(rating) {
-                    case 1: quality = 0; break; // Again - complete failure
-                    case 2: quality = 2; break; // Hard - incorrect response
-                    case 3: quality = 3; break; // Good - correct response
-                    case 4: quality = 5; break; // Easy - perfect response
-                }
-                
-                if (quality < 3) {
-                    // Incorrect response
-                    srs.lapses++;
-                    srs.reps = 0;
-                    srs.interval = 1; // Review in 1 minute
-                    srs.nextInterval = 1;
-                    srs.state = 'relearning';
-                    
-                    // Decrease ease factor
-                    srs.ease = Math.max(1.3, srs.ease - 0.2);
-                } else {
-                    // Correct response
-                    if (srs.reps === 0) {
-                        srs.interval = 1; // First review: 1 day
-                        srs.nextInterval = 1;
-                    } else if (srs.reps === 1) {
-                        srs.interval = 6; // Second review: 6 days
-                        srs.nextInterval = 6;
                     } else {
-                        // SM-2 formula
-                        srs.ease = srs.ease + (0.1 - (5 - quality) * (0.08 + (5 - quality) * 0.02));
-                        srs.ease = Math.max(1.3, Math.min(srs.ease, 2.5));
-                        srs.interval = Math.round(srs.interval * srs.ease);
-                        srs.nextInterval = srs.interval;
+                        this.data = this.seed();
+                        console.log("DB Initialized with seed data.");
                     }
-                    
-                    srs.reps++;
-                    srs.state = 'review';
+                } catch (e) {
+                    console.error("DB Load Error:", e);
+                    this.data = this.seed();
+                    this.save();
                 }
-                
-                // Calculate next due date
-                const intervalMs = srs.interval * 24 * 60 * 60 * 1000;
-                srs.due = now + intervalMs;
-                
-                // Update card in state
-                const cardIndex = this.state.cards.findIndex(c => c.id === card.id);
-                if (cardIndex !== -1) {
-                    this.state.cards[cardIndex].srs = srs;
+                this.checkStreak();
+            },
+
+            save() {
+                try {
+                    localStorage.setItem(this.key, JSON.stringify(this.data));
+                } catch (e) {
+                    console.error("Failed to save to localStorage:", e);
+                    UI.toast("Ma'lumotlarni saqlashda xato yuz berdi!", "error");
                 }
-                
-                this.saveData();
             },
 
-            endStudySession() {
-                // Show completion message
-                const cardsStudied = this.studyQueue.length;
-                
-                // Log session
-                this.state.studySessions.push({
-                    date: Date.now(),
-                    duration: Math.floor(cardsStudied * 0.5),
-                    cards: cardsStudied,
-                    deck: this.currentDeck ? this.currentDeck.id : null
-                });
-                
-                this.saveData();
-                
-                // Hide study session and show app
-                document.getElementById('study-session').classList.add('hidden');
-                document.getElementById('app').classList.remove('hidden');
-                
-                // Show success message
-                this.showToast(`🎉 ${cardsStudied} ta karta takrorlandi!`, 'success');
-                
-                // Return to dashboard
-                this.renderView('dashboard');
+            seed() {
+                return {
+                    user: { xp: 0, streak: 0, lastStudy: null },
+                    decks: [
+                        { id: 'd1', name: 'Ingliz Tili So\'zlari', icon: 'fa-language', color: 'from-blue-600 to-cyan-500' },
+                        { id: 'd2', name: 'Dasturlash Asoslari', icon: 'fa-code', color: 'from-purple-600 to-indigo-600' }
+                    ],
+                    cards: [
+                        { id: 'c1', deckId: 'd1', front: 'Knowledge', back: 'Ilm / Bilim', type: 'basic', nextReview: Date.now(), interval: 0, ease: 2.5 },
+                        { id: 'c2', deckId: 'd2', front: 'JavaScriptda o\'zgaruvchi {{c1::let}} yoki {{c1::const}} orqali e\'lon qilinadi.', back: '', type: 'cloze', nextReview: Date.now(), interval: 0, ease: 2.5 }
+                    ]
+                };
             },
 
-            showHint() {
-                this.showToast('Kartani aylantirish uchun ustiga bosing yoki SPACE tugmasini bosing', 'info');
-            },
-
-            showMotivationalMessage() {
-                const messages = [
-                    "Har bir to'g'ri javob sizni yanada kuchliroq qiladi!",
-                    "Bilim - bu qudratdir. Davom eting!",
-                    "Sizning rivojlanishingizni ko'rish juda yoqimli!",
-                    "Har bir kichik qadam katta muvaffaqiyatga olib boradi."
-                ];
-                
-                const randomMessage = messages[Math.floor(Math.random() * messages.length)];
-                this.showToast(randomMessage, 'info');
-            },
-
-            showRatingMessage(rating) {
-                const type = rating === 1 ? 'again' : rating === 2 ? 'hard' : rating === 3 ? 'good' : 'easy';
-                const messages = this.state.motivationMessages[type];
-                const message = messages[Math.floor(Math.random() * messages.length)];
-                
-                this.showToast(message, rating === 1 ? 'error' : rating === 2 ? 'warning' : rating === 3 ? 'success' : 'info');
-            },
-
-            // ===== GAMIFICATION =====
-            addXP(amount) {
-                this.state.user.xp += amount;
-                
-                // Level up logic (100 XP per level)
-                const newLevel = Math.floor(this.state.user.xp / 100) + 1;
-                if (newLevel > this.state.user.level) {
-                    this.state.user.level = newLevel;
-                    this.showToast(`🎉 Tabriklaymiz! Darajangiz ${newLevel} ga yetdi!`, 'success');
-                }
-                
-                this.saveData();
-            },
-
-            updateStreak() {
+            checkStreak() {
                 const today = new Date().toDateString();
-                const lastStudy = this.state.user.lastStudy;
-                
-                if (lastStudy !== today) {
+                if (this.data.user.lastStudy && this.data.user.lastStudy !== today) {
                     const yesterday = new Date();
                     yesterday.setDate(yesterday.getDate() - 1);
-                    
-                    if (lastStudy === yesterday.toDateString()) {
-                        this.state.user.streak++;
-                    } else if (!lastStudy) {
-                        this.state.user.streak = 1;
-                    } else {
-                        this.state.user.streak = 1;
+                    if (this.data.user.lastStudy !== yesterday.toDateString()) {
+                        this.data.user.streak = 0; // Streak uzildi
                     }
-                    
-                    this.state.user.lastStudy = today;
-                    
-                    // Update heatmap
-                    const dateStr = new Date().toISOString().split('T')[0];
-                    this.state.user.heatmap[dateStr] = (this.state.user.heatmap[dateStr] || 0) + 1;
-                    
-                    this.saveData();
                 }
-            },
-
-            logStudySession(card, rating) {
-                // Simple logging for analytics
-                console.log(`Studied card ${card.id} with rating ${rating}`);
-            },
-
-            // ===== UI HELPERS =====
-            updateHeader(view) {
-                const titleMap = {
-                    dashboard: 'Smart Anki Pro',
-                    decks: 'To\'plamlar',
-                    study: 'O\'qish',
-                    profile: 'Profil',
-                    deck: this.currentDeck ? this.currentDeck.name : 'To\'plam'
-                };
-                
-                document.getElementById('header-title').textContent = titleMap[view] || 'Smart Anki Pro';
-            },
-
-            showSettings() {
-                document.getElementById('settings-modal').classList.remove('hidden');
-                
-                // Set current settings
-                document.getElementById('daily-goal').value = this.state.user.settings.dailyGoal;
-                document.getElementById('smart-srs').checked = this.state.user.settings.smartSRS;
-                document.getElementById('language-select').value = this.state.user.settings.language;
-                
-                // Update theme buttons
-                document.querySelectorAll('.theme-btn').forEach(btn => {
-                    btn.classList.toggle('active', btn.dataset.theme === this.state.user.settings.theme);
-                });
-            },
-
-            closeModal() {
-                document.querySelectorAll('.modal-overlay').forEach(modal => {
-                    modal.classList.add('hidden');
-                });
-                
-                // Reset modal buttons
-                const saveBtn = document.querySelector('#add-card-modal .btn-primary');
-                if (saveBtn) {
-                    saveBtn.innerHTML = '<i class="fas fa-save"></i> Saqlash';
-                    saveBtn.onclick = () => this.saveCard();
-                }
-            },
-
-            showToast(message, type = 'info') {
-                const toast = document.getElementById('toast');
-                const toastIcon = toast.querySelector('.toast-icon');
-                const toastMessage = toast.querySelector('.toast-message');
-                
-                // Set icon based on type
-                let icon = 'fas fa-info-circle';
-                if (type === 'success') icon = 'fas fa-check-circle';
-                if (type === 'error') icon = 'fas fa-exclamation-circle';
-                if (type === 'warning') icon = 'fas fa-exclamation-triangle';
-                
-                toastIcon.className = `toast-icon ${icon}`;
-                toastMessage.textContent = message;
-                
-                // Set color class
-                toast.className = `toast ${type}`;
-                toast.classList.remove('hidden');
-                
-                // Auto hide after 3 seconds
-                setTimeout(() => {
-                    toast.classList.add('hidden');
-                }, 3000);
-            },
-
-            // ===== THEME & LANGUAGE =====
-            changeTheme(theme) {
-                this.state.user.settings.theme = theme;
-                this.applyTheme(theme);
-                this.saveData();
-                
-                // Update UI
-                document.querySelectorAll('.theme-btn').forEach(btn => {
-                    btn.classList.toggle('active', btn.dataset.theme === theme);
-                });
-            },
-
-            applyTheme(theme) {
-                document.body.className = theme === 'light' ? 'light-mode' : 'dark-mode';
-            },
-
-            changeLanguage(lang) {
-                this.state.user.settings.language = lang;
-                this.applyLanguage(lang);
-                this.saveData();
-            },
-
-            applyLanguage(lang) {
-                // Simple language switching
-                const translations = {
-                    uz: {
-                        dashboard: 'Asosiy',
-                        decks: 'To\'plamlar',
-                        study: 'O\'qish',
-                        profile: 'Profil',
-                        dueCards: 'Takrorlash uchun',
-                        totalCards: 'Jami kartalar',
-                        streak: 'Streak',
-                        level: 'Daraja'
-                    },
-                    en: {
-                        dashboard: 'Dashboard',
-                        decks: 'Decks',
-                        study: 'Study',
-                        profile: 'Profile',
-                        dueCards: 'Due Cards',
-                        totalCards: 'Total Cards',
-                        streak: 'Streak',
-                        level: 'Level'
-                    }
-                };
-                
-                const t = translations[lang];
-                if (!t) return;
-                
-                // Update navigation
-                document.querySelectorAll('.nav-btn span').forEach((span, index) => {
-                    const views = ['dashboard', 'decks', '', 'study', 'profile'];
-                    const view = views[index];
-                    if (view && t[view]) {
-                        span.textContent = t[view];
-                    }
-                });
-            },
-
-            // ===== DATA IMPORT/EXPORT =====
-            exportData() {
-                const dataStr = JSON.stringify(this.state, null, 2);
-                const dataUri = 'data:application/json;charset=utf-8,' + encodeURIComponent(dataStr);
-                
-                const exportFileDefaultName = `smart-anki-backup-${new Date().toISOString().split('T')[0]}.json`;
-                
-                const linkElement = document.createElement('a');
-                linkElement.setAttribute('href', dataUri);
-                linkElement.setAttribute('download', exportFileDefaultName);
-                linkElement.click();
-                
-                this.showToast('Ma\'lumotlar eksport qilindi', 'success');
-            },
-
-            importData() {
-                const input = document.createElement('input');
-                input.type = 'file';
-                input.accept = 'application/json';
-                
-                input.onchange = e => {
-                    const file = e.target.files[0];
-                    const reader = new FileReader();
-                    
-                    reader.onload = event => {
-                        try {
-                            const imported = JSON.parse(event.target.result);
-                            this.state = imported;
-                            this.saveData();
-                            this.showToast('Ma\'lumotlar import qilindi', 'success');
-                            this.renderView('dashboard');
-                        } catch (error) {
-                            this.showToast('Import xatosi: fayl formati noto\'g\'ri', 'error');
-                        }
-                    };
-                    
-                    reader.readAsText(file);
-                };
-                
-                input.click();
-            },
-
-            clearAllData() {
-                if (confirm('DIQQAT! Barcha ma\'lumotlar o\'chib ketadi. Davom ettirishni xohlaysizmi?')) {
-                    localStorage.removeItem('smartAnkiPro');
-                    this.state = new SmartAnkiPro().state;
-                    this.createSampleData();
-                    this.renderView('dashboard');
-                    this.showToast('Barcha ma\'lumotlar tozalandi', 'success');
-                }
-            },
-
-            // ===== EVENT LISTENERS =====
-            setupEventListeners() {
-                // Keyboard shortcuts
-                document.addEventListener('keydown', (e) => {
-                    // Space to flip card in study session
-                    if (e.code === 'Space' && document.getElementById('study-session').classList.contains('hidden') === false) {
-                        e.preventDefault();
-                        this.flipCard();
-                    }
-                    
-                    // Number keys 1-4 for rating cards
-                    if (e.key >= '1' && e.key <= '4') {
-                        const studySession = document.getElementById('study-session');
-                        if (studySession.classList.contains('hidden') === false && this.isCardFlipped) {
-                            this.rateCard(parseInt(e.key));
-                        }
-                    }
-                    
-                    // Escape to end study session
-                    if (e.code === 'Escape') {
-                        const studySession = document.getElementById('study-session');
-                        if (studySession.classList.contains('hidden') === false) {
-                            this.endStudySession();
-                        }
-                    }
-                });
-                
-                // Handle back button
-                window.addEventListener('popstate', () => {
-                    this.renderView(this.currentView);
-                });
-                
-                // Save settings on change
-                document.getElementById('daily-goal')?.addEventListener('change', (e) => {
-                    this.state.user.settings.dailyGoal = parseInt(e.target.value);
-                    this.saveData();
-                });
-                
-                document.getElementById('smart-srs')?.addEventListener('change', (e) => {
-                    this.state.user.settings.smartSRS = e.target.checked;
-                    this.saveData();
-                });
+                document.getElementById('streak-display').innerText = this.data.user.streak;
             }
         };
 
-        // Initialize app when DOM is loaded
-        document.addEventListener('DOMContentLoaded', () => {
-            window.SmartAnkiPro = SmartAnkiPro;
-            SmartAnkiPro.init();
+        // --- 2. HIKMATLAR XAZINASI (MOTIVATION ENGINE) ---
+        const Motivation = {
+            quotes: [
+                { author: "Alisher Navoiy", text: "Kamoli insondir ahli ilmni, ilm ahlini qilg'il doimo ahli-ilm." },
+                { author: "Imom Buxoriy", text: "Ilmdan boshqa najot yo'q va bo'lmagay." },
+                { author: "Abu Rayhon Beruniy", text: "Bilim va ilm - insoniyatning eng buyuk yutug'idir." },
+                { author: "Abdulla Avloniy", text: "Tarbiya biz uchun yo hayot - yo mamot, yo najot - yo halokat, yo saodat - yo falokat masalasidir." },
+                { author: "Hadis", text: "Beshikdan qabrgacha ilm izlang." },
+                { author: "Ahmad Yassaviy", text: "Ilm o'rganding, oxir uni unutma, nafsingni sindir, g'aflatda qolma." },
+                { author: "Motivatsiya", text: "Xato qilish - o'rganishning bir qismidir. Har bir xato - yangi bilimga qadamdir. To'xtamang!" },
+                { author: "Albert Eynshteyn", text: "Men aqlli emasman, shunchaki muammolar ustida uzoqroq turaman." }
+            ],
+
+            show() {
+                const modal = document.getElementById('motivation-modal');
+                const random = this.quotes[Math.floor(Math.random() * this.quotes.length)];
+                
+                document.getElementById('quote-author').innerText = random.author;
+                document.getElementById('quote-text').innerText = `"${random.text}"`;
+                
+                modal.classList.remove('hidden');
+                modal.classList.add('flex');
+            },
+
+            close() {
+                const modal = document.getElementById('motivation-modal');
+                modal.classList.add('hidden');
+                modal.classList.remove('flex');
+                
+                // Quote yopilgandan keyin keyingi kartaga o'tish
+                Study.nextCard();
+            }
+        };
+
+        // --- 3. ALGORITM (SM-2 SIMPLIFIED & ROBUST) ---
+        const Algorithm = {
+            // Ratings: 1 (Qayta), 2 (Qiyin), 3 (Yaxshi), 4 (Oson)
+            calculate(card, rating) {
+                const now = Date.now();
+                const minute = 60 * 1000;
+                const day = 24 * 60 * 60 * 1000;
+
+                let nextTimeAdd = 0;
+                let intervalDays = 0;
+
+                if (rating === 1) { // Qayta (Again)
+                    card.interval = 0;
+                    card.ease = Math.max(1.3, card.ease - 0.2);
+                    intervalDays = 0.0035; // ~5 minut
+                } else if (rating === 2) { // Qiyin (Hard)
+                    card.interval = 0.007; // ~10 minut
+                    card.ease = Math.max(1.3, card.ease - 0.15);
+                    intervalDays = card.interval; 
+                } else if (rating === 3) { // Yaxshi (Good)
+                    if (card.interval === 0) intervalDays = 1; // 1 kun
+                    else intervalDays = Math.round(card.interval * card.ease);
+                    card.interval = intervalDays;
+                } else { // Oson (Easy)
+                    if (card.interval === 0) intervalDays = 3; // 3 kun
+                    else intervalDays = Math.round(card.interval * card.ease * 1.3);
+                    card.ease += 0.15;
+                    card.interval = intervalDays;
+                }
+                
+                // Ensure interval is a minimum of 1 minute if it was rated poorly
+                if (intervalDays < 0.01) {
+                    nextTimeAdd = intervalDays * day * 2; // 5-10 minut atrofida
+                } else {
+                    nextTimeAdd = intervalDays * day;
+                }
+
+                card.nextReview = now + nextTimeAdd;
+                return card;
+            }
+        };
+
+        // --- 4. NAVIGATION & VIEWS ---
+        const Router = {
+            current: 'decks',
+            
+            nav(page, param = null) {
+                this.current = page;
+                const vp = document.getElementById('app-viewport');
+                
+                // Active Nav Styling
+                ['decks', 'add', 'profile'].forEach(id => {
+                    const el = document.getElementById('nav-'+id);
+                    if(el) {
+                        if(id === page) {
+                            el.classList.add('text-brand-primary'); 
+                            el.classList.remove('text-slate-400');
+                        } else {
+                            el.classList.remove('text-brand-primary');
+                            el.classList.add('text-slate-400');
+                        }
+                    }
+                });
+
+                vp.innerHTML = ''; // Tozalash
+
+                if (page === 'decks') this.renderDecks(vp);
+                else if (page === 'add') this.renderAdd(vp);
+                else if (page === 'profile') this.renderProfile(vp);
+                else if (page === 'study') this.renderStudy(vp, param);
+            },
+
+            renderDecks(container) {
+                const decks = DB.data.decks;
+                // Kartalar sonini hisoblash
+                const dueCardsCount = DB.data.cards.filter(c => c.nextReview <= Date.now()).length;
+                
+                let html = `
+                    <div class="space-y-6 animate-slide-up">
+                        <div class="bg-gradient-to-br from-slate-800 to-slate-900 p-6 rounded-3xl border border-slate-700 relative overflow-hidden">
+                            <div class="absolute right-0 top-0 w-32 h-32 bg-brand-primary blur-[80px] opacity-20"></div>
+                            <h2 class="text-slate-400 text-xs font-bold uppercase tracking-wider mb-2">Bugungi Maqsad</h2>
+                            <div class="flex items-baseline gap-2">
+                                <span class="text-4xl font-extrabold text-white">${dueCardsCount}</span>
+                                <span class="text-sm font-medium text-slate-400">ta karta takrorlash kerak</span>
+                            </div>
+                        </div>
+                        
+                        <h3 class="font-bold text-lg text-white px-1">To'plamlarim</h3>
+                        <div class="space-y-3">
+                `;
+
+                if(decks.length === 0) {
+                    html += `<div class="text-center py-10 text-slate-500">To'plamlar yo'q. "+" tugmasini bosing!</div>`;
+                }
+
+                decks.forEach(deck => {
+                    const dueCount = DB.data.cards.filter(c => c.deckId === deck.id && c.nextReview <= Date.now()).length;
+                    const total = DB.data.cards.filter(c => c.deckId === deck.id).length;
+
+                    html += `
+                        <div onclick="Study.start('${deck.id}')" class="bg-brand-card hover:bg-slate-700 border border-slate-700 p-4 rounded-2xl flex items-center justify-between transition-transform active:scale-[0.98] shadow-lg">
+                            <div class="flex items-center gap-4">
+                                <div class="w-12 h-12 rounded-xl bg-gradient-to-br ${deck.color} flex items-center justify-center text-white text-xl shadow-lg">
+                                    <i class="fa-solid ${deck.icon}"></i>
+                                </div>
+                                <div>
+                                    <h4 class="font-bold text-white text-base">${deck.name}</h4>
+                                    <p class="text-xs text-slate-400 font-medium mt-1">${total} ta karta • <span class="${dueCount > 0 ? 'text-brand-accent' : ''}">${dueCount} ta faol</span></p>
+                                </div>
+                            </div>
+                            <div class="w-10 h-10 rounded-full bg-slate-900 flex items-center justify-center text-slate-500">
+                                <i class="fa-solid fa-chevron-right ml-0.5"></i>
+                            </div>
+                        </div>
+                    `;
+                });
+                html += `</div></div>`;
+                container.innerHTML = html;
+            },
+
+            renderAdd(container) {
+                const decks = DB.data.decks;
+                const options = decks.map(d => `<option value="${d.id}">${d.name}</option>`).join('');
+
+                container.innerHTML = `
+                    <div class="animate-slide-up space-y-6">
+                        <h2 class="text-2xl font-bold text-white px-1">Yangi Ilm Qo'shish</h2>
+                        
+                        <div class="flex bg-slate-800 p-1 rounded-xl">
+                            <button onclick="UI.toggleType('basic')" id="btn-basic" class="flex-1 py-3 rounded-xl bg-brand-primary text-white font-bold text-sm shadow-lg transition">Savol-Javob</button>
+                            <button onclick="UI.toggleType('cloze')" id="btn-cloze" class="flex-1 py-3 rounded-xl text-slate-400 font-bold text-sm hover:text-white transition">Bo'shliqni To'ldirish</button>
+                        </div>
+
+                        <div class="space-y-4">
+                            <div>
+                                <label class="text-xs font-bold text-slate-400 ml-1 uppercase">Mavzu (To'plam)</label>
+                                <select id="inp-deck" class="modern-input mt-2 cursor-pointer bg-slate-800">
+                                    ${options}
+                                </select>
+                            </div>
+
+                            <div>
+                                <label class="text-xs font-bold text-slate-400 ml-1 uppercase">Savol (Front)</label>
+                                <textarea id="inp-front" rows="3" class="modern-input mt-2" placeholder="Savolni kiriting..."></textarea>
+                                <p id="cloze-hint" class="hidden text-xs text-brand-primary mt-2 bg-blue-900/30 p-2 rounded border border-blue-900">
+                                    <i class="fa-solid fa-circle-info mr-1"></i> Format: {{c1::yashirin so'z}} (Bu yerdagi so'zlar javob bo'ladi)
+                                </p>
+                            </div>
+
+                            <div id="back-box">
+                                <label class="text-xs font-bold text-slate-400 ml-1 uppercase">Javob (Back)</label>
+                                <textarea id="inp-back" rows="3" class="modern-input mt-2" placeholder="Javobni kiriting..."></textarea>
+                            </div>
+
+                            <button onclick="Actions.addCard()" class="w-full py-4 bg-brand-primary hover:bg-blue-600 text-white font-bold rounded-2xl shadow-lg shadow-blue-500/20 active:scale-[0.98] transition mt-4 text-lg">
+                                <i class="fa-solid fa-save mr-2"></i> Saqlash
+                            </button>
+
+                            <div class="border-t border-slate-700 pt-6 mt-6">
+                                <h3 class="text-sm font-bold text-white mb-3">Yangi To'plam Yaratish</h3>
+                                <div class="flex gap-2">
+                                    <input id="inp-deck-name" type="text" class="modern-input py-3 text-sm" placeholder="To'plam nomi...">
+                                    <button onclick="Actions.addDeck()" class="px-6 bg-slate-700 hover:bg-slate-600 text-white font-bold rounded-xl transition">
+                                        <i class="fa-solid fa-plus"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+                UI.toggleType(UI.currentType); // Viewni to'g'ri tiklash
+            },
+
+            renderProfile(container) {
+                container.innerHTML = `
+                    <div class="animate-slide-up flex flex-col items-center justify-center h-[70vh] text-center space-y-6">
+                        <div class="w-32 h-32 rounded-full bg-slate-800 border-4 border-brand-primary flex items-center justify-center shadow-2xl relative">
+                            <i class="fa-solid fa-trophy text-5xl text-brand-gold animate-float"></i>
+                            <div class="absolute bottom-0 right-0 bg-brand-primary text-white text-xs font-bold px-3 py-1 rounded-full border-2 border-slate-900">
+                                LEVEL ${Math.floor(DB.data.user.xp / 100) + 1}
+                            </div>
+                        </div>
+                        
+                        <div>
+                            <h2 class="text-3xl font-bold text-white">Natijalar</h2>
+                            <p class="text-slate-400 font-medium">Sizning bilim darajangiz</p>
+                        </div>
+
+                        <div class="grid grid-cols-2 gap-4 w-full">
+                            <div class="bg-slate-800 p-4 rounded-2xl border border-slate-700">
+                                <p class="text-brand-gold text-2xl font-bold">${DB.data.user.streak}</p>
+                                <p class="text-xs text-slate-400 uppercase font-bold">Kunlik Streak</p>
+                            </div>
+                            <div class="bg-slate-800 p-4 rounded-2xl border border-slate-700">
+                                <p class="text-brand-primary text-2xl font-bold">${DB.data.user.xp}</p>
+                                <p class="text-xs text-slate-400 uppercase font-bold">Umumiy XP</p>
+                            </div>
+                        </div>
+
+                        <button onclick="Actions.reset()" class="text-brand-error text-xs font-bold opacity-50 mt-10 hover:opacity-100 transition">Barcha ma'lumotlarni o'chirish (Diqqat!)</button>
+                    </div>
+                `;
+            },
+
+            renderStudy(container, deckId) {
+                container.innerHTML = `<div id="study-container" class="h-full flex flex-col relative"></div>`;
+            }
+        };
+
+        // --- 5. STUDY LOGIC (CORE) ---
+        const Study = {
+            queue: [],
+            currentCard: null,
+            deckId: null,
+            isFlipped: false,
+
+            start(deckId) {
+                this.deckId = deckId;
+                // Faqat vaqti kelgan kartalar
+                this.queue = DB.data.cards
+                    .filter(c => c.deckId === deckId && c.nextReview <= Date.now())
+                    .sort((a,b) => a.nextReview - b.nextReview);
+
+                if (this.queue.length === 0) {
+                    UI.toast("Bugungi darslar tugadi! 🎉", "success");
+                    return;
+                }
+
+                Router.nav('study');
+                this.nextCard();
+            },
+
+            nextCard() {
+                if (this.queue.length === 0) {
+                    Router.nav('decks');
+                    UI.toast("To'plam yakunlandi! 🏆", "success");
+                    return;
+                }
+
+                this.currentCard = this.queue.shift(); // Kartani navbatdan olamiz
+                this.isFlipped = false;
+                this.renderUI();
+            },
+
+            getIntervalDisplay(rating) {
+                const card = this.currentCard;
+                let days = 0;
+                
+                if (rating === 1) days = 0.0035; // 5 min
+                else if (rating === 2) days = 0.007; // 10 min
+                else if (rating === 3) days = card.interval === 0 ? 1 : card.interval * card.ease;
+                else if (rating === 4) days = card.interval === 0 ? 3 : card.interval * card.ease * 1.3;
+
+                let intervalMs = days * 24 * 60 * 60 * 1000;
+                let display = '';
+
+                if (intervalMs < 60 * 60 * 1000) {
+                    const mins = Math.round(intervalMs / (60 * 1000));
+                    display = `${Math.max(1, mins)}m`;
+                } else if (intervalMs < 24 * 60 * 60 * 1000) {
+                    const hours = Math.round(intervalMs / (60 * 60 * 1000));
+                    display = `${Math.max(1, hours)}s`;
+                } else {
+                    const dayCount = Math.round(intervalMs / (24 * 60 * 60 * 1000));
+                    display = `${Math.max(1, dayCount)}k`;
+                }
+                return display;
+            },
+
+            renderUI() {
+                const container = document.getElementById('study-container');
+                const card = this.currentCard;
+
+                if (!card) return; // Kartaning borligini tekshirish
+
+                // Process Content
+                let frontText = card.front;
+                let backText = card.back;
+                let hint = "";
+
+                if (card.type === 'cloze') {
+                    const regex = /{{c1::(.*?)}}/g;
+                    frontText = card.front.replace(regex, '<span class="cloze-hidden" onclick="Study.flip(event)">???</span>');
+                    backText = card.front.replace(regex, '<span class="cloze-revealed">$1</span>');
+                    hint = "Bo'shliqni to'ldirish";
+                }
+
+                // Render Card HTML
+                container.innerHTML = `
+                    <!-- Top Bar -->
+                    <div class="flex justify-between items-center mb-4">
+                        <button onclick="Router.nav('decks')" class="text-slate-400 hover:text-white active:scale-90 transition"><i class="fa-solid fa-xmark text-xl"></i></button>
+                        <span class="text-xs font-bold text-brand-primary bg-blue-900/20 px-3 py-1 rounded-full">${this.queue.length + 1} ta qoldi</span>
+                        <div class="w-6"></div>
+                    </div>
+
+                    <!-- Card Area -->
+                    <div class="flex-1 perspective-1000 my-4 relative group cursor-pointer" onclick="Study.flip(event)">
+                        <div id="active-card-inner" class="card-inner">
+                            <!-- FRONT -->
+                            <div class="card-front">
+                                <div class="text-xs font-bold text-slate-500 uppercase tracking-widest mb-6">${hint || 'Savol'}</div>
+                                <div class="text-2xl md:text-3xl font-bold text-center leading-relaxed select-none">${frontText}</div>
+                                <div class="absolute bottom-6 text-slate-500 text-xs animate-pulse">Javobni ko'rish uchun bosing</div>
+                            </div>
+                            <!-- BACK -->
+                            <div class="card-back">
+                                <div class="text-sm text-slate-500 line-through mb-4 opacity-50">${card.type === 'basic' ? frontText : ''}</div>
+                                <div class="text-2xl md:text-3xl font-bold text-center text-white leading-relaxed select-none">${backText}</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Controls -->
+                    <div class="h-32 pt-4">
+                        <button id="btn-show" onclick="Study.flip()" class="w-full h-16 bg-brand-primary hover:bg-blue-600 text-white text-lg font-bold rounded-2xl shadow-lg transition active:scale-[0.98]">
+                            Javobni Ko'rsatish
+                        </button>
+
+                        <div id="btn-grading" class="hidden grid-cols-4 gap-2 h-24 animate-slide-up">
+                            <!-- Ergonomik Tugmalar (Katta va Pastda) -->
+                            <button onclick="Study.rate(1)" class="bg-slate-800 border-2 border-brand-error/50 text-brand-error rounded-2xl font-bold flex flex-col items-center justify-center text-sm active:scale-95 transition-all">
+                                <span>Qayta</span> <span class="text-xs font-medium opacity-80">${this.getIntervalDisplay(1)}</span>
+                            </button>
+                            <button onclick="Study.rate(2)" class="bg-slate-800 border-2 border-brand-gold/50 text-brand-gold rounded-2xl font-bold flex flex-col items-center justify-center text-sm active:scale-95 transition-all">
+                                <span>Qiyin</span> <span class="text-xs font-medium opacity-80">${this.getIntervalDisplay(2)}</span>
+                            </button>
+                            <button onclick="Study.rate(3)" class="bg-slate-800 border-2 border-brand-primary/50 text-brand-primary rounded-2xl font-bold flex flex-col items-center justify-center text-sm active:scale-95 transition-all">
+                                <span>Yaxshi</span> <span class="text-xs font-medium opacity-80">${this.getIntervalDisplay(3)}</span>
+                            </button>
+                            <button onclick="Study.rate(4)" class="bg-slate-800 border-2 border-brand-accent/50 text-brand-accent rounded-2xl font-bold flex flex-col items-center justify-center text-sm active:scale-95 transition-all">
+                                <span>Oson</span> <span class="text-xs font-medium opacity-80">${this.getIntervalDisplay(4)}</span>
+                            </button>
+                        </div>
+                    </div>
+                `;
+            },
+
+            flip(event) {
+                // Cloze dagi alohida span bosilganda flip bo'lishini oldini olish
+                if (event && event.target.classList.contains('cloze-hidden')) {
+                    // Xatolikni tuzatish: Bu yerda hech narsa qilmaymiz, chunki foydalanuvchi javobni ko'rishni xohlaydi
+                }
+                
+                if (this.isFlipped) return;
+                this.isFlipped = true;
+                document.getElementById('active-card-inner').classList.add('flipped');
+                document.getElementById('btn-show').classList.add('hidden');
+                document.getElementById('btn-grading').classList.remove('hidden');
+                document.getElementById('btn-grading').classList.add('grid');
+            },
+
+            rate(rating) {
+                // Update Card Logic
+                const updatedCard = Algorithm.calculate(this.currentCard, rating);
+                
+                // Save to DB
+                const idx = DB.data.cards.findIndex(c => c.id === updatedCard.id);
+                if (idx > -1) DB.data.cards[idx] = updatedCard;
+                
+                // Update User Stats (Streak logic is in DB.checkStreak on load)
+                DB.data.user.xp += (rating * 5);
+                
+                // Streakni yangilash
+                const today = new Date().toDateString();
+                if (DB.data.user.lastStudy !== today) {
+                    DB.data.user.streak += 1;
+                }
+                DB.data.user.lastStudy = today;
+                
+                DB.save();
+                
+                // Motivatsiya Tizimini ishga tushirish (Har bir javobdan keyin)
+                Motivation.show(); 
+                
+                // nextCard() Motivation.close() ichida chaqiriladi
+            }
+        };
+
+        // --- 6. ACTIONS & UTILS (FIXED CARD ADDING) ---
+        const UI = {
+            currentType: 'basic',
+            
+            toggleType(type) {
+                this.currentType = type;
+                const b1 = document.getElementById('btn-basic');
+                const b2 = document.getElementById('btn-cloze');
+                const backBox = document.getElementById('back-box');
+                const hint = document.getElementById('cloze-hint');
+
+                if (type === 'basic') {
+                    b1.classList.replace('text-slate-400', 'text-white');
+                    b1.classList.add('bg-brand-primary');
+                    b2.classList.remove('bg-brand-primary', 'text-white');
+                    b2.classList.add('text-slate-400');
+                    if (backBox) backBox.classList.remove('hidden');
+                    if (hint) hint.classList.add('hidden');
+                } else {
+                    b2.classList.replace('text-slate-400', 'text-white');
+                    b2.classList.add('bg-brand-primary');
+                    b1.classList.remove('bg-brand-primary', 'text-white');
+                    b1.classList.add('text-slate-400');
+                    if (backBox) backBox.classList.add('hidden');
+                    if (hint) hint.classList.remove('hidden');
+                }
+            },
+
+            toast(msg, type='info') {
+                const el = document.getElementById('toast');
+                const icon = document.getElementById('toast-icon');
+                document.getElementById('toast-msg').innerText = msg;
+
+                el.classList.remove('opacity-0', 'translate-y-[-20px]');
+                el.classList.add('animate-pop');
+
+                if (type === 'success') {
+                    icon.className = 'fa-solid fa-check-circle text-brand-accent';
+                } else if (type === 'error') {
+                    icon.className = 'fa-solid fa-triangle-exclamation text-brand-error';
+                } else {
+                    icon.className = 'fa-solid fa-info-circle text-brand-primary';
+                }
+
+                setTimeout(() => {
+                    el.classList.remove('animate-pop');
+                    el.classList.add('opacity-0', 'translate-y-[-20px]');
+                }, 2500);
+            }
+        };
+
+        const Actions = {
+            addDeck() {
+                const nameInput = document.getElementById('inp-deck-name');
+                const name = nameInput.value.trim();
+                if (!name) return UI.toast("To'plam nomini kiriting!", "error");
+                
+                DB.data.decks.push({
+                    id: 'd' + Date.now(),
+                    name: name,
+                    icon: 'fa-book',
+                    color: 'from-slate-600 to-slate-800'
+                });
+                DB.save();
+                nameInput.value = ''; // Inputni tozalash
+                Router.nav('add'); // Qayta yuklash (select box yangilanishi uchun)
+                UI.toast("To'plam yaratildi", "success");
+            },
+
+            addCard() {
+                const deckId = document.getElementById('inp-deck')?.value;
+                const frontInput = document.getElementById('inp-front');
+                const backInput = document.getElementById('inp-back');
+
+                const front = frontInput.value.trim();
+                const back = backInput.value.trim();
+                const type = UI.currentType;
+
+                if (!front) return UI.toast("Savol yozilmadi!", "error");
+                if (!deckId) return UI.toast("To'plam tanlanmadi!", "error");
+                
+                if (type === 'basic' && !back) return UI.toast("Javob yozilmadi!", "error");
+                if (type === 'cloze' && !front.includes('{{c1::')) return UI.toast("Cloze format xato! {{c1::so'z}} ishlating.", "error");
+
+                DB.data.cards.push({
+                    id: 'c' + Date.now(),
+                    deckId,
+                    front, 
+                    back: type === 'cloze' ? '' : back,
+                    type,
+                    nextReview: Date.now(),
+                    interval: 0,
+                    ease: 2.5
+                });
+                DB.save();
+                
+                // Inputlarni tozalash
+                frontInput.value = '';
+                if (backInput) backInput.value = '';
+                
+                UI.toast("Karta muvaffaqiyatli saqlandi", "success");
+            },
+
+            reset() {
+                // Custom modal o'rniga, vaqtincha console bilan ishlaymiz
+                if(confirm("Hamma ma'lumotlarni o'chirishga aminmisiz? Bu qaytarilmaydi!")) {
+                    localStorage.removeItem(DB.key);
+                    location.reload();
+                }
+            }
+        };
+
+        // --- INIT ---
+        window.addEventListener('DOMContentLoaded', () => {
+            DB.init();
+            Router.nav('decks');
         });
+
     </script>
 </body>
 </html>
+
