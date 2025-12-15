@@ -3,313 +3,740 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>Anki Pro - macOS Style</title>
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="theme-color" content="#000000">
+    <title>Anki PRO - Smart Flashcards</title>
     
+    <!-- PWA Manifest -->
+    <link rel="manifest" href="data:application/json,{%22name%22:%22Anki%20PRO%22,%22short_name%22:%22AnkiPRO%22,%22start_url%22:%22.%22,%22display%22:%22standalone%22,%22background_color%22:%22%23000000%22,%22theme_color%22:%22%230a84ff%22}">
+    <link rel="apple-touch-icon" href="image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect fill='%230a84ff' width='100' height='100' rx='20'/><text x='50' y='65' font-size='50' text-anchor='middle' fill='white'>A</text></svg>">
+    
+    <!-- Resurslar -->
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.2/dist/confetti.browser.min.js"></script>
 
+    <!-- Tailwind Konfiguratsiyasi -->
     <script>
         tailwind.config = {
             darkMode: 'class',
             theme: {
                 extend: {
-                    fontFamily: { sans: ['Inter', '-apple-system', 'system-ui', 'sans-serif'] },
+                    fontFamily: { sans: ['Inter', '-apple-system', 'BlinkMacSystemFont', 'system-ui', 'sans-serif'] },
                     colors: {
                         ios: {
                             bg: '#000000',
                             surface: '#1c1c1e',
                             surface2: '#2c2c2e',
+                            surface3: '#3a3a3c',
                             border: '#38383a',
                             blue: '#0a84ff',
                             green: '#30d158',
                             indigo: '#5e5ce6',
                             orange: '#ff9f0a',
                             red: '#ff453a',
+                            pink: '#ff375f',
+                            purple: '#bf5af2',
+                            teal: '#64d2ff',
+                            yellow: '#ffd60a',
                             text: '#ffffff',
-                            subtext: '#8e8e93'
+                            subtext: '#8e8e93',
+                            subtext2: '#636366'
                         }
                     },
                     animation: {
-                        'page-enter': 'pageEnter 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards',
-                        'page-exit': 'pageExit 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards',
-                        'card-flip': 'flip 0.6s cubic-bezier(0.4, 0.0, 0.2, 1)',
-                        'scale-tap': 'scaleTap 0.1s ease-in-out',
+                        'page-enter': 'pageEnter 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards',
+                        'slide-up': 'slideUp 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards',
+                        'fade-in': 'fadeIn 0.3s ease-out forwards',
+                        'bounce-in': 'bounceIn 0.6s cubic-bezier(0.68, -0.55, 0.265, 1.55) forwards',
+                        'pulse-glow': 'pulseGlow 2s ease-in-out infinite',
+                        'float': 'float 3s ease-in-out infinite',
                     },
                     keyframes: {
-                        pageEnter: { '0%': { opacity: 0, transform: 'scale(0.98) translateY(10px)' }, '100%': { opacity: 1, transform: 'scale(1) translateY(0)' } },
-                        pageExit: { '0%': { opacity: 1 }, '100%': { opacity: 0 } },
-                        scaleTap: { '0%': { transform: 'scale(1)' }, '50%': { transform: 'scale(0.96)' }, '100%': { transform: 'scale(1)' } }
+                        pageEnter: { 
+                            '0%': { opacity: '0', transform: 'scale(0.95) translateY(20px)' }, 
+                            '100%': { opacity: '1', transform: 'scale(1) translateY(0)' } 
+                        },
+                        slideUp: { 
+                            '0%': { opacity: '0', transform: 'translateY(30px)' }, 
+                            '100%': { opacity: '1', transform: 'translateY(0)' } 
+                        },
+                        fadeIn: { 
+                            '0%': { opacity: '0' }, 
+                            '100%': { opacity: '1' } 
+                        },
+                        bounceIn: { 
+                            '0%': { opacity: '0', transform: 'scale(0.3)' },
+                            '50%': { transform: 'scale(1.05)' },
+                            '70%': { transform: 'scale(0.9)' },
+                            '100%': { opacity: '1', transform: 'scale(1)' }
+                        },
+                        pulseGlow: {
+                            '0%, 100%': { boxShadow: '0 0 20px rgba(10, 132, 255, 0.3)' },
+                            '50%': { boxShadow: '0 0 40px rgba(10, 132, 255, 0.6)' }
+                        },
+                        float: {
+                            '0%, 100%': { transform: 'translateY(0px)' },
+                            '50%': { transform: 'translateY(-10px)' }
+                        }
                     }
                 }
             }
         }
     </script>
 
+    <!-- Premium Stillar -->
     <style>
-        :root { --safe-area-top: env(safe-area-inset-top); --safe-area-bottom: env(safe-area-inset-bottom); }
-        
-        body {
-            background-color: #000; color: #fff;
-            -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale;
-            overflow: hidden; user-select: none; -webkit-tap-highlight-color: transparent;
+        * {
+            -webkit-tap-highlight-color: transparent;
+            -webkit-touch-callout: none;
         }
-
+        
+        html, body {
+            overscroll-behavior: none;
+            touch-action: pan-y;
+        }
+        
+        body { 
+            background-color: #000; 
+            color: #fff; 
+            overflow: hidden; 
+            user-select: none;
+            -webkit-user-select: none;
+        }
+        
+        /* Glass Morphism */
         .glass-panel {
-            background: rgba(28, 28, 30, 0.75);
-            backdrop-filter: blur(25px); -webkit-backdrop-filter: blur(25px);
-            border-top: 0.5px solid rgba(255,255,255,0.12);
+            background: rgba(28, 28, 30, 0.85);
+            backdrop-filter: blur(40px) saturate(180%);
+            -webkit-backdrop-filter: blur(40px) saturate(180%);
+            border-top: 0.5px solid rgba(255,255,255,0.08);
         }
-
-        .card-scene { perspective: 1200px; width: 100%; height: 100%; }
-        .card-object {
-            width: 100%; height: 100%; position: relative;
-            transform-style: preserve-3d; transition: transform 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
-        }
-        .card-face {
-            position: absolute; width: 100%; height: 100%;
-            backface-visibility: hidden; -webkit-backface-visibility: hidden;
-            border-radius: 24px; display: flex; flex-direction: column;
-            justify-content: center; align-items: center; text-align: center;
-            background: #1c1c1e; border: 1px solid #38383a;
-            box-shadow: 0 15px 40px -10px rgba(0,0,0,0.6);
-            padding: 24px;
-            word-break: break-word;
-        }
-        .card-front { transform: rotateY(0deg); }
-        .card-back { transform: rotateY(180deg); background: #0a1e2e; }
-        .is-flipped { transform: rotateY(180deg); }
-
-        .ios-input {
-            background: #2c2c2e; border: none; border-radius: 12px;
-            padding: 16px; color: white; font-size: 17px; width: 100%;
-            transition: all 0.3s; box-sizing: border-box; font-family: inherit;
-        }
-        .ios-input::placeholder { color: #8e8e93; }
-        .ios-input:focus { outline: none; background: #3a3a3c; box-shadow: 0 0 0 2px #0a84ff; }
         
+        .glass-card {
+            background: rgba(44, 44, 46, 0.6);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+        }
+        
+        /* 3D Karta Animatsiyasi */
+        .card-scene { 
+            perspective: 2000px; 
+            width: 100%; 
+            height: 100%; 
+        }
+        
+        .card-object {
+            width: 100%; 
+            height: 100%; 
+            position: relative;
+            transform-style: preserve-3d; 
+            transition: transform 0.7s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+        
+        .card-face {
+            position: absolute; 
+            width: 100%; 
+            height: 100%;
+            backface-visibility: hidden; 
+            -webkit-backface-visibility: hidden;
+            border-radius: 24px; 
+            display: flex; 
+            flex-direction: column;
+            justify-content: center; 
+            align-items: center; 
+            text-align: center;
+            background: linear-gradient(145deg, #1c1c1e 0%, #2c2c2e 100%);
+            border: 1px solid rgba(255,255,255,0.1);
+            box-shadow: 
+                0 25px 50px -12px rgba(0,0,0,0.8),
+                0 0 0 1px rgba(255,255,255,0.05),
+                inset 0 1px 0 rgba(255,255,255,0.1);
+            overflow: hidden;
+        }
+        
+        .card-face::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+        }
+        
+        .card-back { 
+            transform: rotateY(180deg); 
+            background: linear-gradient(145deg, #202022 0%, #1a1a1c 100%);
+        }
+        
+        .is-flipped { 
+            transform: rotateY(180deg); 
+        }
+        
+        /* Cloze Deletion Stillari */
         .cloze-mask {
-            background: rgba(10, 132, 255, 0.3); color: #0a84ff; border-radius: 6px;
-            padding: 4px 10px; font-weight: 600; cursor: pointer; border: 1px solid #0a84ff;
-            display: inline-block; margin: 0 2px;
-        }
-        .cloze-mask:hover { background: rgba(10, 132, 255, 0.5); }
-        .cloze-reveal { color: #30d158; font-weight: 700; border-bottom: 2px solid #30d158; padding: 0 4px; }
-
-        .tap-scale:active { transform: scale(0.96); opacity: 0.8; }
-        .nav-active { color: #0a84ff !important; }
-        .nav-active i { transform: scale(1.1); text-shadow: 0 0 15px rgba(10,132,255,0.5); }
-
-        .heatmap-grid { display: grid; grid-template-columns: repeat(20, 1fr); gap: 4px; }
-        .heat-cell { width: 100%; aspect-ratio: 1; border-radius: 3px; background: #2c2c2e; }
-        .heat-1 { background: #004d1a; }
-        .heat-2 { background: #00802b; }
-        .heat-3 { background: #30d158; }
-
-        .no-scrollbar { scrollbar-width: none; }
-        .no-scrollbar::-webkit-scrollbar { display: none; }
-
-        .study-question { 
-            font-size: 24px; 
-            line-height: 1.6; 
-            font-weight: 500; 
-            color: #ffffff;
-            min-height: 100px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-        .study-answer {
-            font-size: 28px;
-            line-height: 1.8;
+            background: linear-gradient(135deg, rgba(10, 132, 255, 0.2) 0%, rgba(94, 92, 230, 0.2) 100%);
+            color: #0a84ff;
+            border-radius: 8px;
+            padding: 4px 12px;
             font-weight: 700;
-            color: #30d158;
-            min-height: 120px;
+            cursor: pointer;
+            border: 1.5px dashed rgba(10, 132, 255, 0.5);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            display: inline-block;
+            margin: 2px;
+        }
+        
+        .cloze-mask:hover {
+            background: rgba(10, 132, 255, 0.3);
+            transform: scale(1.05);
+        }
+        
+        .cloze-mask:active {
+            transform: scale(0.95);
+        }
+        
+        .cloze-reveal { 
+            color: #30d158; 
+            font-weight: 800; 
+            background: rgba(48, 209, 88, 0.15);
+            padding: 4px 12px;
+            border-radius: 8px;
+            border-bottom: 3px solid #30d158; 
+            display: inline-block;
+            animation: bounceIn 0.5s ease-out;
+        }
+        
+        /* Tap Effekti */
+        .tap-scale {
+            transition: transform 0.15s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.15s ease;
+        }
+        
+        .tap-scale:active { 
+            transform: scale(0.92); 
+            opacity: 0.8; 
+        }
+        
+        /* Navigatsiya */
+        .nav-active { 
+            color: #0a84ff !important; 
+        }
+        
+        .nav-active i {
+            transform: scale(1.1);
+        }
+        
+        /* Scrollbar */
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+        
+        /* Custom Input Stillari */
+        .ios-input {
+            width: 100%;
+            padding: 16px 18px;
+            background: #1c1c1e;
+            border: 1.5px solid #38383a;
+            border-radius: 14px;
+            color: #fff;
+            font-size: 16px;
+            font-weight: 500;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            outline: none;
+        }
+        
+        .ios-input:focus {
+            border-color: #0a84ff;
+            background: #2c2c2e;
+            box-shadow: 0 0 0 4px rgba(10, 132, 255, 0.15);
+        }
+        
+        .ios-input::placeholder {
+            color: #636366;
+        }
+        
+        /* Progress Bar */
+        .progress-bar {
+            height: 4px;
+            background: #2c2c2e;
+            border-radius: 2px;
+            overflow: hidden;
+        }
+        
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #0a84ff, #5e5ce6);
+            border-radius: 2px;
+            transition: width 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        
+        /* Rating Buttons */
+        .rating-btn {
+            flex: 1;
             display: flex;
+            flex-direction: column;
             align-items: center;
             justify-content: center;
+            padding: 12px 8px;
+            border-radius: 16px;
+            font-weight: 700;
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+            border: 1.5px solid transparent;
+        }
+        
+        .rating-btn:active {
+            transform: scale(0.92);
+        }
+        
+        .rating-btn .time {
+            font-size: 11px;
+            font-weight: 600;
+            opacity: 0.8;
+            margin-top: 4px;
+        }
+        
+        /* Heatmap */
+        .heat-cell {
+            aspect-ratio: 1;
+            border-radius: 3px;
+            background: #2c2c2e;
+            transition: all 0.2s ease;
+        }
+        
+        .heat-1 { background: rgba(48, 209, 88, 0.2); }
+        .heat-2 { background: rgba(48, 209, 88, 0.4); }
+        .heat-3 { background: rgba(48, 209, 88, 0.6); }
+        .heat-4 { background: rgba(48, 209, 88, 0.8); }
+        .heat-5 { background: #30d158; }
+        
+        /* Deck Card Hover */
+        .deck-card {
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        
+        .deck-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 20px 40px -15px rgba(0,0,0,0.5);
+        }
+        
+        .deck-card:active {
+            transform: scale(0.98);
+        }
+        
+        /* Motivational Quote */
+        .quote-box {
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .quote-box::before {
+            content: '"';
+            position: absolute;
+            top: -10px;
+            left: 10px;
+            font-size: 60px;
+            color: rgba(10, 132, 255, 0.1);
+            font-family: Georgia, serif;
+        }
+        
+        /* Safe Area */
+        @supports (padding: env(safe-area-inset-bottom)) {
+            .safe-bottom {
+                padding-bottom: calc(20px + env(safe-area-inset-bottom));
+            }
+            .safe-top {
+                padding-top: calc(10px + env(safe-area-inset-top));
+            }
+        }
+        
+        /* Skeleton Loading */
+        .skeleton {
+            background: linear-gradient(90deg, #2c2c2e 25%, #3a3a3c 50%, #2c2c2e 75%);
+            background-size: 200% 100%;
+            animation: shimmer 1.5s infinite;
+        }
+        
+        @keyframes shimmer {
+            0% { background-position: 200% 0; }
+            100% { background-position: -200% 0; }
+        }
+        
+        /* Confetti Canvas */
+        #confetti-canvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 100;
         }
     </style>
 </head>
-<body class="flex flex-col h-[100dvh] w-full max-w-md mx-auto relative border-x border-ios-border bg-black shadow-2xl">
 
-    <header class="h-14 flex items-center justify-between px-5 z-50 glass-panel absolute top-0 w-full rounded-b-2xl">
+<body class="flex flex-col h-[100dvh] w-full max-w-md mx-auto relative border-x border-ios-border/50 bg-black">
+    
+    <!-- Confetti Canvas -->
+    <canvas id="confetti-canvas"></canvas>
+
+    <!-- Header Panel -->
+    <header class="h-16 flex items-center justify-between px-5 z-50 glass-panel fixed top-0 w-full max-w-md border-b border-ios-border/30 safe-top">
         <div class="flex items-center gap-3">
-            <div class="w-8 h-8 rounded-full bg-gradient-to-tr from-ios-blue to-ios-indigo flex items-center justify-center text-white shadow-[0_0_15px_rgba(10,132,255,0.4)]">
-                <i class="fa-brands fa-apple text-sm"></i>
+            <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-ios-blue via-ios-indigo to-ios-purple flex items-center justify-center text-white shadow-lg animate-pulse-glow">
+                <i class="fa-solid fa-bolt text-lg"></i>
             </div>
-            <h1 class="text-[17px] font-semibold tracking-tight">Anki <span class="text-ios-blue">Pro</span></h1>
+            <div>
+                <h1 class="text-lg font-extrabold tracking-tight">Anki <span class="text-ios-blue">PRO</span></h1>
+                <p class="text-[10px] text-ios-subtext font-medium -mt-0.5">Smart Flashcards</p>
+            </div>
         </div>
-        <button onclick="App.toggleLang()" class="w-8 h-8 rounded-full bg-ios-surface2 flex items-center justify-center text-[10px] font-bold text-ios-subtext tap-scale">
-            <span id="lang-ind">UZ</span>
-        </button>
+        <div class="flex items-center gap-2">
+            <button onclick="App.showSettings()" class="w-9 h-9 rounded-full bg-ios-surface2 flex items-center justify-center text-ios-subtext hover:text-white tap-scale transition-colors">
+                <i class="fa-solid fa-gear text-sm"></i>
+            </button>
+            <button onclick="App.toggleLang()" class="w-9 h-9 rounded-full bg-ios-surface2 flex items-center justify-center text-sm font-bold text-ios-subtext hover:text-white tap-scale transition-colors">
+                <span id="lang-ind">UZ</span>
+            </button>
+        </div>
     </header>
 
+    <!-- Main Content Area -->
     <main id="viewport" class="flex-1 overflow-y-auto overflow-x-hidden pt-20 pb-28 px-4 relative scroll-smooth no-scrollbar">
-        <!-- Content renders here -->
+        <!-- Content rendered by JavaScript -->
     </main>
 
-    <nav class="h-[80px] w-full max-w-md fixed bottom-0 z-50 glass-panel flex justify-around items-center px-4 pb-4">
-        <button onclick="Router.go('home')" id="nav-home" class="flex flex-col items-center gap-1 w-16 text-ios-subtext transition-all duration-300 tap-scale">
-            <i class="fa-solid fa-layer-group text-xl mb-0.5"></i>
-            <span class="text-[10px] font-medium" data-key="nav_home">Darslar</span>
+    <!-- Navigation Bar -->
+    <nav class="h-20 w-full max-w-md fixed bottom-0 z-50 glass-panel flex justify-around items-center px-6 safe-bottom border-t border-ios-border/30">
+        <button onclick="Router.go('home')" id="nav-home" class="flex flex-col items-center gap-1 w-20 text-ios-subtext transition-all duration-300 tap-scale group">
+            <i class="fa-solid fa-house text-xl transition-transform group-hover:scale-110"></i>
+            <span class="text-[10px] font-semibold" data-key="nav_home">Bosh Sahifa</span>
         </button>
         
-        <button onclick="Router.go('add')" id="nav-add" class="flex items-center justify-center w-14 h-14 bg-ios-blue text-white rounded-full shadow-[0_0_20px_rgba(10,132,255,0.4)] -mt-10 border-[5px] border-black tap-scale transition-transform hover:scale-105">
+        <button onclick="Router.go('add')" id="nav-add" class="flex items-center justify-center w-14 h-14 bg-gradient-to-br from-ios-blue to-ios-indigo text-white rounded-2xl shadow-lg shadow-ios-blue/30 -mt-6 tap-scale transition-all hover:scale-105 hover:shadow-xl hover:shadow-ios-blue/40">
             <i class="fa-solid fa-plus text-xl"></i>
         </button>
         
-        <button onclick="Router.go('stats')" id="nav-stats" class="flex flex-col items-center gap-1 w-16 text-ios-subtext transition-all duration-300 tap-scale">
-            <i class="fa-solid fa-chart-pie text-xl mb-0.5"></i>
-            <span class="text-[10px] font-medium" data-key="nav_stats">Tahlil</span>
+        <button onclick="Router.go('stats')" id="nav-stats" class="flex flex-col items-center gap-1 w-20 text-ios-subtext transition-all duration-300 tap-scale group">
+            <i class="fa-solid fa-chart-pie text-xl transition-transform group-hover:scale-110"></i>
+            <span class="text-[10px] font-semibold" data-key="nav_stats">Statistika</span>
         </button>
     </nav>
 
-    <div id="modal-finish" class="fixed inset-0 z-[60] hidden flex-col items-center justify-center bg-black/90 backdrop-blur-md p-6 animate-page-enter overflow-y-auto">
-        <div class="w-full max-w-sm">
-            <div class="relative w-32 h-32 mx-auto mb-8">
+    <!-- Session Complete Modal -->
+    <div id="modal-finish" class="fixed inset-0 z-[60] hidden flex-col items-center justify-center bg-black/95 backdrop-blur-2xl p-8">
+        <div class="animate-bounce-in">
+            <div class="relative w-36 h-36 mb-8">
                 <svg class="w-full h-full transform -rotate-90">
-                    <circle cx="64" cy="64" r="56" stroke="#2c2c2e" stroke-width="8" fill="none"></circle>
-                    <circle cx="64" cy="64" r="56" stroke="#30d158" stroke-width="8" fill="none" stroke-dasharray="351" stroke-dashoffset="0" stroke-linecap="round"></circle>
+                    <circle cx="72" cy="72" r="64" stroke="#2c2c2e" stroke-width="8" fill="none"></circle>
+                    <circle id="progress-circle" cx="72" cy="72" r="64" stroke="url(#gradient)" stroke-width="8" fill="none" 
+                            stroke-dasharray="402" stroke-dashoffset="402" stroke-linecap="round"
+                            style="transition: stroke-dashoffset 1.5s cubic-bezier(0.4, 0, 0.2, 1);"></circle>
+                    <defs>
+                        <linearGradient id="gradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                            <stop offset="0%" stop-color="#30d158"/>
+                            <stop offset="100%" stop-color="#0a84ff"/>
+                        </linearGradient>
+                    </defs>
                 </svg>
-                <div class="absolute inset-0 flex items-center justify-center text-4xl">🎉</div>
+                <div class="absolute inset-0 flex items-center justify-center text-5xl animate-float">🏆</div>
             </div>
-
-            <h2 class="text-2xl font-bold text-white mb-2 text-center" data-key="session_title">Ajoyib Natija!</h2>
-            <p class="text-ios-subtext text-sm mb-8 text-center" data-key="session_sub">Bugungi reja to'liq bajarildi.</p>
-
-            <div class="w-full bg-ios-surface border border-ios-border p-6 rounded-2xl relative overflow-hidden mb-8 shadow-2xl">
-                <div class="absolute top-0 left-0 w-1.5 h-full bg-gradient-to-b from-ios-blue to-ios-indigo"></div>
-                <i class="fa-solid fa-quote-left text-ios-surface2 text-4xl absolute top-4 right-4 opacity-20"></i>
-                <p id="quote-text" class="text-lg font-medium text-white italic mb-4 relative z-10 font-serif leading-relaxed">...</p>
-                <p id="quote-author" class="text-xs font-bold text-ios-blue uppercase tracking-widest text-right relative z-10">...</p>
+            
+            <h2 class="text-3xl font-extrabold text-white mb-3 text-center" data-key="session_title">Ajoyib Natija!</h2>
+            <p class="text-ios-subtext text-base mb-3 text-center max-w-xs" data-key="session_sub">Bugungi sessiya muvaffaqiyatli yakunlandi!</p>
+            
+            <!-- Session Stats -->
+            <div id="session-stats" class="grid grid-cols-3 gap-3 mb-8 w-full max-w-xs">
+                <div class="bg-ios-surface p-3 rounded-xl text-center">
+                    <div class="text-2xl font-bold text-ios-green" id="stat-reviewed">0</div>
+                    <div class="text-[10px] text-ios-subtext uppercase font-semibold">Ko'rildi</div>
+                </div>
+                <div class="bg-ios-surface p-3 rounded-xl text-center">
+                    <div class="text-2xl font-bold text-ios-blue" id="stat-xp">+0</div>
+                    <div class="text-[10px] text-ios-subtext uppercase font-semibold">XP</div>
+                </div>
+                <div class="bg-ios-surface p-3 rounded-xl text-center">
+                    <div class="text-2xl font-bold text-ios-orange" id="stat-streak">0</div>
+                    <div class="text-[10px] text-ios-subtext uppercase font-semibold">Streak</div>
+                </div>
             </div>
-
-            <button onclick="Study.close()" class="w-full py-4 bg-ios-surface2 hover:bg-white hover:text-black text-white font-bold rounded-xl transition-all duration-300 tap-scale">
-                <span data-key="btn_close">Yopish</span>
+            
+            <button onclick="Study.close()" class="w-full max-w-xs py-4 bg-gradient-to-r from-ios-blue to-ios-indigo text-white font-bold rounded-2xl tap-scale transition-all hover:opacity-90 shadow-lg shadow-ios-blue/30">
+                <i class="fa-solid fa-home mr-2"></i>
+                <span data-key="btn_close">Bosh Sahifaga</span>
             </button>
         </div>
     </div>
 
-    <div id="toast" class="fixed top-20 left-1/2 -translate-x-1/2 bg-ios-surface2/90 backdrop-blur-md border border-ios-border text-white px-6 py-3 rounded-full shadow-2xl z-[70] flex items-center gap-3 opacity-0 pointer-events-none transition-all duration-300 transform scale-90">
-        <i class="fa-solid fa-check-circle text-ios-green"></i>
-        <span id="toast-msg" class="text-sm font-semibold">Saved</span>
+    <!-- Settings Modal -->
+    <div id="modal-settings" class="fixed inset-0 z-[60] hidden flex-col items-center justify-center bg-black/95 backdrop-blur-2xl p-6">
+        <div class="w-full max-w-sm animate-slide-up">
+            <div class="flex items-center justify-between mb-6">
+                <h2 class="text-2xl font-bold text-white">Sozlamalar</h2>
+                <button onclick="App.hideSettings()" class="w-10 h-10 rounded-full bg-ios-surface2 flex items-center justify-center text-ios-subtext tap-scale">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+            
+            <div class="space-y-4">
+                <!-- Reset Data -->
+                <div class="bg-ios-surface p-4 rounded-2xl border border-ios-border">
+                    <h3 class="font-semibold text-white mb-2">Ma'lumotlarni Tozalash</h3>
+                    <p class="text-xs text-ios-subtext mb-3">Barcha kartalar va statistika o'chiriladi</p>
+                    <button onclick="App.resetData()" class="w-full py-3 bg-ios-red/20 text-ios-red font-semibold rounded-xl tap-scale">
+                        <i class="fa-solid fa-trash mr-2"></i>Tozalash
+                    </button>
+                </div>
+                
+                <!-- Export/Import -->
+                <div class="bg-ios-surface p-4 rounded-2xl border border-ios-border">
+                    <h3 class="font-semibold text-white mb-2">Ma'lumotlarni Eksport</h3>
+                    <p class="text-xs text-ios-subtext mb-3">Barcha ma'lumotlarni JSON formatida yuklab olish</p>
+                    <button onclick="App.exportData()" class="w-full py-3 bg-ios-blue/20 text-ios-blue font-semibold rounded-xl tap-scale">
+                        <i class="fa-solid fa-download mr-2"></i>Yuklab olish
+                    </button>
+                </div>
+                
+                <!-- App Info -->
+                <div class="bg-ios-surface p-4 rounded-2xl border border-ios-border text-center">
+                    <div class="w-16 h-16 rounded-2xl bg-gradient-to-br from-ios-blue to-ios-indigo mx-auto mb-3 flex items-center justify-center">
+                        <i class="fa-solid fa-bolt text-2xl text-white"></i>
+                    </div>
+                    <h3 class="font-bold text-white">Anki PRO</h3>
+                    <p class="text-xs text-ios-subtext">Version 2.0.0</p>
+                    <p class="text-xs text-ios-blue mt-2 font-medium">Made by ©️Muhammad Daler</p>
+                </div>
+            </div>
+        </div>
     </div>
 
+    <!-- Toast Notification -->
+    <div id="toast" class="fixed top-24 left-1/2 -translate-x-1/2 bg-ios-surface2/95 backdrop-blur-xl border border-ios-border text-white px-6 py-3 rounded-2xl shadow-2xl z-[70] flex items-center gap-3 opacity-0 pointer-events-none transition-all duration-300 transform -translate-y-4 scale-95">
+        <i id="toast-icon" class="fa-solid fa-check-circle text-ios-green text-lg"></i>
+        <span id="toast-msg" class="text-sm font-semibold">Saqlandi</span>
+    </div>
+
+    <!-- Delete Confirmation Modal -->
+    <div id="modal-delete" class="fixed inset-0 z-[60] hidden flex items-center justify-center bg-black/90 backdrop-blur-xl p-6">
+        <div class="bg-ios-surface rounded-3xl p-6 w-full max-w-xs animate-bounce-in border border-ios-border">
+            <div class="text-center">
+                <div class="w-16 h-16 rounded-full bg-ios-red/20 mx-auto mb-4 flex items-center justify-center">
+                    <i class="fa-solid fa-trash text-2xl text-ios-red"></i>
+                </div>
+                <h3 class="text-xl font-bold text-white mb-2" data-key="delete_title">O'chirishni tasdiqlang</h3>
+                <p class="text-sm text-ios-subtext mb-6" id="delete-message">Bu amalni ortga qaytarib bo'lmaydi</p>
+                <div class="grid grid-cols-2 gap-3">
+                    <button onclick="App.hideDeleteModal()" class="py-3 bg-ios-surface2 text-white font-semibold rounded-xl tap-scale">
+                        Bekor
+                    </button>
+                    <button id="delete-confirm-btn" class="py-3 bg-ios-red text-white font-semibold rounded-xl tap-scale">
+                        O'chirish
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ================================================================== -->
+    <!-- JAVASCRIPT ENGINE -->
+    <!-- ================================================================== -->
     <script>
-        // ==========================================
-        // 1. LOCALIZATION (TILLAR)
-        // ==========================================
+        // ============================================================
+        // 1. LOCALIZATION - Ko'p tilli qo'llab-quvvatlash
+        // ============================================================
         const I18n = {
             uz: {
-                nav_home: "Darslar",
-                nav_stats: "Tahlil",
-                hero_title: "Bugungi Vazifalar",
-                hero_sub: "ta karta kutyapti",
+                nav_home: "Bosh Sahifa",
+                nav_stats: "Statistika",
+                hero_title: "Bugungi Maqsad",
+                hero_sub: "ta karta kutmoqda",
+                hero_complete: "Barcha kartalar o'rganildi! 🎉",
                 decks: "To'plamlar",
-                no_decks: "To'plamlar yo'q. Yangi qo'shing.",
-                add_h: "Yangi Yaratish",
+                no_decks: "To'plamlar yo'q. Yangi qo'shish uchun + tugmasini bosing.",
+                add_h: "Yangi Qo'shish",
                 tab_card: "Karta",
                 tab_deck: "To'plam",
                 lbl_deck: "To'plamni tanlang",
-                lbl_front: "Savol",
-                lbl_back: "Javob",
-                lbl_name: "To'plam Nomi",
+                lbl_front: "Savol (Old tomon)",
+                lbl_back: "Javob (Orqa tomon)",
+                lbl_name: "To'plam nomi",
                 ph_front: "Savolni kiriting...",
                 ph_back: "Javobni kiriting...",
-                hint_cloze: "Format: {{c1::yashirin so'z}} yoki {{c2::yana bir so'z}}",
-                btn_save: "Saqlash",
-                btn_create: "Yaratish",
-                study_h: "O'quv Jarayoni",
+                ph_name: "To'plam nomini kiriting...",
+                hint_cloze: "💡 Yopish formati: {{c1::yashirin so'z}}",
+                btn_save: "Kartani Saqlash",
+                btn_create: "To'plamni Yaratish",
+                study_h: "O'rganish",
                 study_left: "qoldi",
                 show_ans: "Javobni Ko'rsatish",
                 btn_again: "Qayta",
                 btn_hard: "Qiyin",
                 btn_good: "Yaxshi",
                 btn_easy: "Oson",
-                session_title: "Sessiya Yakunlandi!",
-                session_sub: "Bilim darajangiz oshdi.",
-                btn_close: "Bosh Sahifa",
+                session_title: "Ajoyib Natija!",
+                session_sub: "Bugungi sessiya muvaffaqiyatli yakunlandi!",
+                btn_close: "Bosh Sahifaga",
                 stats_h: "Statistika",
                 strk: "Streak",
                 xp: "Jami XP",
                 total: "Kartalar",
+                due: "Kutilayotgan",
                 msg_saved: "Muvaffaqiyatli saqlandi!",
-                msg_err: "Maydonlarni to'ldiring!",
-                msg_deck_empty: "Bu to'plamda hech qanday karta yo'q!",
-                msg_no_deck: "Avval to'plam yaratib oling!",
-                cloze_hint: "{{c1::...}}, {{c2::...}} formatini ishlating"
+                msg_err: "Iltimos, barcha maydonlarni to'ldiring!",
+                msg_deleted: "Muvaffaqiyatli o'chirildi!",
+                msg_exported: "Ma'lumotlar yuklab olindi!",
+                msg_reset: "Barcha ma'lumotlar tozalandi!",
+                study_q: "Savol",
+                study_a: "Javob",
+                study_no_cards: "Bu to'plamda o'rganish uchun kartalar yo'q.",
+                delete_title: "O'chirishni tasdiqlang",
+                delete_deck: "Bu to'plam va undagi barcha kartalar o'chiriladi",
+                delete_card: "Bu karta o'chiriladi",
+                level: "Daraja",
+                reviews: "Takrorlar",
+                new_cards: "Yangi",
+                learning: "O'rganilmoqda",
+                review: "Takrorlash",
+                activity: "Faollik (60 kun)",
+                edit_deck: "Tahrirlash",
+                deck_settings: "To'plam sozlamalari",
+                cards_count: "ta karta",
+                today_studied: "Bugun o'rganildi",
+                best_streak: "Eng yaxshi streak",
+                total_reviews: "Jami takrorlar",
+                avg_ease: "O'rtacha osonlik",
+                no_cards_deck: "Bu to'plamda kartalar yo'q"
             },
             en: {
-                nav_home: "Library",
-                nav_stats: "Stats",
-                hero_title: "Today's Focus",
-                hero_sub: "cards due",
+                nav_home: "Home",
+                nav_stats: "Statistics",
+                hero_title: "Today's Goal",
+                hero_sub: "cards waiting",
+                hero_complete: "All cards studied! 🎉",
                 decks: "Decks",
-                no_decks: "No decks found. Create one.",
+                no_decks: "No decks yet. Press + to create one.",
                 add_h: "Create New",
                 tab_card: "Card",
                 tab_deck: "Deck",
-                lbl_deck: "Select Deck",
-                lbl_front: "Question",
-                lbl_back: "Answer",
-                lbl_name: "Deck Name",
+                lbl_deck: "Select deck",
+                lbl_front: "Question (Front)",
+                lbl_back: "Answer (Back)",
+                lbl_name: "Deck name",
                 ph_front: "Enter question...",
                 ph_back: "Enter answer...",
-                hint_cloze: "Format: {{c1::hidden word}} or {{c2::another word}}",
+                ph_name: "Enter deck name...",
+                hint_cloze: "💡 Cloze format: {{c1::hidden word}}",
                 btn_save: "Save Card",
                 btn_create: "Create Deck",
-                study_h: "Study Session",
+                study_h: "Study",
                 study_left: "left",
                 show_ans: "Show Answer",
                 btn_again: "Again",
                 btn_hard: "Hard",
                 btn_good: "Good",
                 btn_easy: "Easy",
-                session_title: "Session Complete!",
-                session_sub: "Progress updated successfully.",
-                btn_close: "Home",
-                stats_h: "Analytics",
+                session_title: "Great Job!",
+                session_sub: "Today's session completed successfully!",
+                btn_close: "Back to Home",
+                stats_h: "Statistics",
                 strk: "Streak",
                 xp: "Total XP",
-                total: "Total Cards",
-                msg_saved: "Saved Successfully!",
+                total: "Cards",
+                due: "Due",
+                msg_saved: "Saved successfully!",
                 msg_err: "Please fill all fields!",
-                msg_deck_empty: "No cards in this deck!",
-                msg_no_deck: "Create a deck first!",
-                cloze_hint: "Use {{c1::...}}, {{c2::...}} format"
+                msg_deleted: "Deleted successfully!",
+                msg_exported: "Data exported!",
+                msg_reset: "All data cleared!",
+                study_q: "Question",
+                study_a: "Answer",
+                study_no_cards: "No cards due in this deck.",
+                delete_title: "Confirm deletion",
+                delete_deck: "This deck and all its cards will be deleted",
+                delete_card: "This card will be deleted",
+                level: "Level",
+                reviews: "Reviews",
+                new_cards: "New",
+                learning: "Learning",
+                review: "Review",
+                activity: "Activity (60 days)",
+                edit_deck: "Edit",
+                deck_settings: "Deck settings",
+                cards_count: "cards",
+                today_studied: "Studied today",
+                best_streak: "Best streak",
+                total_reviews: "Total reviews",
+                avg_ease: "Average ease",
+                no_cards_deck: "No cards in this deck"
             }
         };
 
-        const QUOTES = {
+        // ============================================================
+        // 2. MOTIVATSION HIKMATLAR - Ilmga oid iqtiboslar
+        // ============================================================
+        const Quotes = {
             uz: [
-                { t: "Ilmdan o'zga najot yo'q va bo'lmagay.", a: "Imom Buxoriy" },
-                { t: "Ozlarga hikmat - yomg'irdek, ko'plarga - seldek.", a: "Alisher Navoiy" },
-                { t: "Vaqt - bu qilich. Agar sen uni kesmasang, u seni kesadi.", a: "Arab Hikmati" },
-                { t: "Bugungi harakat - ertangi natija.", a: "Noma'lum" },
-                { t: "O'qish - aql ziyosi.", a: "O'zbek Maqoli" }
+                "Ilm olish beshikdan to qabrgacha. — Hadis",
+                "Bilim — bu kuch, ammo bilimni qo'llash — bu qudrat.",
+                "Har kuni bir narsani o'rganing va siz dunyoni o'zgartirasiz.",
+                "Eng yaxshi investitsiya — bu o'z aqlga qilingan investitsiyadir. — Benjamin Franklin",
+                "Takrorlash — ilm onasi. — Lotin maqoli",
+                "Ming milya yo'l ham birinchi qadamdan boshlanadi. — Lao Tzu",
+                "Bilim yo'li cheksiz, ammo har bir qadam muhim.",
+                "O'qigan — o'zgan, o'qimagan — to'zgan. — O'zbek maqoli",
+                "Bugungi kichik harakat ertangi katta natija garovidir.",
+                "Ilm izlash har bir musulmonga farzdir. — Hadis",
+                "Vaqtingizni ilm o'rganishga sarflang — bu eng foydali sarfdir.",
+                "Muvaffaqiyat — bu kundalik oddiy amallarning takrorlanishidir.",
+                "O'rganish hech qachon kech emas. — Konfutsiy",
+                "Qiyinchilik — bu o'sish imkoniyatidir.",
+                "Aql charxlanmasa, o'tmas bo'lib qoladi.",
+                "Ilm — zulmatda nur, tanholikda do'st.",
+                "Har bir kartani o'rganish — kelajakka qo'yilgan g'isht.",
+                "Sabr — muvaffaqiyat kaliti.",
+                "Bilimli bo'lish oson emas, lekin arziydigan narsalar oson bo'lmaydi.",
+                "Bugun qilingan takrorlash — ertangi o'zingizga hadya."
             ],
             en: [
-                { t: "Knowledge is power.", a: "Francis Bacon" },
-                { t: "The roots of education are bitter, but the fruit is sweet.", a: "Aristotle" },
-                { t: "Success is the sum of small efforts.", a: "Robert Collier" },
-                { t: "An investment in knowledge pays the best interest.", a: "Benjamin Franklin" },
-                { t: "Education is the most powerful weapon.", a: "Nelson Mandela" }
+                "Knowledge is power. — Francis Bacon",
+                "The more you learn, the more you earn. — Warren Buffett",
+                "Education is not preparation for life; education is life itself. — John Dewey",
+                "The best investment you can make is in yourself. — Benjamin Franklin",
+                "Repetition is the mother of learning. — Latin Proverb",
+                "A journey of a thousand miles begins with a single step. — Lao Tzu",
+                "The only way to do great work is to love what you do. — Steve Jobs",
+                "Learning is a treasure that will follow its owner everywhere. — Chinese Proverb",
+                "Today a reader, tomorrow a leader. — Margaret Fuller",
+                "The mind is not a vessel to be filled, but a fire to be kindled. — Plutarch",
+                "Success is the sum of small efforts repeated daily.",
+                "It's never too late to learn. — Confucius",
+                "Difficulty is the nurse of greatness. — William Bryant",
+                "The beautiful thing about learning is that no one can take it away from you.",
+                "What we learn with pleasure we never forget. — Alfred Mercier",
+                "Small daily improvements are the key to staggering long-term results.",
+                "Every card you study is a brick in your palace of knowledge.",
+                "Patience is the key to success.",
+                "Hard things are worth doing because they're hard.",
+                "Today's repetition is a gift to your future self."
             ]
         };
 
-        // ==========================================
-        // 2. DATABASE (SAQLASH)
-        // ==========================================
+        // ============================================================
+        // 3. DATABASE - LocalStorage ma'lumotlar bazasi
+        // ============================================================
         const DB = {
-            key: 'anki_pro_v6',
+            key: 'anki_pro_v3_final',
             state: {
                 lang: 'uz',
                 user: {
                     xp: 0,
                     streak: 0,
+                    bestStreak: 0,
                     lastStudy: null,
+                    totalReviews: 0,
+                    todayReviews: 0,
+                    todayDate: null,
                     heatmap: {}
                 },
                 decks: [],
@@ -318,143 +745,441 @@
 
             init() {
                 try {
-                    const stored = localStorage.getItem(this.key);
-                    if (stored) {
-                        const parsed = JSON.parse(stored);
-                        this.state = { ...this.state, ...parsed };
+                    const saved = localStorage.getItem(this.key);
+                    if (saved) {
+                        const parsed = JSON.parse(saved);
+                        this.state = this.mergeDeep(this.state, parsed);
                     } else {
                         this.seed();
                     }
-                    this.syncStreak();
                 } catch (e) {
-                    console.error("DB init error:", e);
+                    console.error('DB Init Error:', e);
                     this.seed();
                 }
+                this.syncStreak();
+                this.syncToday();
+            },
+
+            mergeDeep(target, source) {
+                const output = Object.assign({}, target);
+                if (this.isObject(target) && this.isObject(source)) {
+                    Object.keys(source).forEach(key => {
+                        if (this.isObject(source[key])) {
+                            if (!(key in target)) {
+                                Object.assign(output, { [key]: source[key] });
+                            } else {
+                                output[key] = this.mergeDeep(target[key], source[key]);
+                            }
+                        } else {
+                            Object.assign(output, { [key]: source[key] });
+                        }
+                    });
+                }
+                return output;
+            },
+
+            isObject(item) {
+                return item && typeof item === 'object' && !Array.isArray(item);
             },
 
             save() {
                 try {
                     localStorage.setItem(this.key, JSON.stringify(this.state));
                 } catch (e) {
-                    console.error("Save error:", e);
+                    console.error('DB Save Error:', e);
                 }
             },
 
             seed() {
-                const deckId = 'd_demo_' + Date.now();
+                const now = Date.now();
+                const d1 = 'deck_english';
+                const d2 = 'deck_tech';
+                
                 this.state.decks = [
                     {
-                        id: deckId,
-                        name: 'Ingliz tili (Demo)',
+                        id: d1,
+                        name: 'English Vocabulary',
                         icon: 'fa-language',
-                        color: 'from-blue-500 to-cyan-500'
-                    }
-                ];
-                this.state.cards = [
-                    {
-                        id: 'c1',
-                        deckId: deckId,
-                        type: 'basic',
-                        front: 'Apple',
-                        back: 'Olma (meyva)',
-                        interval: 0,
-                        ease: 2.5,
-                        due: Date.now(),
-                        created: Date.now()
+                        color: 'from-ios-blue to-ios-indigo',
+                        created: now
                     },
                     {
-                        id: 'c2',
-                        deckId: deckId,
+                        id: d2,
+                        name: 'Dasturlash',
+                        icon: 'fa-code',
+                        color: 'from-ios-orange to-ios-red',
+                        created: now
+                    }
+                ];
+
+                this.state.cards = [
+                    // English deck - yangi kartalar
+                    {
+                        id: 'card_1',
+                        deckId: d1,
+                        type: 'basic',
+                        front: 'Perseverance',
+                        back: "Qat'iyatlilik, sabr-toqat, bardosh",
+                        interval: 0,
+                        ease: 2.5,
+                        due: now,
+                        reviews: 0,
+                        lapses: 0,
+                        created: now,
+                        lastReview: null,
+                        state: 'new'
+                    },
+                    {
+                        id: 'card_2',
+                        deckId: d1,
+                        type: 'basic',
+                        front: 'Commitment',
+                        back: "Majburiyat, va'da, sadoqat",
+                        interval: 0,
+                        ease: 2.5,
+                        due: now,
+                        reviews: 0,
+                        lapses: 0,
+                        created: now,
+                        lastReview: null,
+                        state: 'new'
+                    },
+                    {
+                        id: 'card_3',
+                        deckId: d1,
                         type: 'cloze',
-                        front: 'London is the capital of {{c1::United Kingdom}}.',
+                        front: "The capital of Uzbekistan is {{c1::Tashkent}}.",
                         back: '',
                         interval: 0,
                         ease: 2.5,
-                        due: Date.now(),
-                        created: Date.now()
+                        due: now,
+                        reviews: 0,
+                        lapses: 0,
+                        created: now,
+                        lastReview: null,
+                        state: 'new'
                     },
+                    // Tech deck
                     {
-                        id: 'c3',
-                        deckId: deckId,
+                        id: 'card_4',
+                        deckId: d2,
                         type: 'basic',
-                        front: 'What is 2 + 2?',
-                        back: '4 (to'rt)',
+                        front: 'Algoritm nima?',
+                        back: "Muammoni yechish uchun ketma-ket bajariladigan aniq ko'rsatmalar to'plami",
                         interval: 0,
                         ease: 2.5,
-                        due: Date.now(),
-                        created: Date.now()
+                        due: now,
+                        reviews: 0,
+                        lapses: 0,
+                        created: now,
+                        lastReview: null,
+                        state: 'new'
+                    },
+                    {
+                        id: 'card_5',
+                        deckId: d2,
+                        type: 'cloze',
+                        front: "JavaScript da {{c1::const}} kalit so'zi o'zgarmas qiymat e'lon qiladi.",
+                        back: '',
+                        interval: 0,
+                        ease: 2.5,
+                        due: now,
+                        reviews: 0,
+                        lapses: 0,
+                        created: now,
+                        lastReview: null,
+                        state: 'new'
                     }
                 ];
+
                 this.save();
             },
 
             syncStreak() {
-                const today = new Date().toISOString().split('T')[0];
-                if (this.state.user.lastStudy && this.state.user.lastStudy !== today) {
-                    const lastDate = new Date(this.state.user.lastStudy);
-                    const currDate = new Date(today);
-                    const diffMs = currDate.getTime() - lastDate.getTime();
-                    const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
-                    
-                    if (diffDays > 1) {
-                        this.state.user.streak = 0;
-                    }
+                const today = this.getToday();
+                const yesterday = this.getDateString(new Date(Date.now() - 86400000));
+                const last = this.state.user.lastStudy;
+
+                if (last && last !== today && last !== yesterday) {
+                    this.state.user.streak = 0;
                 }
-            }
-        };
+                this.save();
+            },
 
-        // ==========================================
-        // 3. ALGORITHM (FSRS LITE - SM2 HYBRID)
-        // ==========================================
-        const Brain = {
-            calc(card, rating) {
-                const now = Date.now();
-                const dayMs = 86400000;
-                let newInterval = 0;
+            syncToday() {
+                const today = this.getToday();
+                if (this.state.user.todayDate !== today) {
+                    this.state.user.todayDate = today;
+                    this.state.user.todayReviews = 0;
+                    this.save();
+                }
+            },
 
-                if (rating === 1) {
-                    // AGAIN - Reset va ease kamaytirish
-                    card.interval = 0;
-                    card.ease = Math.max(1.3, card.ease - 0.2);
-                    newInterval = 60000; // 1 minut
-                } else {
-                    // Good, Hard, Easy - Interval ortirish
-                    if (card.interval === 0) {
-                        card.interval = 1;
+            getToday() {
+                return this.getDateString(new Date());
+            },
+
+            getDateString(date) {
+                return date.toISOString().split('T')[0];
+            },
+
+            updateStreak() {
+                const today = this.getToday();
+                const last = this.state.user.lastStudy;
+
+                if (last !== today) {
+                    const yesterday = this.getDateString(new Date(Date.now() - 86400000));
+                    if (last === yesterday || !last) {
+                        this.state.user.streak++;
                     } else {
-                        let multiplier = 1.2; // Default (Good)
-                        if (rating === 2) multiplier = 0.8; // Hard
-                        if (rating === 4) multiplier = 1.5; // Easy
-                        
-                        card.interval = Math.ceil(card.interval * card.ease * multiplier);
+                        this.state.user.streak = 1;
                     }
+                    this.state.user.lastStudy = today;
                     
-                    // Ease o'zgarishi
-                    if (rating === 4) card.ease += 0.15;
-                    else if (rating === 2) card.ease -= 0.15;
-                    
-                    card.ease = Math.max(1.3, Math.min(2.5, card.ease));
-                    
-                    newInterval = card.interval * dayMs;
+                    if (this.state.user.streak > this.state.user.bestStreak) {
+                        this.state.user.bestStreak = this.state.user.streak;
+                    }
                 }
-                
-                card.due = now + newInterval;
-                return card;
+
+                // Heatmap yangilash
+                if (!this.state.user.heatmap[today]) {
+                    this.state.user.heatmap[today] = 0;
+                }
+                this.state.user.heatmap[today]++;
+                this.state.user.todayReviews++;
+                this.state.user.totalReviews++;
+
+                this.save();
             }
         };
 
-        // ==========================================
-        // 4. APP CONTROLLER (ASOSIY BOSHQARUV)
-        // ==========================================
+        // ============================================================
+        // 4. SM-2 ALGORITM - Anki ning aqlli takrorlash tizimi
+        // ============================================================
+        const SM2 = {
+            // O'rganish bosqichlari (daqiqalarda)
+            LEARNING_STEPS: [1, 10],
+            // Qayta o'rganish bosqichlari (daqiqalarda)
+            RELEARNING_STEPS: [10],
+            // Graduating interval (kunlarda)
+            GRADUATING_INTERVAL: 1,
+            // Easy interval (kunlarda)
+            EASY_INTERVAL: 4,
+            // Minimum ease factor
+            MIN_EASE: 1.3,
+            // Maximum ease factor
+            MAX_EASE: 2.5,
+            // Default ease factor
+            DEFAULT_EASE: 2.5,
+            // Hard interval multiplier
+            HARD_MULTIPLIER: 1.2,
+            // Easy bonus multiplier
+            EASY_BONUS: 1.3,
+            // New interval after lapse (multiplier)
+            LAPSE_MULTIPLIER: 0,
+            // Minimum interval (kunlarda)
+            MIN_INTERVAL: 1,
+            // Maximum interval (kunlarda)
+            MAX_INTERVAL: 36500,
+            // Milliseconds in a day
+            DAY_MS: 86400000,
+            // Milliseconds in a minute
+            MIN_MS: 60000,
+
+            // Vaqtni formatlash
+            formatTime(ms) {
+                if (ms < this.MIN_MS) return '<1m';
+                if (ms < this.MIN_MS * 60) return Math.round(ms / this.MIN_MS) + 'm';
+                if (ms < this.DAY_MS) return Math.round(ms / (this.MIN_MS * 60)) + 'h';
+                return Math.round(ms / this.DAY_MS) + 'd';
+            },
+
+            // Karta holati bo'yicha intervallarni hisoblash
+            getIntervals(card) {
+                const now = Date.now();
+                const intervals = {};
+                const state = card.state || 'new';
+                const currentInterval = card.interval || 0;
+                const ease = card.ease || this.DEFAULT_EASE;
+
+                if (state === 'new' || state === 'learning') {
+                    // O'rganish bosqichidagi karta
+                    intervals[1] = this.LEARNING_STEPS[0] * this.MIN_MS; // Again - 1 daqiqa
+                    intervals[2] = this.LEARNING_STEPS[1] * this.MIN_MS; // Hard - 10 daqiqa
+                    intervals[3] = this.GRADUATING_INTERVAL * this.DAY_MS; // Good - 1 kun
+                    intervals[4] = this.EASY_INTERVAL * this.DAY_MS; // Easy - 4 kun
+                } else if (state === 'relearning') {
+                    // Qayta o'rganish bosqichidagi karta
+                    intervals[1] = this.RELEARNING_STEPS[0] * this.MIN_MS; // Again - 10 daqiqa
+                    intervals[2] = Math.max(this.MIN_INTERVAL, currentInterval * 0.5) * this.DAY_MS; // Hard
+                    intervals[3] = Math.max(this.MIN_INTERVAL, currentInterval) * this.DAY_MS; // Good
+                    intervals[4] = Math.max(this.MIN_INTERVAL, currentInterval * ease) * this.DAY_MS; // Easy
+                } else {
+                    // Review bosqichidagi karta
+                    // Kechikish bonusi
+                    const scheduled = card.due || now;
+                    const daysLate = Math.max(0, (now - scheduled) / this.DAY_MS);
+                    const effectiveInterval = currentInterval + daysLate * 0.5;
+
+                    // Again - Qayta o'rganishga
+                    intervals[1] = this.RELEARNING_STEPS[0] * this.MIN_MS;
+                    
+                    // Hard - 1.2x ko'paytirish, ease 15% kamayadi
+                    const hardInterval = Math.max(
+                        this.MIN_INTERVAL,
+                        Math.min(this.MAX_INTERVAL, effectiveInterval * this.HARD_MULTIPLIER)
+                    );
+                    intervals[2] = hardInterval * this.DAY_MS;
+                    
+                    // Good - ease x ko'paytirish
+                    const goodInterval = Math.max(
+                        this.MIN_INTERVAL,
+                        Math.min(this.MAX_INTERVAL, effectiveInterval * ease)
+                    );
+                    intervals[3] = goodInterval * this.DAY_MS;
+                    
+                    // Easy - ease x easyBonus ko'paytirish, ease 15% oshadi
+                    const easyInterval = Math.max(
+                        this.MIN_INTERVAL,
+                        Math.min(this.MAX_INTERVAL, effectiveInterval * ease * this.EASY_BONUS)
+                    );
+                    intervals[4] = easyInterval * this.DAY_MS;
+                }
+
+                return intervals;
+            },
+
+            // Kartani yangilash
+            updateCard(card, rating, intervals) {
+                const now = Date.now();
+                const state = card.state || 'new';
+                let newState = state;
+                let newInterval = card.interval || 0;
+                let newEase = card.ease || this.DEFAULT_EASE;
+
+                // Ease factor o'zgartirish
+                if (state === 'review' || state === 'relearning') {
+                    switch (rating) {
+                        case 1: // Again
+                            newEase = Math.max(this.MIN_EASE, newEase - 0.20);
+                            break;
+                        case 2: // Hard
+                            newEase = Math.max(this.MIN_EASE, newEase - 0.15);
+                            break;
+                        case 3: // Good
+                            // Ease o'zgarmaydi
+                            break;
+                        case 4: // Easy
+                            newEase = Math.min(this.MAX_EASE, newEase + 0.15);
+                            break;
+                    }
+                }
+
+                // State va interval o'zgartirish
+                if (state === 'new' || state === 'learning') {
+                    switch (rating) {
+                        case 1: // Again
+                            newState = 'learning';
+                            newInterval = 0;
+                            break;
+                        case 2: // Hard
+                            newState = 'learning';
+                            newInterval = 0;
+                            break;
+                        case 3: // Good
+                            newState = 'review';
+                            newInterval = this.GRADUATING_INTERVAL;
+                            break;
+                        case 4: // Easy
+                            newState = 'review';
+                            newInterval = this.EASY_INTERVAL;
+                            break;
+                    }
+                } else if (state === 'relearning') {
+                    switch (rating) {
+                        case 1: // Again
+                            newState = 'relearning';
+                            // Interval o'zgarmaydi
+                            break;
+                        case 2: // Hard
+                            newState = 'relearning';
+                            break;
+                        case 3: // Good
+                            newState = 'review';
+                            // Interval qaytariladi
+                            break;
+                        case 4: // Easy
+                            newState = 'review';
+                            newInterval = Math.round(intervals[4] / this.DAY_MS);
+                            break;
+                    }
+                } else {
+                    // Review state
+                    switch (rating) {
+                        case 1: // Again - Lapse
+                            newState = 'relearning';
+                            card.lapses = (card.lapses || 0) + 1;
+                            // Interval kamaytirish (lekin saqlab qolish)
+                            newInterval = Math.max(this.MIN_INTERVAL, Math.round(card.interval * 0.5));
+                            break;
+                        case 2: // Hard
+                            newInterval = Math.round(intervals[2] / this.DAY_MS);
+                            break;
+                        case 3: // Good
+                            newInterval = Math.round(intervals[3] / this.DAY_MS);
+                            break;
+                        case 4: // Easy
+                            newInterval = Math.round(intervals[4] / this.DAY_MS);
+                            break;
+                    }
+                }
+
+                // Kartani yangilash
+                card.state = newState;
+                card.interval = newInterval;
+                card.ease = newEase;
+                card.due = now + intervals[rating];
+                card.lastReview = now;
+                card.reviews = (card.reviews || 0) + 1;
+
+                return card;
+            },
+
+            // XP hisoblash
+            calculateXP(rating, card) {
+                const baseXP = { 1: 2, 2: 5, 3: 10, 4: 15 };
+                let xp = baseXP[rating] || 5;
+                
+                // Streak bonus
+                const streakBonus = Math.min(DB.state.user.streak * 0.5, 10);
+                xp += streakBonus;
+                
+                // Difficulty bonus
+                if (card.interval > 30) xp += 5;
+                if (card.interval > 100) xp += 10;
+                
+                return Math.round(xp);
+            }
+        };
+
+        // ============================================================
+        // 5. MAIN APPLICATION - Asosiy ilova
+        // ============================================================
         const App = {
             lang: 'uz',
-            
+
             init() {
                 DB.init();
                 this.lang = DB.state.lang;
                 this.updateLangBtn();
                 Router.go('home');
-                this.translateAll();
+                this.registerServiceWorker();
+            },
+
+            registerServiceWorker() {
+                if ('serviceWorker' in navigator) {
+                    // PWA qo'llab-quvvatlash (offline ishlash)
+                }
             },
 
             toggleLang() {
@@ -462,322 +1187,716 @@
                 DB.state.lang = this.lang;
                 DB.save();
                 this.updateLangBtn();
-                this.translateAll();
                 Router.refresh();
             },
 
             updateLangBtn() {
-                const btn = document.getElementById('lang-ind');
-                if (btn) btn.textContent = this.lang.toUpperCase();
+                const el = document.getElementById('lang-ind');
+                if (el) el.innerText = this.lang.toUpperCase();
             },
 
             t(key) {
-                return (I18n[this.lang] && I18n[this.lang][key]) || key;
+                return I18n[this.lang][key] || key;
             },
 
-            translateAll() {
-                document.querySelectorAll('[data-key]').forEach(el => {
-                    if (el) {
-                        el.textContent = this.t(el.getAttribute('data-key'));
-                    }
-                });
+            getQuote() {
+                const quotes = Quotes[this.lang];
+                return quotes[Math.floor(Math.random() * quotes.length)];
             },
 
             toast(msg, type = 'success') {
-                const toastEl = document.getElementById('toast');
-                if (!toastEl) return;
+                const toast = document.getElementById('toast');
+                const msgEl = document.getElementById('toast-msg');
+                const iconEl = document.getElementById('toast-icon');
 
-                const msgEl = toastEl.querySelector('#toast-msg');
-                const iconEl = toastEl.querySelector('i');
-                
-                if (msgEl) msgEl.textContent = msg;
-                
+                if (!toast || !msgEl || !iconEl) return;
+
+                msgEl.innerText = msg;
+
                 if (type === 'error') {
-                    iconEl.className = 'fa-solid fa-triangle-exclamation text-ios-red';
+                    iconEl.className = 'fa-solid fa-circle-exclamation text-ios-red text-lg';
+                } else if (type === 'warning') {
+                    iconEl.className = 'fa-solid fa-triangle-exclamation text-ios-orange text-lg';
                 } else {
-                    iconEl.className = 'fa-solid fa-check-circle text-ios-green';
+                    iconEl.className = 'fa-solid fa-circle-check text-ios-green text-lg';
                 }
 
-                toastEl.classList.remove('opacity-0', 'scale-90', 'pointer-events-none');
-                toastEl.classList.add('opacity-100', 'scale-100', 'pointer-events-auto');
-                
+                toast.classList.remove('opacity-0', '-translate-y-4', 'scale-95');
+                toast.classList.add('opacity-100', 'translate-y-0', 'scale-100');
+
                 setTimeout(() => {
-                    toastEl.classList.add('opacity-0', 'scale-90', 'pointer-events-none');
-                    toastEl.classList.remove('opacity-100', 'scale-100', 'pointer-events-auto');
+                    toast.classList.remove('opacity-100', 'translate-y-0', 'scale-100');
+                    toast.classList.add('opacity-0', '-translate-y-4', 'scale-95');
                 }, 2500);
+            },
+
+            showSettings() {
+                document.getElementById('modal-settings').classList.remove('hidden');
+                document.getElementById('modal-settings').classList.add('flex');
+            },
+
+            hideSettings() {
+                document.getElementById('modal-settings').classList.add('hidden');
+                document.getElementById('modal-settings').classList.remove('flex');
+            },
+
+            resetData() {
+                if (confirm('Barcha ma\'lumotlar o\'chiriladi. Davom etasizmi?')) {
+                    localStorage.removeItem(DB.key);
+                    DB.state = {
+                        lang: this.lang,
+                        user: { xp: 0, streak: 0, bestStreak: 0, lastStudy: null, totalReviews: 0, todayReviews: 0, todayDate: null, heatmap: {} },
+                        decks: [],
+                        cards: []
+                    };
+                    DB.seed();
+                    this.hideSettings();
+                    Router.go('home');
+                    this.toast(this.t('msg_reset'), 'warning');
+                }
+            },
+
+            exportData() {
+                const data = JSON.stringify(DB.state, null, 2);
+                const blob = new Blob([data], { type: 'application/json' });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = 'anki_pro_backup.json';
+                a.click();
+                URL.revokeObjectURL(url);
+                this.toast(this.t('msg_exported'));
+            },
+
+            showDeleteModal(type, id, callback) {
+                const modal = document.getElementById('modal-delete');
+                const msg = document.getElementById('delete-message');
+                const btn = document.getElementById('delete-confirm-btn');
+
+                msg.innerText = type === 'deck' ? this.t('delete_deck') : this.t('delete_card');
+                
+                btn.onclick = () => {
+                    callback();
+                    this.hideDeleteModal();
+                };
+
+                modal.classList.remove('hidden');
+                modal.classList.add('flex');
+            },
+
+            hideDeleteModal() {
+                const modal = document.getElementById('modal-delete');
+                modal.classList.add('hidden');
+                modal.classList.remove('flex');
+            },
+
+            confetti() {
+                if (typeof confetti === 'function') {
+                    confetti({
+                        particleCount: 100,
+                        spread: 70,
+                        origin: { y: 0.6 },
+                        colors: ['#0a84ff', '#30d158', '#ff9f0a', '#5e5ce6', '#ff375f']
+                    });
+                }
             }
         };
 
-        // ==========================================
-        // 5. ROUTER (YO'NALISH)
-        // ==========================================
+        // ============================================================
+        // 6. ROUTER - Sahifa navigatsiyasi
+        // ============================================================
         const Router = {
             current: 'home',
             params: null,
-            
+
             go(view, params = null) {
                 this.current = view;
                 this.params = params;
-                
-                // Nav highlight
+
+                // Navigatsiya tugmalarini yangilash
                 ['home', 'add', 'stats'].forEach(v => {
-                    const btn = document.getElementById('nav-' + v);
-                    if (btn) {
-                        if (v === view) {
-                            btn.classList.add('nav-active', 'text-ios-blue');
+                    const el = document.getElementById('nav-' + v);
+                    if (el) {
+                        if (v === view || (view === 'study' && v === 'home')) {
+                            el.classList.add('nav-active', 'text-ios-blue');
+                            el.classList.remove('text-ios-subtext');
                         } else {
-                            btn.classList.remove('nav-active', 'text-ios-blue');
+                            el.classList.remove('nav-active', 'text-ios-blue');
+                            el.classList.add('text-ios-subtext');
                         }
                     }
                 });
 
                 const viewport = document.getElementById('viewport');
-                if (viewport) {
-                    viewport.innerHTML = '';
-                    
-                    if (view === 'home') Views.home(viewport);
-                    else if (view === 'add') Views.add(viewport);
-                    else if (view === 'stats') Views.stats(viewport);
-                    else if (view === 'study') Views.study(viewport);
+                if (!viewport) return;
+
+                viewport.innerHTML = '';
+                viewport.scrollTop = 0;
+
+                switch (view) {
+                    case 'home':
+                        Views.home(viewport);
+                        break;
+                    case 'add':
+                        Views.add(viewport);
+                        break;
+                    case 'stats':
+                        Views.stats(viewport);
+                        break;
+                    case 'study':
+                        Views.study(viewport);
+                        break;
+                    case 'deck':
+                        Views.deck(viewport);
+                        break;
                 }
 
-                App.translateAll();
+                // Tarjimalarni qo'llash
+                this.applyTranslations();
             },
 
             refresh() {
                 this.go(this.current, this.params);
+            },
+
+            applyTranslations() {
+                document.querySelectorAll('[data-key]').forEach(el => {
+                    const key = el.getAttribute('data-key');
+                    el.innerText = App.t(key);
+                });
             }
         };
 
-        // ==========================================
-        // 6. VIEWS (EKRANLAR)
-        // ==========================================
+        // ============================================================
+        // 7. VIEWS - Sahifa ko'rinishlari
+        // ============================================================
         const Views = {
             home(el) {
-                const totalDue = DB.state.cards.filter(c => c.due <= Date.now()).length;
+                const now = Date.now();
+                const totalDue = DB.state.cards.filter(c => c.due <= now).length;
                 const user = DB.state.user;
                 const level = Math.floor(user.xp / 100) + 1;
-                
+                const xpProgress = (user.xp % 100);
+
                 let html = `
-                    <div class="animate-page-enter space-y-6">
-                        <!-- HERO CARD -->
-                        <div class="w-full p-6 rounded-3xl bg-gradient-to-br from-ios-surface2 to-black border border-ios-border relative overflow-hidden shadow-2xl">
-                            <div class="absolute -right-6 -top-6 w-32 h-32 bg-ios-blue blur-[60px] opacity-20"></div>
+                    <div class="animate-page-enter space-y-5">
+                        <!-- Hero Section -->
+                        <div class="relative overflow-hidden rounded-3xl bg-gradient-to-br from-ios-surface via-ios-surface2 to-ios-surface p-5 border border-ios-border/50">
+                            <!-- Background Decoration -->
+                            <div class="absolute -right-10 -top-10 w-40 h-40 bg-ios-blue/20 rounded-full blur-3xl"></div>
+                            <div class="absolute -left-10 -bottom-10 w-32 h-32 bg-ios-purple/20 rounded-full blur-3xl"></div>
                             
-                            <h2 class="text-xs font-bold text-ios-blue uppercase tracking-widest mb-1" data-key="hero_title">Bugungi Vazifalar</h2>
-                            <div class="flex items-end gap-2 mb-4">
-                                <span class="text-5xl font-bold text-white tracking-tighter">${totalDue}</span>
-                                <span class="text-sm font-medium text-ios-subtext mb-2" data-key="hero_sub">ta karta kutyapti</span>
-                            </div>
-                            
-                            <!-- Progress Bar -->
-                            <div class="flex gap-2 items-center">
-                                <div class="h-1.5 flex-1 bg-ios-surface rounded-full overflow-hidden">
-                                    <div class="h-full bg-gradient-to-r from-ios-blue to-ios-green rounded-full transition-all duration-1000" style="width: ${Math.min(100, (user.xp % 100))}%"></div>
+                            <div class="relative z-10">
+                                <!-- Level Badge -->
+                                <div class="flex items-center justify-between mb-4">
+                                    <div class="flex items-center gap-3">
+                                        <div class="w-12 h-12 rounded-2xl bg-gradient-to-br from-ios-blue to-ios-indigo flex items-center justify-center text-white font-bold text-lg shadow-lg">
+                                            ${level}
+                                        </div>
+                                        <div>
+                                            <p class="text-xs text-ios-subtext font-medium uppercase tracking-wider">${App.t('level')}</p>
+                                            <p class="text-lg font-bold text-white">${user.xp} XP</p>
+                                        </div>
+                                    </div>
+                                    <div class="flex items-center gap-2 bg-ios-surface/80 px-3 py-2 rounded-xl">
+                                        <i class="fa-solid fa-fire text-ios-orange"></i>
+                                        <span class="font-bold text-white">${user.streak}</span>
+                                    </div>
                                 </div>
-                                <span class="text-[10px] text-ios-subtext font-bold">Lvl ${level}</span>
+                                
+                                <!-- XP Progress Bar -->
+                                <div class="progress-bar mb-4">
+                                    <div class="progress-fill" style="width: ${xpProgress}%"></div>
+                                </div>
+                                
+                                <!-- Today's Goal -->
+                                <div class="flex items-center justify-between">
+                                    <div>
+                                        <h2 class="text-xs font-semibold text-ios-blue uppercase tracking-wider mb-1">${App.t('hero_title')}</h2>
+                                        ${totalDue > 0 
+                                            ? `<p class="text-3xl font-extrabold text-white">${totalDue} <span class="text-base font-medium text-ios-subtext">${App.t('hero_sub')}</span></p>`
+                                            : `<p class="text-lg font-semibold text-ios-green">${App.t('hero_complete')}</p>`
+                                        }
+                                    </div>
+                                    ${totalDue > 0 ? `
+                                        <button onclick="Study.initAll()" class="px-5 py-3 bg-ios-blue hover:bg-ios-blue/90 text-white font-bold rounded-xl tap-scale transition-all shadow-lg shadow-ios-blue/30">
+                                            <i class="fa-solid fa-play mr-2"></i>Boshlash
+                                        </button>
+                                    ` : ''}
+                                </div>
                             </div>
                         </div>
 
-                        <!-- DECKS SECTION -->
+                        <!-- Motivational Quote -->
+                        <div class="quote-box bg-ios-surface/50 p-4 rounded-2xl border border-ios-border/30">
+                            <p class="text-sm text-ios-subtext italic leading-relaxed pl-6">
+                                ${App.getQuote()}
+                            </p>
+                        </div>
+
+                        <!-- Decks Section -->
                         <div>
-                            <h3 class="text-lg font-bold text-white mb-3 px-1" data-key="decks">To'plamlar</h3>
+                            <div class="flex items-center justify-between mb-3 px-1">
+                                <h3 class="text-lg font-bold text-white">${App.t('decks')}</h3>
+                                <span class="text-xs text-ios-subtext font-medium">${DB.state.decks.length} ta to'plam</span>
+                            </div>
+
                             <div class="space-y-3">
                 `;
 
                 if (DB.state.decks.length === 0) {
-                    html += `<div class="p-8 text-center border border-dashed border-ios-border rounded-2xl text-ios-subtext text-sm" data-key="no_decks">To'plamlar yo'q. Yangi qo'shing.</div>`;
-                } else {
-                    DB.state.decks.forEach(deck => {
-                        const cardCount = DB.state.cards.filter(c => c.deckId === deck.id).length;
-                        const dueCount = DB.state.cards.filter(c => c.deckId === deck.id && c.due <= Date.now()).length;
-
-                        html += `
-                            <div onclick="Study.init('${deck.id}')" class="group relative bg-ios-surface hover:bg-ios-surface2 border border-ios-border p-4 rounded-2xl flex items-center justify-between transition-all tap-scale shadow-sm cursor-pointer">
-                                <div class="flex items-center gap-4 flex-1">
-                                    <div class="w-12 h-12 rounded-2xl bg-gradient-to-br ${deck.color} flex items-center justify-center text-white text-xl shadow-lg flex-shrink-0">
-                                        <i class="fa-solid ${deck.icon}"></i>
-                                    </div>
-                                    <div class="flex-1 min-w-0">
-                                        <h4 class="font-bold text-white text-[17px] tracking-tight truncate">${deck.name}</h4>
-                                        <p class="text-xs text-ios-subtext font-medium mt-0.5">${cardCount} Karta • <span class="${dueCount > 0 ? 'text-ios-green font-bold' : ''}">${dueCount} Due</span></p>
-                                    </div>
-                                </div>
-                                <div class="w-8 h-8 rounded-full bg-black border border-ios-border flex items-center justify-center text-ios-subtext group-hover:text-white transition flex-shrink-0">
-                                    <i class="fa-solid fa-chevron-right text-xs"></i>
-                                </div>
-                            </div>
-                        `;
-                    });
+                    html += `
+                        <div class="p-8 text-center border-2 border-dashed border-ios-border/50 rounded-2xl">
+                            <i class="fa-solid fa-folder-open text-4xl text-ios-subtext mb-3"></i>
+                            <p class="text-ios-subtext text-sm">${App.t('no_decks')}</p>
+                        </div>
+                    `;
                 }
 
-                html += `</div></div></div>`;
+                DB.state.decks.forEach((deck, index) => {
+                    const deckCards = DB.state.cards.filter(c => c.deckId === deck.id);
+                    const count = deckCards.length;
+                    const due = deckCards.filter(c => c.due <= now).length;
+                    const newCount = deckCards.filter(c => c.state === 'new').length;
+                    const learningCount = deckCards.filter(c => c.state === 'learning' || c.state === 'relearning').length;
+
+                    html += `
+                        <div class="deck-card group bg-ios-surface hover:bg-ios-surface2 border border-ios-border/50 p-4 rounded-2xl flex items-center justify-between cursor-pointer tap-scale"
+                             onclick="Router.go('deck', { deckId: '${deck.id}' })"
+                             style="animation-delay: ${index * 50}ms">
+                            <div class="flex items-center gap-4">
+                                <div class="w-14 h-14 rounded-2xl bg-gradient-to-br ${deck.color} flex items-center justify-center text-white text-xl shadow-lg">
+                                    <i class="fa-solid ${deck.icon}"></i>
+                                </div>
+                                <div>
+                                    <h4 class="font-bold text-white text-base mb-1">${deck.name}</h4>
+                                    <div class="flex items-center gap-3 text-xs">
+                                        <span class="text-ios-subtext">${count} ${App.t('cards_count')}</span>
+                                        ${due > 0 ? `<span class="text-ios-red font-semibold">${due} ${App.t('due')}</span>` : ''}
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="flex items-center gap-2">
+                                ${due > 0 ? `
+                                    <button onclick="event.stopPropagation(); Study.init('${deck.id}')" 
+                                            class="w-10 h-10 rounded-xl bg-ios-blue/20 text-ios-blue flex items-center justify-center tap-scale hover:bg-ios-blue hover:text-white transition-all">
+                                        <i class="fa-solid fa-play text-sm"></i>
+                                    </button>
+                                ` : ''}
+                                <div class="w-10 h-10 rounded-xl bg-ios-surface2 flex items-center justify-center text-ios-subtext group-hover:text-white transition-colors">
+                                    <i class="fa-solid fa-chevron-right text-sm"></i>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                });
+
+                html += `
+                            </div>
+                        </div>
+
+                        <!-- Footer Credit -->
+                        <div class="text-center py-4">
+                            <p class="text-xs text-ios-subtext2">Made by ©️Muhammad Daler</p>
+                        </div>
+                    </div>
+                `;
+
+                el.innerHTML = html;
+            },
+
+            deck(el) {
+                const deckId = Router.params?.deckId;
+                const deck = DB.state.decks.find(d => d.id === deckId);
+                
+                if (!deck) {
+                    Router.go('home');
+                    return;
+                }
+
+                const now = Date.now();
+                const deckCards = DB.state.cards.filter(c => c.deckId === deckId);
+                const due = deckCards.filter(c => c.due <= now).length;
+                const newCount = deckCards.filter(c => c.state === 'new').length;
+                const learningCount = deckCards.filter(c => c.state === 'learning' || c.state === 'relearning').length;
+                const reviewCount = deckCards.filter(c => c.state === 'review' && c.due <= now).length;
+
+                let html = `
+                    <div class="animate-page-enter space-y-5">
+                        <!-- Header -->
+                        <div class="flex items-center gap-3">
+                            <button onclick="Router.go('home')" class="w-10 h-10 rounded-xl bg-ios-surface2 flex items-center justify-center text-ios-subtext tap-scale hover:text-white transition-colors">
+                                <i class="fa-solid fa-chevron-left"></i>
+                            </button>
+                            <div class="flex-1">
+                                <h2 class="text-xl font-bold text-white">${deck.name}</h2>
+                                <p class="text-xs text-ios-subtext">${deckCards.length} ${App.t('cards_count')}</p>
+                            </div>
+                            <button onclick="Actions.deleteDeck('${deck.id}')" class="w-10 h-10 rounded-xl bg-ios-red/20 flex items-center justify-center text-ios-red tap-scale hover:bg-ios-red hover:text-white transition-all">
+                                <i class="fa-solid fa-trash text-sm"></i>
+                            </button>
+                        </div>
+
+                        <!-- Deck Stats -->
+                        <div class="grid grid-cols-3 gap-3">
+                            <div class="bg-ios-surface p-4 rounded-2xl border border-ios-border/50 text-center">
+                                <div class="text-2xl font-bold text-ios-blue">${newCount}</div>
+                                <div class="text-[10px] text-ios-subtext uppercase font-semibold">${App.t('new_cards')}</div>
+                            </div>
+                            <div class="bg-ios-surface p-4 rounded-2xl border border-ios-border/50 text-center">
+                                <div class="text-2xl font-bold text-ios-orange">${learningCount}</div>
+                                <div class="text-[10px] text-ios-subtext uppercase font-semibold">${App.t('learning')}</div>
+                            </div>
+                            <div class="bg-ios-surface p-4 rounded-2xl border border-ios-border/50 text-center">
+                                <div class="text-2xl font-bold text-ios-green">${reviewCount}</div>
+                                <div class="text-[10px] text-ios-subtext uppercase font-semibold">${App.t('review')}</div>
+                            </div>
+                        </div>
+
+                        <!-- Study Button -->
+                        ${due > 0 ? `
+                            <button onclick="Study.init('${deck.id}')" class="w-full py-4 bg-gradient-to-r from-ios-blue to-ios-indigo text-white font-bold rounded-2xl tap-scale transition-all shadow-lg shadow-ios-blue/30">
+                                <i class="fa-solid fa-play mr-2"></i>O'rganishni Boshlash (${due})
+                            </button>
+                        ` : `
+                            <div class="p-4 bg-ios-green/10 border border-ios-green/30 rounded-2xl text-center">
+                                <i class="fa-solid fa-check-circle text-ios-green text-xl mb-2"></i>
+                                <p class="text-ios-green font-medium">Barcha kartalar o'rganildi!</p>
+                            </div>
+                        `}
+
+                        <!-- Cards List -->
+                        <div>
+                            <h3 class="text-base font-bold text-white mb-3">Kartalar</h3>
+                            <div class="space-y-2">
+                `;
+
+                if (deckCards.length === 0) {
+                    html += `
+                        <div class="p-6 text-center border-2 border-dashed border-ios-border/50 rounded-2xl">
+                            <i class="fa-solid fa-layer-group text-3xl text-ios-subtext mb-2"></i>
+                            <p class="text-ios-subtext text-sm">${App.t('no_cards_deck')}</p>
+                        </div>
+                    `;
+                }
+
+                deckCards.forEach((card, index) => {
+                    const isDue = card.due <= now;
+                    const stateColor = {
+                        'new': 'text-ios-blue',
+                        'learning': 'text-ios-orange',
+                        'relearning': 'text-ios-orange',
+                        'review': 'text-ios-green'
+                    }[card.state] || 'text-ios-subtext';
+
+                    let frontPreview = card.front.replace(/{{c\d::(.*?)}}/g, '[$1]');
+                    if (frontPreview.length > 50) frontPreview = frontPreview.substring(0, 50) + '...';
+
+                    html += `
+                        <div class="bg-ios-surface p-3 rounded-xl border border-ios-border/30 flex items-center justify-between group">
+                            <div class="flex-1 min-w-0">
+                                <p class="text-sm text-white truncate">${frontPreview}</p>
+                                <p class="text-xs ${stateColor} mt-1 capitalize">${card.state || 'new'} • ${card.interval}d</p>
+                            </div>
+                            <button onclick="Actions.deleteCard('${card.id}')" 
+                                    class="w-8 h-8 rounded-lg bg-ios-red/10 text-ios-red flex items-center justify-center tap-scale opacity-0 group-hover:opacity-100 transition-opacity">
+                                <i class="fa-solid fa-xmark text-xs"></i>
+                            </button>
+                        </div>
+                    `;
+                });
+
+                html += `
+                            </div>
+                        </div>
+                    </div>
+                `;
+
                 el.innerHTML = html;
             },
 
             add(el) {
-                if (DB.state.decks.length === 0) {
-                    el.innerHTML = `
-                        <div class="animate-page-enter space-y-6">
-                            <h2 class="text-2xl font-bold text-white px-1 tracking-tight" data-key="add_h">Yangi Yaratish</h2>
-                            <div class="p-8 text-center border border-dashed border-ios-border rounded-2xl text-ios-subtext text-sm">
-                                <p class="mb-4" data-key="msg_no_deck">Avval to'plam yaratib oling!</p>
-                                <button onclick="UI.setAddMode('deck')" class="text-ios-blue font-bold">To'plam Yaratish</button>
-                            </div>
-                        </div>
-                    `;
-                    return;
-                }
+                const decks = DB.state.decks.map(d => 
+                    `<option value="${d.id}">${d.name}</option>`
+                ).join('');
 
-                const deckOptions = DB.state.decks.map(d => `<option value="${d.id}">${d.name}</option>`).join('');
-                
                 el.innerHTML = `
                     <div class="animate-page-enter space-y-6">
-                        <h2 class="text-2xl font-bold text-white px-1 tracking-tight" data-key="add_h">Yangi Yaratish</h2>
-                        
-                        <!-- MODE TOGGLE -->
+                        <h2 class="text-2xl font-bold text-white">${App.t('add_h')}</h2>
+
+                        <!-- Tab Switcher -->
                         <div class="grid grid-cols-2 gap-1 p-1 bg-ios-surface2 rounded-xl">
-                            <button onclick="UI.setAddMode('card')" id="btn-mode-card" class="py-2 rounded-lg text-xs font-bold bg-ios-surface text-white shadow-sm transition" data-key="tab_card">Karta</button>
-                            <button onclick="UI.setAddMode('deck')" id="btn-mode-deck" class="py-2 rounded-lg text-xs font-bold text-ios-subtext transition" data-key="tab_deck">To'plam</button>
+                            <button onclick="UI.switchTab('card')" id="tab-card" 
+                                    class="py-3 rounded-xl text-sm font-bold bg-ios-surface text-white shadow-sm transition-all">
+                                <i class="fa-solid fa-clone mr-2"></i>${App.t('tab_card')}
+                            </button>
+                            <button onclick="UI.switchTab('deck')" id="tab-deck" 
+                                    class="py-3 rounded-xl text-sm font-bold text-ios-subtext transition-all">
+                                <i class="fa-solid fa-folder mr-2"></i>${App.t('tab_deck')}
+                            </button>
                         </div>
 
-                        <!-- CARD FORM -->
+                        <!-- Card Form -->
                         <div id="form-card" class="space-y-4">
                             <div>
-                                <label class="text-xs font-bold text-ios-subtext uppercase ml-1 mb-2 block" data-key="lbl_deck">To'plamni tanlang</label>
+                                <label class="block text-xs font-semibold text-ios-subtext uppercase tracking-wider mb-2 ml-1">${App.t('lbl_deck')}</label>
                                 <div class="relative">
-                                    <select id="inp-deck" class="ios-input appearance-none">${deckOptions}</select>
-                                    <i class="fa-solid fa-chevron-down absolute right-4 top-4 text-ios-subtext pointer-events-none text-sm"></i>
+                                    <select id="input-deck" class="ios-input appearance-none pr-10">
+                                        ${decks || '<option value="">To\'plam yarating</option>'}
+                                    </select>
+                                    <i class="fa-solid fa-chevron-down absolute right-4 top-1/2 -translate-y-1/2 text-ios-subtext pointer-events-none"></i>
                                 </div>
                             </div>
+
                             <div>
-                                <label class="text-xs font-bold text-ios-subtext uppercase ml-1 mb-2 block" data-key="lbl_front">Savol</label>
-                                <textarea id="inp-front" rows="4" class="ios-input resize-none" placeholder="Savolni kiriting..."></textarea>
-                                <p class="text-[10px] text-ios-blue mt-2 ml-1 opacity-80"><i class="fa-solid fa-lightbulb mr-1"></i> <span data-key="cloze_hint">{{c1::...}}, {{c2::...}} formatini ishlating</span></p>
+                                <label class="block text-xs font-semibold text-ios-subtext uppercase tracking-wider mb-2 ml-1">${App.t('lbl_front')}</label>
+                                <textarea id="input-front" rows="4" class="ios-input resize-none" placeholder="${App.t('ph_front')}"></textarea>
+                                <p class="text-xs text-ios-blue mt-2 ml-1 font-medium">${App.t('hint_cloze')}</p>
                             </div>
-                            <div id="back-wrap" class="block">
-                                <label class="text-xs font-bold text-ios-subtext uppercase ml-1 mb-2 block" data-key="lbl_back">Javob</label>
-                                <textarea id="inp-back" rows="3" class="ios-input resize-none" placeholder="Javobni kiriting..."></textarea>
+
+                            <div id="back-field">
+                                <label class="block text-xs font-semibold text-ios-subtext uppercase tracking-wider mb-2 ml-1">${App.t('lbl_back')}</label>
+                                <textarea id="input-back" rows="4" class="ios-input resize-none" placeholder="${App.t('ph_back')}"></textarea>
                             </div>
-                            <button onclick="Actions.saveCard()" class="w-full py-4 bg-ios-blue hover:bg-blue-600 text-white font-bold rounded-2xl shadow-[0_5px_15px_rgba(10,132,255,0.3)] tap-scale transition text-[17px]" data-key="btn_save">Saqlash</button>
+
+                            <button onclick="Actions.saveCard()" class="w-full py-4 bg-gradient-to-r from-ios-blue to-ios-indigo text-white font-bold rounded-2xl tap-scale transition-all shadow-lg shadow-ios-blue/30">
+                                <i class="fa-solid fa-plus mr-2"></i>${App.t('btn_save')}
+                            </button>
                         </div>
 
-                        <!-- DECK FORM -->
+                        <!-- Deck Form -->
                         <div id="form-deck" class="space-y-4 hidden">
                             <div>
-                                <label class="text-xs font-bold text-ios-subtext uppercase ml-1 mb-2 block" data-key="lbl_name">To'plam Nomi</label>
-                                <input id="inp-deck-name" type="text" class="ios-input" placeholder="Nomni kiriting...">
+                                <label class="block text-xs font-semibold text-ios-subtext uppercase tracking-wider mb-2 ml-1">${App.t('lbl_name')}</label>
+                                <input id="input-deck-name" type="text" class="ios-input" placeholder="${App.t('ph_name')}">
                             </div>
-                            <button onclick="Actions.saveDeck()" class="w-full py-4 bg-ios-surface2 border border-ios-border text-white font-bold rounded-2xl tap-scale transition" data-key="btn_create">Yaratish</button>
+
+                            <button onclick="Actions.saveDeck()" class="w-full py-4 bg-ios-surface2 border border-ios-border text-white font-bold rounded-2xl tap-scale transition-all hover:bg-ios-surface3">
+                                <i class="fa-solid fa-folder-plus mr-2"></i>${App.t('btn_create')}
+                            </button>
+                        </div>
+
+                        <!-- Footer Credit -->
+                        <div class="text-center py-4">
+                            <p class="text-xs text-ios-subtext2">Made by ©️Muhammad Daler</p>
                         </div>
                     </div>
                 `;
-                App.translateAll();
             },
 
             stats(el) {
                 const user = DB.state.user;
+                const totalCards = DB.state.cards.length;
                 const level = Math.floor(user.xp / 100) + 1;
-                
-                let grid = '';
+                const avgEase = DB.state.cards.length > 0
+                    ? (DB.state.cards.reduce((sum, c) => sum + (c.ease || 2.5), 0) / DB.state.cards.length).toFixed(2)
+                    : '2.50';
+
+                // Heatmap yaratish (oxirgi 60 kun)
+                let heatmapHtml = '';
                 const today = new Date();
-                
                 for (let i = 0; i < 60; i++) {
-                    const d = new Date();
-                    d.setDate(today.getDate() - (59 - i));
-                    const key = d.toISOString().split('T')[0];
-                    const val = user.heatmap[key] || 0;
-                    let cls = 'heat-cell';
-                    if (val > 0) cls += ' heat-1';
-                    if (val > 5) cls += ' heat-2';
-                    if (val > 10) cls += ' heat-3';
-                    grid += `<div class="${cls}" title="${key}: ${val} cards"></div>`;
+                    const date = new Date(today);
+                    date.setDate(today.getDate() - (59 - i));
+                    const dateStr = date.toISOString().split('T')[0];
+                    const count = user.heatmap[dateStr] || 0;
+                    
+                    let heatClass = 'heat-cell';
+                    if (count >= 1 && count < 5) heatClass += ' heat-1';
+                    else if (count >= 5 && count < 10) heatClass += ' heat-2';
+                    else if (count >= 10 && count < 20) heatClass += ' heat-3';
+                    else if (count >= 20 && count < 30) heatClass += ' heat-4';
+                    else if (count >= 30) heatClass += ' heat-5';
+
+                    heatmapHtml += `<div class="${heatClass}" title="${dateStr}: ${count}"></div>`;
                 }
 
                 el.innerHTML = `
                     <div class="animate-page-enter space-y-6">
-                        <!-- TROPHY -->
-                        <div class="w-24 h-24 rounded-full bg-ios-surface border-4 border-ios-blue mx-auto flex items-center justify-center shadow-2xl relative mt-4">
-                            <i class="fa-solid fa-trophy text-4xl text-ios-orange"></i>
-                            <div class="absolute -bottom-2 bg-ios-blue text-white text-[10px] font-bold px-3 py-1 rounded-full border-2 border-black">
-                                LVL ${level}
-                            </div>
-                        </div>
-
-                        <h2 class="text-2xl font-bold text-white text-center" data-key="stats_h">Statistika</h2>
-
-                        <!-- STATS GRID -->
-                        <div class="grid grid-cols-2 gap-4">
-                            <div class="bg-ios-surface p-4 rounded-2xl border border-ios-border">
-                                <div class="text-center">
-                                    <i class="fa-solid fa-fire text-ios-orange text-2xl mb-2 block"></i>
-                                    <div class="text-3xl font-bold text-white">${user.streak}</div>
-                                    <div class="text-[10px] font-bold text-ios-subtext uppercase mt-1" data-key="strk">Streak</div>
+                        <!-- Profile Header -->
+                        <div class="text-center">
+                            <div class="w-24 h-24 rounded-3xl bg-gradient-to-br from-ios-blue via-ios-indigo to-ios-purple mx-auto mb-4 flex items-center justify-center shadow-xl shadow-ios-blue/30 relative">
+                                <span class="text-4xl font-black text-white">${level}</span>
+                                <div class="absolute -bottom-2 -right-2 w-8 h-8 rounded-full bg-ios-orange flex items-center justify-center shadow-lg">
+                                    <i class="fa-solid fa-fire text-white text-xs"></i>
                                 </div>
                             </div>
-                            <div class="bg-ios-surface p-4 rounded-2xl border border-ios-border">
-                                <div class="text-center">
-                                    <i class="fa-solid fa-bolt text-ios-green text-2xl mb-2 block"></i>
-                                    <div class="text-3xl font-bold text-white">${user.xp}</div>
-                                    <div class="text-[10px] font-bold text-ios-subtext uppercase mt-1" data-key="xp">Jami XP</div>
+                            <h2 class="text-2xl font-bold text-white">${App.t('level')} ${level}</h2>
+                            <p class="text-ios-subtext">${user.xp} XP</p>
+                        </div>
+
+                        <!-- Main Stats -->
+                        <div class="grid grid-cols-2 gap-3">
+                            <div class="bg-ios-surface p-4 rounded-2xl border border-ios-border/50">
+                                <div class="flex items-center gap-3 mb-2">
+                                    <div class="w-10 h-10 rounded-xl bg-ios-orange/20 flex items-center justify-center">
+                                        <i class="fa-solid fa-fire text-ios-orange"></i>
+                                    </div>
+                                    <div>
+                                        <div class="text-2xl font-bold text-white">${user.streak}</div>
+                                        <div class="text-[10px] text-ios-subtext uppercase font-semibold">${App.t('strk')}</div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="bg-ios-surface p-4 rounded-2xl border border-ios-border/50">
+                                <div class="flex items-center gap-3 mb-2">
+                                    <div class="w-10 h-10 rounded-xl bg-ios-indigo/20 flex items-center justify-center">
+                                        <i class="fa-solid fa-trophy text-ios-indigo"></i>
+                                    </div>
+                                    <div>
+                                        <div class="text-2xl font-bold text-white">${user.bestStreak}</div>
+                                        <div class="text-[10px] text-ios-subtext uppercase font-semibold">${App.t('best_streak')}</div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="bg-ios-surface p-4 rounded-2xl border border-ios-border/50">
+                                <div class="flex items-center gap-3 mb-2">
+                                    <div class="w-10 h-10 rounded-xl bg-ios-green/20 flex items-center justify-center">
+                                        <i class="fa-solid fa-check-double text-ios-green"></i>
+                                    </div>
+                                    <div>
+                                        <div class="text-2xl font-bold text-white">${user.totalReviews}</div>
+                                        <div class="text-[10px] text-ios-subtext uppercase font-semibold">${App.t('total_reviews')}</div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="bg-ios-surface p-4 rounded-2xl border border-ios-border/50">
+                                <div class="flex items-center gap-3 mb-2">
+                                    <div class="w-10 h-10 rounded-xl bg-ios-blue/20 flex items-center justify-center">
+                                        <i class="fa-solid fa-layer-group text-ios-blue"></i>
+                                    </div>
+                                    <div>
+                                        <div class="text-2xl font-bold text-white">${totalCards}</div>
+                                        <div class="text-[10px] text-ios-subtext uppercase font-semibold">${App.t('total')}</div>
+                                    </div>
                                 </div>
                             </div>
                         </div>
 
-                        <!-- HEATMAP -->
-                        <div class="bg-ios-surface p-4 rounded-2xl border border-ios-border">
-                            <h3 class="text-sm font-bold text-white mb-3">60 kun o'quv xarxasi</h3>
-                            <div class="heatmap-grid">${grid}</div>
+                        <!-- Today's Progress -->
+                        <div class="bg-ios-surface p-4 rounded-2xl border border-ios-border/50">
+                            <div class="flex items-center justify-between mb-3">
+                                <h3 class="font-semibold text-white">${App.t('today_studied')}</h3>
+                                <span class="text-ios-green font-bold">${user.todayReviews}</span>
+                            </div>
+                            <div class="progress-bar">
+                                <div class="progress-fill" style="width: ${Math.min(100, user.todayReviews * 5)}%"></div>
+                            </div>
                         </div>
 
-                        <!-- CARD COUNT -->
-                        <div class="bg-ios-surface p-4 rounded-2xl border border-ios-border">
-                            <div class="flex items-center justify-between">
-                                <span class="text-ios-subtext" data-key="total">Kartalar</span>
-                                <span class="text-2xl font-bold text-ios-blue">${DB.state.cards.length}</span>
+                        <!-- Activity Heatmap -->
+                        <div class="bg-ios-surface p-4 rounded-2xl border border-ios-border/50">
+                            <h3 class="font-semibold text-white mb-3">${App.t('activity')}</h3>
+                            <div class="grid grid-cols-10 gap-1">
+                                ${heatmapHtml}
                             </div>
+                            <div class="flex items-center justify-end gap-2 mt-3 text-[10px] text-ios-subtext">
+                                <span>Kam</span>
+                                <div class="flex gap-1">
+                                    <div class="w-3 h-3 rounded-sm bg-ios-surface2"></div>
+                                    <div class="w-3 h-3 rounded-sm heat-1"></div>
+                                    <div class="w-3 h-3 rounded-sm heat-2"></div>
+                                    <div class="w-3 h-3 rounded-sm heat-3"></div>
+                                    <div class="w-3 h-3 rounded-sm heat-5"></div>
+                                </div>
+                                <span>Ko'p</span>
+                            </div>
+                        </div>
+
+                        <!-- Footer Credit -->
+                        <div class="text-center py-4">
+                            <p class="text-xs text-ios-subtext2">Made by ©️Muhammad Daler</p>
                         </div>
                     </div>
                 `;
-                App.translateAll();
             },
 
             study(el) {
-                el.innerHTML = `<div id="study-area" class="h-full flex flex-col relative"></div>`;
+                el.innerHTML = `
+                    <div id="study-container" class="flex flex-col h-full animate-page-enter">
+                        <!-- Study content will be rendered here -->
+                    </div>
+                `;
             }
         };
 
-        // ==========================================
-        // 7. UI & ACTIONS (TUGMALAR VA AMALLAR)
-        // ==========================================
+        // ============================================================
+        // 8. UI HELPERS
+        // ============================================================
         const UI = {
-            setAddMode(mode) {
-                const isCard = mode === 'card';
+            switchTab(tab) {
                 const cardForm = document.getElementById('form-card');
                 const deckForm = document.getElementById('form-deck');
-                const btnCard = document.getElementById('btn-mode-card');
-                const btnDeck = document.getElementById('btn-mode-deck');
+                const cardTab = document.getElementById('tab-card');
+                const deckTab = document.getElementById('tab-deck');
 
-                if (cardForm) cardForm.classList.toggle('hidden', !isCard);
-                if (deckForm) deckForm.classList.toggle('hidden', isCard);
+                if (!cardForm || !deckForm || !cardTab || !deckTab) return;
 
-                if (btnCard) {
-                    btnCard.className = isCard 
-                        ? "py-2 rounded-lg text-xs font-bold bg-ios-surface text-white shadow-sm transition" 
-                        : "py-2 rounded-lg text-xs font-bold text-ios-subtext transition";
-                }
-                if (btnDeck) {
-                    btnDeck.className = !isCard 
-                        ? "py-2 rounded-lg text-xs font-bold bg-ios-surface text-white shadow-sm transition" 
-                        : "py-2 rounded-lg text-xs font-bold text-ios-subtext transition";
+                if (tab === 'card') {
+                    cardForm.classList.remove('hidden');
+                    deckForm.classList.add('hidden');
+                    cardTab.className = 'py-3 rounded-xl text-sm font-bold bg-ios-surface text-white shadow-sm transition-all';
+                    deckTab.className = 'py-3 rounded-xl text-sm font-bold text-ios-subtext transition-all';
+                } else {
+                    cardForm.classList.add('hidden');
+                    deckForm.classList.remove('hidden');
+                    deckTab.className = 'py-3 rounded-xl text-sm font-bold bg-ios-surface text-white shadow-sm transition-all';
+                    cardTab.className = 'py-3 rounded-xl text-sm font-bold text-ios-subtext transition-all';
                 }
             }
         };
 
+        // ============================================================
+        // 9. ACTIONS - Foydalanuvchi amallari
+        // ============================================================
         const Actions = {
+            saveCard() {
+                const deckId = document.getElementById('input-deck')?.value;
+                const front = document.getElementById('input-front')?.value?.trim();
+                const back = document.getElementById('input-back')?.value?.trim();
+
+                if (!deckId || !front) {
+                    App.toast(App.t('msg_err'), 'error');
+                    return;
+                }
+
+                // Cloze detection
+                const isCloze = /{{c\d::(.*?)}}/g.test(front);
+                
+                if (!isCloze && !back) {
+                    App.toast(App.t('msg_err'), 'error');
+                    return;
+                }
+
+                const now = Date.now();
+                const card = {
+                    id: 'card_' + now,
+                    deckId: deckId,
+                    type: isCloze ? 'cloze' : 'basic',
+                    front: front,
+                    back: isCloze ? '' : back,
+                    interval: 0,
+                    ease: SM2.DEFAULT_EASE,
+                    due: now,
+                    reviews: 0,
+                    lapses: 0,
+                    created: now,
+                    lastReview: null,
+                    state: 'new'
+                };
+
+                DB.state.cards.push(card);
+                DB.save();
+
+                // Formni tozalash
+                document.getElementById('input-front').value = '';
+                document.getElementById('input-back').value = '';
+
+                App.toast(App.t('msg_saved'));
+            },
+
             saveDeck() {
-                const nameInput = document.getElementById('inp-deck-name');
-                const name = nameInput ? nameInput.value.trim() : '';
+                const name = document.getElementById('input-deck-name')?.value?.trim();
 
                 if (!name) {
                     App.toast(App.t('msg_err'), 'error');
@@ -785,88 +1904,116 @@
                 }
 
                 const colors = [
-                    'from-blue-500 to-indigo-500',
-                    'from-red-500 to-orange-500',
-                    'from-green-500 to-emerald-500',
-                    'from-purple-500 to-pink-500',
-                    'from-cyan-500 to-blue-500'
+                    'from-ios-blue to-ios-indigo',
+                    'from-ios-red to-ios-orange',
+                    'from-ios-green to-emerald-500',
+                    'from-ios-purple to-ios-pink',
+                    'from-ios-teal to-ios-blue',
+                    'from-ios-orange to-ios-yellow'
                 ];
-                const icons = ['fa-book', 'fa-code', 'fa-atom', 'fa-globe', 'fa-language', 'fa-star'];
 
-                DB.state.decks.push({
-                    id: 'd_' + Date.now(),
+                const icons = ['fa-book', 'fa-code', 'fa-atom', 'fa-globe', 'fa-pen-nib', 'fa-flask', 'fa-brain', 'fa-language', 'fa-calculator', 'fa-music'];
+
+                const deck = {
+                    id: 'deck_' + Date.now(),
                     name: name,
                     icon: icons[Math.floor(Math.random() * icons.length)],
-                    color: colors[Math.floor(Math.random() * colors.length)]
-                });
+                    color: colors[Math.floor(Math.random() * colors.length)],
+                    created: Date.now()
+                };
 
+                DB.state.decks.push(deck);
                 DB.save();
-                UI.setAddMode('card');
-                if (nameInput) nameInput.value = '';
+
+                document.getElementById('input-deck-name').value = '';
+                UI.switchTab('card');
+                Router.go('add');
                 App.toast(App.t('msg_saved'));
-                setTimeout(() => Router.go('home'), 500);
             },
 
-            saveCard() {
-                const deckSelect = document.getElementById('inp-deck');
-                const frontInput = document.getElementById('inp-front');
-                const backInput = document.getElementById('inp-back');
-
-                const deckId = deckSelect ? deckSelect.value : null;
-                const front = frontInput ? frontInput.value.trim() : '';
-                const back = backInput ? backInput.value.trim() : '';
-
-                if (!front || !deckId) {
-                    App.toast(App.t('msg_err'), 'error');
-                    return;
-                }
-
-                let type = 'basic';
-                if (front.includes('{{c1::') && front.includes('}}')) {
-                    type = 'cloze';
-                }
-
-                DB.state.cards.push({
-                    id: 'c_' + Date.now(),
-                    deckId: deckId,
-                    type: type,
-                    front: front,
-                    back: type === 'cloze' ? '' : back,
-                    interval: 0,
-                    ease: 2.5,
-                    due: Date.now(),
-                    created: Date.now()
+            deleteDeck(deckId) {
+                App.showDeleteModal('deck', deckId, () => {
+                    DB.state.decks = DB.state.decks.filter(d => d.id !== deckId);
+                    DB.state.cards = DB.state.cards.filter(c => c.deckId !== deckId);
+                    DB.save();
+                    Router.go('home');
+                    App.toast(App.t('msg_deleted'));
                 });
+            },
 
-                DB.save();
-                if (frontInput) frontInput.value = '';
-                if (backInput) backInput.value = '';
-                App.toast(App.t('msg_saved'));
+            deleteCard(cardId) {
+                App.showDeleteModal('card', cardId, () => {
+                    DB.state.cards = DB.state.cards.filter(c => c.id !== cardId);
+                    DB.save();
+                    Router.refresh();
+                    App.toast(App.t('msg_deleted'));
+                });
             }
         };
 
-        // ==========================================
-        // 8. STUDY ENGINE (O'QUISH JARAYONI)
-        // ==========================================
+        // ============================================================
+        // 10. STUDY ENGINE - O'rganish tizimi
+        // ============================================================
         const Study = {
             queue: [],
             current: null,
+            currentIndex: 0,
+            totalCount: 0,
+            deckId: null,
             flipped: false,
-            startTime: null,
+            intervals: {},
+            sessionXP: 0,
+            sessionReviews: 0,
 
             init(deckId) {
+                this.deckId = deckId;
+                const now = Date.now();
+                
                 this.queue = DB.state.cards
-                    .filter(c => c.deckId === deckId && c.due <= Date.now())
-                    .sort((a, b) => a.due - b.due);
+                    .filter(c => c.deckId === deckId && c.due <= now)
+                    .sort((a, b) => {
+                        // Ustuvorlik: new -> learning -> review
+                        const priority = { 'new': 0, 'learning': 1, 'relearning': 1, 'review': 2 };
+                        return (priority[a.state] || 0) - (priority[b.state] || 0) || a.due - b.due;
+                    });
 
                 if (this.queue.length === 0) {
-                    App.toast(App.t('msg_deck_empty'), 'error');
+                    App.toast(App.t('study_no_cards'), 'warning');
                     return;
                 }
 
-                this.startTime = Date.now();
+                this.totalCount = this.queue.length;
+                this.currentIndex = 0;
+                this.sessionXP = 0;
+                this.sessionReviews = 0;
+
                 Router.go('study');
-                this.next();
+                setTimeout(() => this.next(), 100);
+            },
+
+            initAll() {
+                const now = Date.now();
+                
+                this.queue = DB.state.cards
+                    .filter(c => c.due <= now)
+                    .sort((a, b) => {
+                        const priority = { 'new': 0, 'learning': 1, 'relearning': 1, 'review': 2 };
+                        return (priority[a.state] || 0) - (priority[b.state] || 0) || a.due - b.due;
+                    });
+
+                if (this.queue.length === 0) {
+                    App.toast(App.t('study_no_cards'), 'warning');
+                    return;
+                }
+
+                this.deckId = null;
+                this.totalCount = this.queue.length;
+                this.currentIndex = 0;
+                this.sessionXP = 0;
+                this.sessionReviews = 0;
+
+                Router.go('study');
+                setTimeout(() => this.next(), 100);
             },
 
             next() {
@@ -875,186 +2022,57 @@
                     return;
                 }
 
-                this.current = this.queue[0];
+                this.current = this.queue.shift();
+                this.currentIndex++;
                 this.flipped = false;
-                this.renderCard();
+                this.intervals = SM2.getIntervals(this.current);
+                this.render();
             },
 
-            renderCard() {
+            render() {
+                const container = document.getElementById('study-container');
+                if (!container || !this.current) return;
+
                 const card = this.current;
-                const area = document.getElementById('study-area');
-                
-                if (!area || !card) return;
+                const progress = Math.round((this.currentIndex / this.totalCount) * 100);
 
-                let front = card.front;
-                let back = card.back;
+                // Karta kontentini tayyorlash
+                let frontContent = card.front;
+                let backContent = card.back;
 
-                // CLOZE processing
                 if (card.type === 'cloze') {
-                    front = front.replace(/\{\{c\d+::(.*?)\}\}/g, '<span class="cloze-mask">...</span>');
-                    back = card.front.replace(/\{\{c\d+::(.*?)\}\}/g, '<span class="cloze-reveal">$1</span>');
+                    frontContent = card.front.replace(
+                        /{{c\d::(.*?)}}/g,
+                        '<span class="cloze-mask" onclick="Study.revealCloze(event, \'$1\')">[ ? ]</span>'
+                    );
+                    backContent = card.front.replace(
+                        /{{c\d::(.*?)}}/g,
+                        '<span class="cloze-reveal">$1</span>'
+                    );
                 }
 
-                area.innerHTML = `
-                    <div class="flex items-center justify-between mb-6 animate-page-enter">
-                        <button onclick="Router.go('home')" class="w-8 h-8 rounded-full bg-ios-surface text-ios-subtext hover:text-white transition tap-scale">
+                const stateLabel = {
+                    'new': 'Yangi',
+                    'learning': "O'rganilmoqda",
+                    'relearning': 'Qayta o\'rganish',
+                    'review': 'Takrorlash'
+                }[card.state] || 'Yangi';
+
+                const stateColor = {
+                    'new': 'text-ios-blue',
+                    'learning': 'text-ios-orange',
+                    'relearning': 'text-ios-orange',
+                    'review': 'text-ios-green'
+                }[card.state] || 'text-ios-blue';
+
+                container.innerHTML = `
+                    <!-- Header -->
+                    <div class="flex items-center justify-between mb-4">
+                        <button onclick="Study.exit()" class="w-10 h-10 rounded-xl bg-ios-surface2 flex items-center justify-center text-ios-subtext tap-scale hover:text-white transition-colors">
                             <i class="fa-solid fa-xmark"></i>
                         </button>
-                        <div class="px-3 py-1 bg-ios-surface rounded-full border border-ios-border text-[10px] font-bold text-ios-blue uppercase tracking-wider">
-                            ${this.queue.length} <span data-key="study_left">qoldi</span>
-                        </div>
-                        <div class="w-8"></div>
-                    </div>
-
-                    <!-- 3D CARD CONTAINER -->
-                    <div class="flex-1 card-scene mb-8 cursor-pointer animate-page-enter" onclick="Study.flip()">
-                        <div id="active-card" class="card-object">
-                            <!-- QUESTION SIDE -->
-                            <div class="card-face card-front">
-                                <div class="text-[11px] font-bold text-ios-subtext uppercase tracking-widest mb-6">Savol</div>
-                                <div class="study-question">${front}</div>
-                                <div class="absolute bottom-8 text-[11px] text-ios-blue opacity-60 animate-pulse" data-key="show_ans">Javobni Ko'rsatish</div>
+                        <div class="flex-1 mx-4">
+                            <div class="progress-bar">
+                                <div class="progress-fill" style="width: ${progress}%"></div>
                             </div>
-                            <!-- ANSWER SIDE -->
-                            <div class="card-face card-back">
-                                <div class="text-[11px] font-bold text-ios-subtext uppercase tracking-widest mb-6">Javob</div>
-                                <div class="study-answer">${back}</div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- CONTROLS -->
-                    <div class="flex flex-col gap-3 pb-4">
-                        <button id="btn-show" onclick="Study.flip()" class="w-full py-4 bg-ios-blue hover:bg-blue-600 text-white font-bold rounded-2xl shadow-[0_5px_15px_rgba(10,132,255,0.3)] tap-scale transition text-[17px]" data-key="show_ans">
-                            Javobni Ko'rsatish
-                        </button>
-
-                        <div id="grading-grid" class="hidden grid grid-cols-4 gap-2">
-                            <button onclick="Study.rate(1)" class="py-3 px-2 bg-ios-red/20 border border-ios-red text-ios-red rounded-xl font-bold text-xs active:bg-ios-red/40 transition flex flex-col items-center justify-center">
-                                <i class="fa-solid fa-arrow-rotate-left text-lg mb-1"></i>
-                                <span data-key="btn_again">Qayta</span>
-                                <span class="text-[9px] opacity-70 mt-0.5">1m</span>
-                            </button>
-                            <button onclick="Study.rate(2)" class="py-3 px-2 bg-ios-orange/20 border border-ios-orange text-ios-orange rounded-xl font-bold text-xs active:bg-ios-orange/40 transition flex flex-col items-center justify-center">
-                                <i class="fa-solid fa-hourglass-end text-lg mb-1"></i>
-                                <span data-key="btn_hard">Qiyin</span>
-                                <span class="text-[9px] opacity-70 mt-0.5">10m</span>
-                            </button>
-                            <button onclick="Study.rate(3)" class="py-3 px-2 bg-ios-green/20 border border-ios-green text-ios-green rounded-xl font-bold text-xs active:bg-ios-green/40 transition flex flex-col items-center justify-center">
-                                <i class="fa-solid fa-check text-lg mb-1"></i>
-                                <span data-key="btn_good">Yaxshi</span>
-                                <span class="text-[9px] opacity-70 mt-0.5">1d</span>
-                            </button>
-                            <button onclick="Study.rate(4)" class="py-3 px-2 bg-ios-blue/20 border border-ios-blue text-ios-blue rounded-xl font-bold text-xs active:bg-ios-blue/40 transition flex flex-col items-center justify-center">
-                                <i class="fa-solid fa-star text-lg mb-1"></i>
-                                <span data-key="btn_easy">Oson</span>
-                                <span class="text-[9px] opacity-70 mt-0.5">4d</span>
-                            </button>
-                        </div>
-                    </div>
-                `;
-                App.translateAll();
-            },
-
-            flip() {
-                if (this.flipped) return;
-                
-                this.flipped = true;
-                const card = document.getElementById('active-card');
-                const btnShow = document.getElementById('btn-show');
-                const gridding = document.getElementById('grading-grid');
-
-                if (card) card.classList.add('is-flipped');
-                if (btnShow) btnShow.classList.add('hidden');
-                if (gridding) {
-                    gridding.classList.remove('hidden');
-                    gridding.classList.add('grid');
-                }
-            },
-
-            rate(rating) {
-                // Algorithm hisoblash
-                const updated = Brain.calc(this.current, rating);
-                
-                // DB da yangilash
-                const idx = DB.state.cards.findIndex(c => c.id === updated.id);
-                if (idx >= 0) {
-                    DB.state.cards[idx] = updated;
-                }
-
-                // XP qo'shish
-                DB.state.user.xp += rating * 2;
-
-                // Heatmap yangilash
-                const today = new Date().toISOString().split('T')[0];
-                if (!DB.state.user.heatmap[today]) {
-                    DB.state.user.heatmap[today] = 0;
-                }
-                DB.state.user.heatmap[today]++;
-
-                // Streak yangilash
-                if (DB.state.user.lastStudy !== today) {
-                    DB.state.user.streak++;
-                    DB.state.user.lastStudy = today;
-                }
-
-                DB.save();
-
-                // Queue boshqarish
-                this.queue.shift();
-                if (rating === 1) {
-                    // Again bo'lsa, oxiriga qo'shish
-                    this.queue.push(updated);
-                }
-
-                // Keyingi karta
-                this.next();
-            },
-
-            finish() {
-                // Confetti effekti
-                confetti({
-                    particleCount: 100,
-                    spread: 60,
-                    origin: { y: 0.6 },
-                    colors: ['#0a84ff', '#30d158', '#ff9f0a', '#ff453a']
-                });
-
-                // Quotes ko'rsatish
-                const allQuotes = QUOTES[App.lang] || [];
-                if (allQuotes.length > 0) {
-                    const randomQuote = allQuotes[Math.floor(Math.random() * allQuotes.length)];
-                    const quoteText = document.getElementById('quote-text');
-                    const quoteAuthor = document.getElementById('quote-author');
-                    
-                    if (quoteText) quoteText.textContent = '"' + randomQuote.t + '"';
-                    if (quoteAuthor) quoteAuthor.textContent = randomQuote.a;
-                }
-
-                // Modalni ko'rsatish
-                const modal = document.getElementById('modal-finish');
-                if (modal) {
-                    modal.classList.remove('hidden');
-                    modal.classList.add('flex');
-                }
-            },
-
-            close() {
-                const modal = document.getElementById('modal-finish');
-                if (modal) {
-                    modal.classList.add('hidden');
-                    modal.classList.remove('flex');
-                }
-                Router.go('home');
-            }
-        };
-
-        // ==========================================
-        // 9. INITIALIZATION (BOSHLASH)
-        // ==========================================
-        window.addEventListener('DOMContentLoaded', () => {
-            App.init();
-        });
-    </script>
-</body>
-</html>
+                            <p
