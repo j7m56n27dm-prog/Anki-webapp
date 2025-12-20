@@ -2,8 +2,9 @@
 <html lang="uz">
 <head>
   <meta charset="UTF-8" />
-  <title>Nur & Ilm Hand Control</title>
+  <title>Nur & Ilm — Digital Tadabbur</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
   <style>
     html, body {
       margin: 0;
@@ -13,113 +14,85 @@
       background: #050505;
       overflow: hidden;
       font-family: system-ui, sans-serif;
-      color: #f5f5f5;
+      color: #f2f2f2;
     }
-    #overlay {
-      position: absolute;
-      top: 24px;
-      width: 100%;
-      text-align: center;
-      pointer-events: none;
-    }
-    #ayah {
-      font-size: 26px;
-      line-height: 1.8;
-      opacity: 0;
-      transition: opacity 3s ease;
-    }
-    #translation {
-      font-size: 13px;
-      opacity: 0.6;
-      margin-top: 6px;
-    }
-    #insight {
-      margin-top: 14px;
-      font-size: 14px;
-      opacity: 0;
-      transition: opacity 2s ease;
-    }
-    #start {
-      position: absolute;
+
+    canvas { display: block; }
+
+    #start-overlay {
+      position: fixed;
       inset: 0;
+      background: #050505;
       display: flex;
       align-items: center;
       justify-content: center;
-      background: #050505;
+      z-index: 10;
     }
-    #start button {
+
+    #start-overlay button {
       background: none;
       border: 1px solid #d4af37;
       color: #d4af37;
-      padding: 14px 28px;
+      padding: 16px 36px;
       font-size: 16px;
+      letter-spacing: 0.1em;
       cursor: pointer;
+    }
+
+    #text-overlay {
+      position: fixed;
+      top: 28px;
+      width: 100%;
+      text-align: center;
+      pointer-events: none;
+      z-index: 5;
+    }
+
+    #ayah {
+      font-size: 26px;
+      line-height: 1.9;
+      opacity: 0;
+      transition: opacity 3s ease;
+    }
+
+    #translation {
+      margin-top: 6px;
+      font-size: 13px;
+      opacity: 0.6;
     }
   </style>
 
-  <!-- Three.js -->
+  <!-- THREE -->
   <script src="https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.min.js"></script>
 
-  <!-- MediaPipe Hands -->
+  <!-- MEDIAPIPE -->
   <script src="https://cdn.jsdelivr.net/npm/@mediapipe/hands/hands.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils/camera_utils.js"></script>
 </head>
+
 <body>
 
-<div id="start">
-  <button id="startBtn">Boshlash</button>
+<div id="start-overlay">
+  <button id="start-btn">BOSHLASH</button>
 </div>
 
-<div id="overlay">
-  <div id="ayah"></div>
-  <div id="translation"></div>
-  <div id="insight"></div>
+<div id="text-overlay">
+  <div id="ayah">﴿اللَّهُ نُورُ السَّمَاوَاتِ وَالْأَرْضِ﴾</div>
+  <div id="translation">Alloh osmonlar va yerning nuridir</div>
 </div>
 
 <script>
-/* ===========================
-   MAJBURIY OYATLAR KETMA-KETLIGI
-   =========================== */
-
-const AYATS = [
-  {
-    ar: "﴿اللَّهُ نُورُ السَّمَاوَاتِ وَالْأَرْضِ﴾",
-    uz: "Alloh osmonlar va yerning nuridir",
-    hikmah: "— Ilm hikmati: Nur – mavjudlikni anglash kalitidir."
-  },
-  {
-    ar: "﴿اقْرَأْ بِاسْمِ رَبِّكَ الَّذِي خَلَقَ﴾",
-    uz: "Yaratgan Robbing nomi bilan o‘qi",
-    hikmah: "— Ilm hikmati: Bilish ibodat bilan boshlanadi."
-  },
-  {
-    ar: "﴿هَلْ يَسْتَوِي الَّذِينَ يَعْلَمُونَ وَالَّذِينَ لَا يَعْلَمُونَ﴾",
-    uz: "Biladiganlar bilan bilmaydiganlar teng bo‘lurmi?",
-    hikmah: "— Ilm hikmati: Aql – mas’uliyatdir."
-  },
-  {
-    ar: "﴿أَوَلَمْ يَرَ الَّذِينَ كَفَرُوا أَنَّ السَّمَاوَاتِ وَالْأَرْضَ كَانَتَا رَتْقًا﴾",
-    uz: "Osmonlar va yer bir butun bo‘lganini ko‘rmaydilarmi?",
-    hikmah: "— Ilm hikmati: Koinot kengayishda davom etmoqda."
-  },
-  {
-    ar: "﴿أَفَلَا يَنْظُرُونَ إِلَى الْإِبِلِ كَيْفَ خُلِقَتْ﴾",
-    uz: "Ular yaratilishga nazar solmaydilarmi?",
-    hikmah: "— Ilm hikmati: Tafakkur – kuzatishdan boshlanadi."
-  },
-  {
-    ar: "﴿سَنُرِيهِمْ آيَاتِنَا فِي الْآفَاقِ وَفِي أَنْفُسِهِمْ﴾",
-    uz: "Biz ularga oyatlarimizni ufqlarda va o‘zlarida ko‘rsatamiz",
-    hikmah: "— Ilm hikmati: Ichki va tashqi olam uyg‘un."
-  }
-];
-
-/* ===========================
+/* ============================================================
    THREE.JS SAHNA
-   =========================== */
-
+   ============================================================ */
 const scene = new THREE.Scene();
-const camera = new THREE.PerspectiveCamera(60, innerWidth / innerHeight, 0.1, 100);
+
+const camera = new THREE.PerspectiveCamera(
+  60,
+  innerWidth / innerHeight,
+  0.1,
+  100
+);
 camera.position.z = 3;
 
 const renderer = new THREE.WebGLRenderer({ antialias: true });
@@ -127,63 +100,60 @@ renderer.setSize(innerWidth, innerHeight);
 renderer.setClearColor(0x050505);
 document.body.appendChild(renderer.domElement);
 
+/* ZARRALAR */
 const COUNT = 15000;
 const geometry = new THREE.BufferGeometry();
 const positions = new Float32Array(COUNT * 3);
 
-function sphereShape(scale) {
-  for (let i = 0; i < COUNT; i++) {
-    const r = Math.cbrt(Math.random()) * scale;
-    const t = Math.random() * Math.PI * 2;
-    const p = Math.acos(2 * Math.random() - 1);
-    positions[i*3]   = r * Math.sin(p) * Math.cos(t);
-    positions[i*3+1] = r * Math.sin(p) * Math.sin(t);
-    positions[i*3+2] = r * Math.cos(p);
-  }
+for (let i = 0; i < COUNT; i++) {
+  const r = Math.cbrt(Math.random());
+  const t = Math.random() * Math.PI * 2;
+  const p = Math.acos(2 * Math.random() - 1);
+
+  positions[i*3]   = r * Math.sin(p) * Math.cos(t);
+  positions[i*3+1] = r * Math.sin(p) * Math.sin(t);
+  positions[i*3+2] = r * Math.cos(p);
 }
 
-sphereShape(1);
 geometry.setAttribute("position", new THREE.BufferAttribute(positions, 3));
 
 const material = new THREE.PointsMaterial({
-  color: 0xfff5cc,
+  color: 0xfff6cc,
   size: 0.01,
-  blending: THREE.AdditiveBlending
+  blending: THREE.AdditiveBlending,
+  depthWrite: false
 });
 
-const points = new THREE.Points(geometry, material);
-scene.add(points);
+const particles = new THREE.Points(geometry, material);
+scene.add(particles);
 
-/* ===========================
-   QALB ↔ KOINOT MORFING
-   =========================== */
+/* ============================================================
+   IKKI QO‘L → QALB ↔ KOINOT
+   ============================================================ */
+let targetZ = 3;
 
-let morphTarget = 1;
+function applyTwoHands(hands) {
+  if (hands.length === 2) {
+    const a = hands[0][8];
+    const b = hands[1][8];
 
-function morph() {
-  morphTarget = morphTarget === 1 ? 2.2 : 1;
-}
+    const dx = a.x - b.x;
+    const dy = a.y - b.y;
+    const dist = Math.sqrt(dx * dx + dy * dy);
 
-/* ===========================
-   IKKI QO‘L TAFAKKUR MEKANIKASI
-   =========================== */
-
-let calmness = 0.5;
-
-function applyHands(landmarks) {
-  if (landmarks.length === 2) {
-    const dx = landmarks[0][8].x - landmarks[1][8].x;
-    const dy = landmarks[0][8].y - landmarks[1][8].y;
-    const dist = Math.sqrt(dx*dx + dy*dy);
-    camera.position.z = 2 + dist * 5;
-    calmness = Math.max(0.1, Math.min(1, dist));
+    // yaqin → qalb (2)
+    // uzoq → koinot (6)
+    targetZ = THREE.MathUtils.clamp(
+      THREE.MathUtils.mapLinear(dist, 0.1, 0.6, 2, 6),
+      2,
+      6
+    );
   }
 }
 
-/* ===========================
-   MEDIA PIPE
-   =========================== */
-
+/* ============================================================
+   MEDIAPIPE
+   ============================================================ */
 const hands = new Hands({
   locateFile: f => `https://cdn.jsdelivr.net/npm/@mediapipe/hands/${f}`
 });
@@ -197,7 +167,7 @@ hands.setOptions({
 
 hands.onResults(res => {
   if (res.multiHandLandmarks) {
-    applyHands(res.multiHandLandmarks);
+    applyTwoHands(res.multiHandLandmarks);
   }
 });
 
@@ -213,48 +183,21 @@ const cam = new Camera(video, {
   height: 480
 });
 
-/* ===========================
-   OYAT + HIKMAH ROTATSIYASI
-   =========================== */
-
-let ayahIndex = 0;
-const ayahEl = document.getElementById("ayah");
-const trEl = document.getElementById("translation");
-const insEl = document.getElementById("insight");
-
-function showAyah() {
-  const a = AYATS[ayahIndex];
-  ayahEl.textContent = a.ar;
-  trEl.textContent = a.uz;
-  insEl.textContent = a.hikmah;
-  ayahEl.style.opacity = 1;
-  insEl.style.opacity = 1;
-}
-
-setInterval(() => {
-  ayahIndex = (ayahIndex + 1) % AYATS.length;
-  showAyah();
-  morph();
-}, 15000);
-
-/* ===========================
-   ANIMATSIYA
-   =========================== */
-
+/* ============================================================
+   ANIMATSIYA — NAFASGA O‘XSHASH
+   ============================================================ */
 function animate() {
-  points.rotation.y += 0.0003 * calmness;
-  points.scale.lerp(new THREE.Vector3(morphTarget, morphTarget, morphTarget), 0.02);
+  camera.position.z += (targetZ - camera.position.z) * 0.04;
   renderer.render(scene, camera);
   requestAnimationFrame(animate);
 }
 
-/* ===========================
+/* ============================================================
    START
-   =========================== */
-
-document.getElementById("startBtn").onclick = () => {
-  document.getElementById("start").remove();
-  showAyah();
+   ============================================================ */
+document.getElementById("start-btn").onclick = () => {
+  document.getElementById("start-overlay").remove();
+  document.getElementById("ayah").style.opacity = 1;
   cam.start();
   animate();
 };
@@ -262,6 +205,6 @@ document.getElementById("startBtn").onclick = () => {
 
 </body>
 </html>
-  </file>
+</file>
 
 </project>
