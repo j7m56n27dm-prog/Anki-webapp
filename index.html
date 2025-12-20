@@ -1,624 +1,385 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="uz">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Nebula Hand Control</title>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r160/three.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@mediapipe/hands@0.4.1646424915/hands.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils@0.4.1646424915/camera_utils.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@mediapipe/drawing_utils@0.4.1646424915/drawing_utils.min.js"></script>
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        body {
-            background: #050505;
-            color: #fff;
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            overflow: hidden;
-            width: 100vw;
-            height: 100vh;
-        }
-
-        #canvas {
-            display: block;
-            width: 100%;
-            height: 100%;
-        }
-
-        #video {
-            display: none;
-        }
-
-        .ui-overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            pointer-events: none;
-            z-index: 10;
-        }
-
-        .start-button {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            padding: 20px 60px;
-            font-size: 18px;
-            font-weight: 600;
-            color: #050505;
-            background: linear-gradient(135deg, #00d9ff, #0099ff);
-            border: none;
-            border-radius: 50px;
-            cursor: pointer;
-            box-shadow: 0 0 30px rgba(0, 217, 255, 0.5);
-            transition: all 0.3s ease;
-            pointer-events: all;
-            z-index: 100;
-        }
-
-        .start-button:hover {
-            transform: translate(-50%, -50%) scale(1.1);
-            box-shadow: 0 0 50px rgba(0, 217, 255, 0.8);
-        }
-
-        .start-button.hidden {
-            display: none;
-        }
-
-        .info-panel {
-            position: absolute;
-            bottom: 20px;
-            left: 20px;
-            background: rgba(5, 5, 5, 0.9);
-            border: 1px solid rgba(0, 217, 255, 0.3);
-            border-radius: 8px;
-            padding: 15px 20px;
-            font-size: 12px;
-            color: #00d9ff;
-            pointer-events: all;
-            max-width: 280px;
-            backdrop-filter: blur(10px);
-        }
-
-        .info-panel p {
-            margin: 8px 0;
-            line-height: 1.4;
-        }
-
-        .shape-indicator {
-            position: absolute;
-            top: 20px;
-            right: 20px;
-            background: rgba(5, 5, 5, 0.9);
-            border: 2px solid rgba(0, 217, 255, 0.5);
-            border-radius: 8px;
-            padding: 15px 25px;
-            font-size: 14px;
-            color: #00d9ff;
-            text-align: center;
-            pointer-events: all;
-            backdrop-filter: blur(10px);
-            min-width: 150px;
-        }
-
-        .shape-name {
-            font-weight: 600;
-            font-size: 16px;
-            text-transform: uppercase;
-            letter-spacing: 2px;
-        }
-
-        .hand-count {
-            position: absolute;
-            top: 20px;
-            left: 20px;
-            background: rgba(5, 5, 5, 0.9);
-            border: 1px solid rgba(0, 217, 255, 0.3);
-            border-radius: 8px;
-            padding: 10px 15px;
-            font-size: 12px;
-            color: #00d9ff;
-            pointer-events: all;
-            backdrop-filter: blur(10px);
-        }
-
-        .copyright {
-            position: absolute;
-            bottom: 15px;
-            right: 15px;
-            font-size: 11px;
-            color: rgba(0, 217, 255, 0.4);
-            pointer-events: all;
-        }
-    </style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Nur & Ilm - Tadabbur</title>
+  <script crossorigin src="https://unpkg.com/react@19/umd/react.production.min.js"></script>
+  <script crossorigin src="https://unpkg.com/react-dom@19/umd/react-dom.production.min.js"></script>
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/three@r160/build/three.min.js"></script>
+  <script async src="https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils@0.4.1646424915/camera_utils.js"></script>
+  <script async src="https://cdn.jsdelivr.net/npm/@mediapipe/drawing_utils@0.4.1646424915/drawing_utils.js"></script>
+  <script async src="https://cdn.jsdelivr.net/npm/@mediapipe/hands@0.4.1646424915/hands.js"></script>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { background: #050505; color: #e0e0e0; font-family: 'Inter', -apple-system, sans-serif; overflow: hidden; width: 100vw; height: 100vh; }
+    #root { width: 100%; height: 100%; }
+    canvas { display: block; }
+    video { display: none; }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(-20px); } to { opacity: 1; transform: translateY(0); } }
+    .ayah { font-size: 48px; color: #00d4ff; text-shadow: 0 0 20px rgba(0,212,255,0.8); font-weight: bold; margin-bottom: 20px; animation: fadeIn 2s ease-in-out; }
+    .uzbek { font-size: 18px; color: #e0e0e0; max-width: 600px; line-height: 1.6; }
+    .hikmah { font-size: 16px; color: #ffd700; font-style: italic; max-width: 500px; animation: fadeIn 1s ease-in-out; margin-top: 40px; }
+    .author { font-size: 12px; color: #a0a0a0; margin-top: 10px; }
+    button { padding: 12px 30px; font-size: 14px; background: #00d4ff; border: none; border-radius: 6px; cursor: pointer; color: #050505; font-weight: bold; box-shadow: 0 0 15px rgba(0,212,255,0.6); }
+    button:hover { box-shadow: 0 0 25px rgba(0,212,255,0.8); transform: scale(1.05); }
+    .start-btn { padding: 20px 40px; font-size: 18px; }
+  </style>
 </head>
 <body>
-    <canvas id="canvas"></canvas>
-    <video id="video" width="640" height="480" playsinline></video>
-    
-    <div class="ui-overlay">
-        <button class="start-button" id="startBtn">START NEBULA</button>
-        <div class="hand-count" id="handCount">Hands: 0</div>
-        <div class="shape-indicator" id="shapeIndicator">
-            <div class="shape-name" id="shapeName">SPHERE</div>
-        </div>
-        <div class="info-panel">
-            <p><strong>Controls:</strong></p>
-            <p>🖐️ Hand position → Rotate</p>
-            <p>✌️ Pinch → Attract/Repel</p>
-            <p>👋 Swipe → Change shape</p>
-            <p>🤝 Two hands → Zoom</p>
-        </div>
-        <div class="copyright">© 2025 Muhammad Daler - Nebula Hand Control</div>
-    </div>
+  <div id="root"></div>
+  <script type="text/babel">
+    // Qur'on Data
+    const AYAHS = [
+      {
+        id: 'an-nur-35',
+        arabic: 'اللَّهُ نُورُ السَّمَاوَاتِ وَالْأَرْضِ',
+        uzbek: 'Alloh osmonlar va yerning nuri',
+        theme: 'nur',
+        shape: 'nurSphere',
+      },
+      {
+        id: 'al-alaq-1',
+        arabic: 'بِسْمِ رَبِّكَ الَّذِي خَلَقَ',
+        uzbek: 'Rab nomida o\'qi, kimsan yamasi yaratdi',
+        theme: 'ilm',
+        shape: 'ayahHalo',
+      },
+      {
+        id: 'az-zumar-9',
+        arabic: 'قُلْ هَلْ يَسْتَوِي الَّذِينَ يَعْلَمُونَ',
+        uzbek: 'Aytingki: biluvchilar va bilmaslari teng bola',
+        theme: 'tafakkur',
+        shape: 'knowledgeSpiral',
+      },
+      {
+        id: 'al-anbiya-30',
+        arabic: 'أَوَلَمْ يَرَ الَّذِينَ كَفَرُوا أَنَّ السَّمَاوَاتِ وَالْأَرْضَ كَانَتَا رَتْقًا',
+        uzbek: 'Osmon va yer bir qolibda edi, Biz uni ajratdik',
+        theme: 'koinot',
+        shape: 'cosmicExpansion',
+      },
+      {
+        id: 'al-ghashiyah-17',
+        arabic: 'أَفَلَا يَنظُرُونَ إِلَى الْإِبِلِ كَيْفَ خُلِقَتْ',
+        uzbek: 'Ularning bunyodini ko\'rasanmi',
+        theme: 'yaratilish',
+        shape: 'qalbField',
+      },
+      {
+        id: 'fussilat-53',
+        arabic: 'سَنُرِيهِمْ آيَاتِنَا فِي الْآفَاقِ',
+        uzbek: 'Ufqda va o\'zlarida Biz alamatlarni ko\'rsatamiz',
+        theme: 'alamat',
+        shape: 'nurSphere',
+      },
+    ];
 
-    <script>
-        // ==================== CONFIGURATION ====================
-        const CONFIG = {
-            particleCount: 15000,
-            shapes: ['SPHERE', 'HEART', 'FLOWER', 'SATURN', 'FIREWORKS'],
-            audioEnabled: false,
-            handSmoothing: 0.15,
-            particleLerpSpeed: 0.08,
-        };
+    const HIKMAH = [
+      { author: 'Ibn Sina', text: 'Ilm — qalbning nur, aql — ruhning shodiyasi', category: 'ibn-sina' },
+      { author: 'Al-Farabi', text: 'Intellekt sarflash — kosmosning garmoniyasiga erishish', category: 'al-farabi' },
+      { author: 'Al-Biruni', text: 'Koinotni o\'rganish — Yaratuvchini qabul qilishdir', category: 'al-biruni' },
+      { author: 'Imam Ghazali', text: 'Qalb va aql — ikkita qanotli qushlar singari', category: 'ghazali' },
+      { author: 'Mirzo Ulugbek', text: 'Yulduzlarni o\'rganish — mangu haqiqatni bilishdir', category: 'ulugbek' },
+    ];
 
-        // ==================== STATE ====================
-        const state = {
-            started: false,
-            currentShapeIndex: 0,
-            hands: [],
-            audioContext: null,
-            audioEngine: null,
-        };
+    // Particle Shape Generators
+    const generateNurSphere = (count) => {
+      const positions = new Float32Array(count * 3);
+      for (let i = 0; i < count; i++) {
+        const theta = Math.random() * Math.PI * 2;
+        const phi = Math.acos(Math.random() * 2 - 1);
+        const r = 1 + Math.random() * 0.3;
+        positions[i * 3] = r * Math.sin(phi) * Math.cos(theta);
+        positions[i * 3 + 1] = r * Math.sin(phi) * Math.sin(theta);
+        positions[i * 3 + 2] = r * Math.cos(phi);
+      }
+      return positions;
+    };
 
-        // ==================== THREE.JS SETUP ====================
-        const canvas = document.getElementById('canvas');
+    const generateCosmicExpansion = (count) => {
+      const positions = new Float32Array(count * 3);
+      for (let i = 0; i < count; i++) {
+        const theta = Math.random() * Math.PI * 2;
+        const phi = Math.random() * Math.PI;
+        const r = Math.random() * 2;
+        positions[i * 3] = r * Math.sin(phi) * Math.cos(theta);
+        positions[i * 3 + 1] = r * Math.sin(phi) * Math.sin(theta);
+        positions[i * 3 + 2] = r * Math.cos(phi);
+      }
+      return positions;
+    };
+
+    // Audio Engine
+    class AudioEngine {
+      constructor() {
+        this.audioContext = null;
+        this.oscillator = null;
+        this.gainNode = null;
+        this.filter = null;
+      }
+
+      async initialize() {
+        if (this.audioContext) return;
+        this.audioContext = new (window.AudioContext || window.webkitAudioContext)();
+        await this.audioContext.resume();
+
+        this.oscillator = this.audioContext.createOscillator();
+        this.gainNode = this.audioContext.createGain();
+        this.filter = this.audioContext.createBiquadFilter();
+
+        this.oscillator.frequency.value = 55;
+        this.oscillator.type = 'sine';
+        this.gainNode.gain.value = 0.05;
+        this.filter.type = 'lowpass';
+        this.filter.frequency.value = 800;
+
+        this.oscillator.connect(this.filter);
+        this.filter.connect(this.gainNode);
+        this.gainNode.connect(this.audioContext.destination);
+        this.oscillator.start();
+      }
+
+      modulate(pinchStrength) {
+        if (!this.audioContext) return;
+        const clampedPinch = Math.max(0, Math.min(1, 1 - pinchStrength));
+        this.gainNode.gain.setTargetAtTime(clampedPinch * 0.1, this.audioContext.currentTime, 0.1);
+        this.filter.frequency.setTargetAtTime(800 + clampedPinch * 600, this.audioContext.currentTime, 0.1);
+      }
+
+      playWhoosh() {
+        if (!this.audioContext) return;
+        const now = this.audioContext.currentTime;
+        const noise = this.audioContext.createBufferSource();
+        const buffer = this.audioContext.createBuffer(1, this.audioContext.sampleRate * 0.5, this.audioContext.sampleRate);
+        const data = buffer.getChannelData(0);
+        for (let i = 0; i < buffer.length; i++) {
+          data[i] = Math.random() * 2 - 1;
+        }
+        noise.buffer = buffer;
+        const noiseGain = this.audioContext.createGain();
+        const noiseFilter = this.audioContext.createBiquadFilter();
+        noiseFilter.type = 'bandpass';
+        noiseFilter.frequency.setValueAtTime(200, now);
+        noiseFilter.frequency.exponentialRampToValueAtTime(1000, now + 0.3);
+        noiseGain.gain.setValueAtTime(0.3, now);
+        noiseGain.gain.exponentialRampToValueAtTime(0.01, now + 0.3);
+        noise.connect(noiseFilter);
+        noiseFilter.connect(noiseGain);
+        noiseGain.connect(this.audioContext.destination);
+        noise.start(now);
+        noise.stop(now + 0.3);
+      }
+    }
+
+    // Main App Component
+    function App() {
+      const [started, setStarted] = React.useState(false);
+      const [currentAyahIdx, setCurrentAyahIdx] = React.useState(0);
+      const [showHikmah, setShowHikmah] = React.useState(false);
+      const containerRef = React.useRef(null);
+      const audioEngineRef = React.useRef(new AudioEngine());
+      const sceneRef = React.useRef(null);
+      const rendererRef = React.useRef(null);
+      const cameraRef = React.useRef(null);
+      const particlesRef = React.useRef(null);
+      const handsRef = React.useRef([]);
+      const pinchStrengthRef = React.useRef(0);
+
+      const currentAyah = AYAHS[currentAyahIdx];
+      const currentHikmah = HIKMAH[currentAyahIdx % HIKMAH.length];
+
+      const handleStart = async () => {
+        await audioEngineRef.current.initialize();
+        setStarted(true);
+        initializeThreeJS();
+      };
+
+      const initializeThreeJS = () => {
+        if (!containerRef.current) return;
+
+        // Scene setup
         const scene = new THREE.Scene();
+        sceneRef.current = scene;
+        scene.background = new THREE.Color(0x050505);
+
         const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
-        const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true });
-        
+        camera.position.z = 3;
+        cameraRef.current = camera;
+
+        const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
         renderer.setSize(window.innerWidth, window.innerHeight);
-        renderer.setClearColor(0x050505, 1);
-        camera.position.z = 25;
+        renderer.setPixelRatio(window.devicePixelRatio);
+        containerRef.current.appendChild(renderer.domElement);
+        rendererRef.current = renderer;
 
-        // ==================== PARTICLE SYSTEM ====================
-        let particleGeometry;
-        let particleMesh;
-        let targetPositions = new Float32Array(CONFIG.particleCount * 3);
-        let currentPositions = new Float32Array(CONFIG.particleCount * 3);
+        // Particles
+        const particleCount = 15000;
+        const geometry = new THREE.BufferGeometry();
+        const positions = generateNurSphere(particleCount);
+        geometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
 
-        function createParticleSystem() {
-            if (particleMesh) scene.remove(particleMesh);
+        const canvas = document.createElement('canvas');
+        canvas.width = 64;
+        canvas.height = 64;
+        const ctx = canvas.getContext('2d');
+        const gradient = ctx.createRadialGradient(32, 32, 0, 32, 32, 32);
+        gradient.addColorStop(0, 'rgba(255, 255, 255, 1)');
+        gradient.addColorStop(0.5, 'rgba(255, 255, 255, 0.5)');
+        gradient.addColorStop(1, 'rgba(255, 255, 255, 0)');
+        ctx.fillStyle = gradient;
+        ctx.fillRect(0, 0, 64, 64);
+        const texture = new THREE.CanvasTexture(canvas);
 
-            particleGeometry = new THREE.BufferGeometry();
-            const positions = generateSphereParticles(CONFIG.particleCount);
-            
-            particleGeometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
-            
-            const canvas = createParticleTexture();
-            const texture = new THREE.CanvasTexture(canvas);
+        const material = new THREE.PointsMaterial({
+          size: 0.01,
+          sizeAttenuation: true,
+          map: texture,
+          transparent: true,
+          depthWrite: false,
+          blending: THREE.AdditiveBlending,
+        });
 
-            const material = new THREE.PointsMaterial({
-                size: 0.15,
-                map: texture,
-                transparent: true,
-                sizeAttenuation: true,
-                blending: THREE.AdditiveBlending,
-            });
+        const points = new THREE.Points(geometry, material);
+        scene.add(points);
+        particlesRef.current = points;
 
-            particleMesh = new THREE.Points(particleGeometry, material);
-            scene.add(particleMesh);
+        const light = new THREE.PointLight(0xffffff, 1);
+        light.position.set(5, 5, 5);
+        scene.add(light);
 
-            currentPositions = positions.slice();
-            targetPositions = positions.slice();
-        }
-
-        function createParticleTexture() {
-            const canvas = document.createElement('canvas');
-            canvas.width = 128;
-            canvas.height = 128;
-            const ctx = canvas.getContext('2d');
-
-            const gradient = ctx.createRadialGradient(64, 64, 0, 64, 64, 64);
-            gradient.addColorStop(0, 'rgba(0, 217, 255, 1)');
-            gradient.addColorStop(0.5, 'rgba(0, 150, 255, 0.5)');
-            gradient.addColorStop(1, 'rgba(0, 100, 255, 0)');
-
-            ctx.fillStyle = gradient;
-            ctx.fillRect(0, 0, 128, 128);
-
-            return canvas;
-        }
-
-        function generateSphereParticles(count) {
-            const positions = new Float32Array(count * 3);
-            for (let i = 0; i < count; i++) {
-                const theta = Math.random() * Math.PI * 2;
-                const phi = Math.acos(Math.random() * 2 - 1);
-                const radius = 8;
-
-                positions[i * 3] = radius * Math.sin(phi) * Math.cos(theta);
-                positions[i * 3 + 1] = radius * Math.sin(phi) * Math.sin(theta);
-                positions[i * 3 + 2] = radius * Math.cos(phi);
-            }
-            return positions;
-        }
-
-        function generateHeartParticles(count) {
-            const positions = new Float32Array(count * 3);
-            for (let i = 0; i < count; i++) {
-                const t = (i / count) * Math.PI * 2;
-                const scale = 4;
-
-                const x = 16 * Math.pow(Math.sin(t), 3);
-                const y = 13 * Math.cos(t) - 5 * Math.cos(2 * t) - 2 * Math.cos(3 * t) - Math.cos(4 * t);
-
-                positions[i * 3] = (x / 5) + (Math.random() - 0.5) * 0.5;
-                positions[i * 3 + 1] = (y / 5) + (Math.random() - 0.5) * 0.5;
-                positions[i * 3 + 2] = (Math.random() - 0.5) * 2;
-            }
-            return positions;
-        }
-
-        function generateFlowerParticles(count) {
-            const positions = new Float32Array(count * 3);
-            for (let i = 0; i < count; i++) {
-                const t = (i / count) * Math.PI * 2;
-                const r = 8 * Math.sin(5 * t);
-                const x = r * Math.cos(t);
-                const y = r * Math.sin(t);
-
-                positions[i * 3] = x + (Math.random() - 0.5) * 0.3;
-                positions[i * 3 + 1] = y + (Math.random() - 0.5) * 0.3;
-                positions[i * 3 + 2] = (Math.random() - 0.5) * 2;
-            }
-            return positions;
-        }
-
-        function generateSaturnParticles(count) {
-            const positions = new Float32Array(count * 3);
-            const coreCount = Math.floor(count * 0.6);
-            const ringCount = count - coreCount;
-
-            for (let i = 0; i < coreCount; i++) {
-                const theta = Math.random() * Math.PI * 2;
-                const phi = Math.acos(Math.random() * 2 - 1);
-                const radius = 4;
-
-                positions[i * 3] = radius * Math.sin(phi) * Math.cos(theta);
-                positions[i * 3 + 1] = radius * Math.sin(phi) * Math.sin(theta);
-                positions[i * 3 + 2] = radius * Math.cos(phi);
-            }
-
-            for (let i = coreCount; i < count; i++) {
-                const theta = Math.random() * Math.PI * 2;
-                const distance = 10 + Math.random() * 1;
-
-                positions[i * 3] = distance * Math.cos(theta);
-                positions[i * 3 + 1] = (Math.random() - 0.5) * 1;
-                positions[i * 3 + 2] = distance * Math.sin(theta);
-            }
-            return positions;
-        }
-
-        function generateFireworksParticles(count) {
-            const positions = new Float32Array(count * 3);
-            for (let i = 0; i < count; i++) {
-                const theta = Math.random() * Math.PI * 2;
-                const phi = Math.random() * Math.PI;
-                const radius = Math.random() * 15;
-
-                positions[i * 3] = radius * Math.sin(phi) * Math.cos(theta);
-                positions[i * 3 + 1] = radius * Math.sin(phi) * Math.sin(theta);
-                positions[i * 3 + 2] = radius * Math.cos(phi);
-            }
-            return positions;
-        }
-
-        function changeShape(index) {
-            const shapeGenerators = [
-                generateSphereParticles,
-                generateHeartParticles,
-                generateFlowerParticles,
-                generateSaturnParticles,
-                generateFireworksParticles,
-            ];
-
-            targetPositions = shapeGenerators[index](CONFIG.particleCount);
-            document.getElementById('shapeName').textContent = CONFIG.shapes[index];
-
-            if (state.audioEngine) {
-                state.audioEngine.playSFX();
-            }
-        }
-
-        // ==================== AUDIO ENGINE ====================
-        class AudioEngine {
-            constructor(audioContext) {
-                this.ctx = audioContext;
-                this.droneOscillator = null;
-                this.droneLowPass = null;
-                this.droneGain = null;
-                this.isPlaying = false;
-            }
-
-            start() {
-                if (this.isPlaying) return;
-                this.isPlaying = true;
-
-                this.droneOscillator = this.ctx.createOscillator();
-                this.droneOscillator.type = 'sine';
-                this.droneOscillator.frequency.value = 55;
-
-                this.droneLowPass = this.ctx.createBiquadFilter();
-                this.droneLowPass.type = 'lowpass';
-                this.droneLowPass.frequency.value = 2000;
-                this.droneLowPass.Q.value = 2;
-
-                this.droneGain = this.ctx.createGain();
-                this.droneGain.gain.value = 0.1;
-
-                this.droneOscillator.connect(this.droneLowPass);
-                this.droneLowPass.connect(this.droneGain);
-                this.droneGain.connect(this.ctx.destination);
-
-                this.droneOscillator.start();
-            }
-
-            updatePinch(pinchDistance) {
-                if (!this.isPlaying) return;
-
-                const freq = 55 + pinchDistance * 500;
-                const cutoff = 800 + pinchDistance * 1500;
-                const volume = Math.max(0.05, 0.3 - pinchDistance * 0.2);
-
-                this.droneOscillator.frequency.setValueAtTime(freq, this.ctx.currentTime);
-                this.droneLowPass.frequency.setValueAtTime(cutoff, this.ctx.currentTime);
-                this.droneGain.gain.setValueAtTime(volume, this.ctx.currentTime);
-            }
-
-            playSFX() {
-                const noise = this.ctx.createBufferSource();
-                const buffer = this.ctx.createBuffer(1, this.ctx.sampleRate * 0.3, this.ctx.sampleRate);
-                const data = buffer.getChannelData(0);
-
-                for (let i = 0; i < buffer.length; i++) {
-                    data[i] = Math.random() * 2 - 1;
-                }
-
-                noise.buffer = buffer;
-
-                const filter = this.ctx.createBiquadFilter();
-                filter.type = 'bandpass';
-                filter.frequency.setValueAtTime(5000, this.ctx.currentTime);
-                filter.frequency.exponentialRampToValueAtTime(500, this.ctx.currentTime + 0.3);
-
-                const gain = this.ctx.createGain();
-                gain.gain.setValueAtTime(0.3, this.ctx.currentTime);
-                gain.gain.exponentialRampToValueAtTime(0.01, this.ctx.currentTime + 0.3);
-
-                noise.connect(filter);
-                filter.connect(gain);
-                gain.connect(this.ctx.destination);
-
-                noise.start();
-            }
-
-            stop() {
-                if (this.droneOscillator) {
-                    this.droneOscillator.stop();
-                    this.isPlaying = false;
-                }
-            }
-        }
-
-        // ==================== MEDIAPIPE SETUP ====================
-        const videoElement = document.getElementById('video');
-        const canvasElement = canvas;
-        let mediaStreamCreated = false;
-
-        async function initMediaPipe() {
-            const hands = new Hands({
-                locateFile: (file) => {
-                    return `https://cdn.jsdelivr.net/npm/@mediapipe/hands@0.4.1646424915/${file}`;
-                },
-            });
-
-            hands.setOptions({
-                maxNumHands: 2,
-                modelComplexity: 1,
-                minDetectionConfidence: 0.5,
-                minTrackingConfidence: 0.5,
-            });
-
-            hands.onResults((results) => {
-                state.hands = results.multiHandLandmarks || [];
-                document.getElementById('handCount').textContent = `Hands: ${state.hands.length}`;
-            });
-
-            if (!mediaStreamCreated) {
-                const camera = new Camera(videoElement, {
-                    onFrame: async () => {
-                        await hands.send({ image: videoElement });
-                    },
-                    width: 640,
-                    height: 480,
-                });
-                await camera.initialize();
-                await camera.start();
-                mediaStreamCreated = true;
-            }
-        }
-
-        // ==================== HAND INTERACTION ====================
-        const handState = {
-            left: { position: null, pinchDistance: 0, lastSwipeX: 0 },
-            right: { position: null, pinchDistance: 0, lastSwipeX: 0 },
+        // Animation loop
+        const animate = () => {
+          requestAnimationFrame(animate);
+          renderer.render(scene, camera);
         };
-
-        function processHands() {
-            if (state.hands.length === 0) return;
-
-            if (state.hands.length >= 1) {
-                const landmarks = state.hands[0];
-                const indexFinger = landmarks[8];
-                const thumb = landmarks[4];
-                const middleFinger = landmarks[12];
-
-                const pinchDist = Math.hypot(
-                    indexFinger.x - thumb.x,
-                    indexFinger.y - thumb.y
-                );
-
-                handState.left.pinchDistance = pinchDist;
-                handState.left.position = indexFinger;
-
-                if (Math.abs(indexFinger.x - handState.left.lastSwipeX) > 0.15) {
-                    if (indexFinger.x > handState.left.lastSwipeX) {
-                        state.currentShapeIndex = (state.currentShapeIndex + 1) % CONFIG.shapes.length;
-                        changeShape(state.currentShapeIndex);
-                    }
-                    handState.left.lastSwipeX = indexFinger.x;
-                }
-            }
-
-            if (state.hands.length >= 2) {
-                const leftIndexFinger = state.hands[0][8];
-                const rightIndexFinger = state.hands[1][8];
-
-                const zoomDistance = Math.hypot(
-                    rightIndexFinger.x - leftIndexFinger.x,
-                    rightIndexFinger.y - leftIndexFinger.y
-                );
-
-                const scale = 0.5 + zoomDistance * 2.5;
-                camera.scale.set(scale, scale, scale);
-            } else {
-                camera.scale.set(1, 1, 1);
-            }
-        }
-
-        function attractRepelParticles(handIndex) {
-            if (!state.hands[handIndex]) return;
-
-            const landmarks = state.hands[handIndex];
-            const indexFinger = landmarks[8];
-            const pinchDistance = Math.hypot(
-                indexFinger.x - landmarks[4].x,
-                indexFinger.y - landmarks[4].y
-            );
-
-            const handWorldX = (indexFinger.x - 0.5) * 40;
-            const handWorldY = (0.5 - indexFinger.y) * 30;
-            const handWorldZ = 0;
-
-            const attractThreshold = 0.2;
-            const attractRadius = 15;
-
-            for (let i = 0; i < CONFIG.particleCount; i++) {
-                const idx = i * 3;
-                const px = currentPositions[idx];
-                const py = currentPositions[idx + 1];
-                const pz = currentPositions[idx + 2];
-
-                const dx = px - handWorldX;
-                const dy = py - handWorldY;
-                const dz = pz - handWorldZ;
-                const dist = Math.sqrt(dx * dx + dy * dy + dz * dz);
-
-                if (dist < attractRadius) {
-                    if (pinchDistance < attractThreshold) {
-                        const force = (1 - dist / attractRadius) * 0.5;
-                        targetPositions[idx] = px - (dx / dist) * force;
-                        targetPositions[idx + 1] = py - (dy / dist) * force;
-                        targetPositions[idx + 2] = pz - (dz / dist) * force;
-                    } else {
-                        const force = (1 - dist / attractRadius) * 0.3;
-                        targetPositions[idx] = px + (dx / dist) * force;
-                        targetPositions[idx + 1] = py + (dy / dist) * force;
-                        targetPositions[idx + 2] = pz + (dz / dist) * force;
-                    }
-                }
-            }
-
-            if (state.audioEngine) {
-                state.audioEngine.updatePinch(pinchDistance);
-            }
-        }
-
-        function rotateSceneByHand() {
-            if (!state.hands[0]) return;
-
-            const indexFinger = state.hands[0][8];
-            const rotX = (indexFinger.y - 0.5) * Math.PI * 0.5;
-            const rotY = (indexFinger.x - 0.5) * Math.PI * 0.5;
-
-            particleMesh.rotation.x += (rotX - particleMesh.rotation.x) * 0.1;
-            particleMesh.rotation.y += (rotY - particleMesh.rotation.y) * 0.1;
-        }
-
-        // ==================== ANIMATION LOOP ====================
-        function animate() {
-            requestAnimationFrame(animate);
-
-            if (!state.started) {
-                renderer.render(scene, camera);
-                return;
-            }
-
-            processHands();
-            rotateSceneByHand();
-
-            for (let i = 0; i < state.hands.length; i++) {
-                attractRepelParticles(i);
-            }
-
-            // Lerp particles to target positions
-            const positions = particleGeometry.attributes.position.array;
-            for (let i = 0; i < CONFIG.particleCount * 3; i++) {
-                currentPositions[i] += (targetPositions[i] - currentPositions[i]) * CONFIG.particleLerpSpeed;
-                positions[i] = currentPositions[i];
-            }
-            particleGeometry.attributes.position.needsUpdate = true;
-
-            // Color animation
-            particleMesh.rotation.z += 0.001;
-
-            renderer.render(scene, camera);
-        }
-
-        // ==================== UI EVENT LISTENERS ====================
-        document.getElementById('startBtn').addEventListener('click', async () => {
-            state.started = true;
-
-            if (!state.audioContext) {
-                state.audioContext = new (window.AudioContext || window.webkitAudioContext)();
-                state.audioEngine = new AudioEngine(state.audioContext);
-                state.audioEngine.start();
-            }
-
-            document.getElementById('startBtn').classList.add('hidden');
-
-            await initMediaPipe();
-        });
-
-        // ==================== WINDOW RESIZE ====================
-        window.addEventListener('resize', () => {
-            camera.aspect = window.innerWidth / window.innerHeight;
-            camera.updateProjectionMatrix();
-            renderer.setSize(window.innerWidth, window.innerHeight);
-        });
-
-        // ==================== INITIALIZATION ====================
-        createParticleSystem();
         animate();
-    </script>
+
+        // MediaPipe initialization
+        initializeMediaPipe();
+      };
+
+      const initializeMediaPipe = async () => {
+        const video = document.createElement('video');
+        video.style.display = 'none';
+        document.body.appendChild(video);
+
+        const hands = new window.Hands({
+          locateFile: (file) => `https://cdn.jsdelivr.net/npm/@mediapipe/hands@0.4.1646424915/${file}`,
+        });
+
+        hands.setOptions({
+          maxNumHands: 2,
+          modelComplexity: 1,
+          minDetectionConfidence: 0.5,
+          minTrackingConfidence: 0.5,
+        });
+
+        hands.onResults((results) => {
+          handsRef.current = [];
+          if (results.multiHandLandmarks) {
+            results.multiHandLandmarks.forEach((landmarks, idx) => {
+              handsRef.current.push({
+                landmarks: landmarks.map((lm) => ({ x: lm.x, y: lm.y, z: lm.z })),
+                handedness: results.multiHandedness[idx].label,
+              });
+            });
+
+            if (handsRef.current.length > 0) {
+              const thumb = handsRef.current[0].landmarks[4];
+              const index = handsRef.current[0].landmarks[8];
+              const distance = Math.sqrt(
+                Math.pow(thumb.x - index.x, 2) + Math.pow(thumb.y - index.y, 2)
+              );
+              pinchStrengthRef.current = distance;
+              audioEngineRef.current.modulate(distance);
+            }
+          }
+        });
+
+        const camera = new window.Camera(video, {
+          onFrame: async () => {
+            await hands.send({ image: video });
+          },
+          width: 640,
+          height: 480,
+        });
+        camera.start();
+      };
+
+      const handleNextAyah = () => {
+        audioEngineRef.current.playWhoosh();
+        setCurrentAyahIdx((idx) => (idx + 1) % AYAHS.length);
+        setShowHikmah(false);
+      };
+
+      React.useEffect(() => {
+        if (started) {
+          const timer = setTimeout(() => setShowHikmah(true), 3000);
+          return () => clearTimeout(timer);
+        }
+      }, [currentAyahIdx, started]);
+
+      if (!started) {
+        return (
+          <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+            <button className="start-btn" onClick={handleStart}>
+              ▶ Tadabbur Boshlash
+            </button>
+          </div>
+        );
+      }
+
+      return (
+        <div style={{ width: '100%', height: '100%', position: 'relative', overflow: 'hidden' }}>
+          <div ref={containerRef} style={{ width: '100%', height: '100%' }} />
+
+          <div
+            style={{
+              position: 'absolute',
+              top: 0,
+              left: 0,
+              right: 0,
+              bottom: 0,
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'center',
+              justifyContent: 'center',
+              pointerEvents: 'none',
+              zIndex: 10,
+            }}
+          >
+            <div style={{ textAlign: 'center', marginBottom: '40px' }}>
+              <h1 className="ayah">{currentAyah.arabic}</h1>
+              <p className="uzbek">{currentAyah.uzbek}</p>
+            </div>
+
+            {showHikmah && (
+              <div style={{ textAlign: 'center' }}>
+                <p className="hikmah">"{currentHikmah.text}"</p>
+                <p className="author">— {currentHikmah.author}</p>
+              </div>
+            )}
+          </div>
+
+          <div
+            style={{
+              position: 'absolute',
+              bottom: '40px',
+              left: '50%',
+              transform: 'translateX(-50%)',
+              zIndex: 20,
+              pointerEvents: 'all',
+            }}
+          >
+            <button onClick={handleNextAyah}>→ Keyingi Ayah</button>
+          </div>
+        </div>
+      );
+    }
+
+    ReactDOM.createRoot(document.getElementById('root')).render(<App />);
+  </script>
 </body>
 </html>
