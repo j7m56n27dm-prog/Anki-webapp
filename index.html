@@ -1,264 +1,577 @@
 <!DOCTYPE html>
-<html lang="uz">
+<html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <title>Nur & Ilm — Digital Tadabbur</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nur & Ilm Hand Control - Digital Tadabbur</title>
+    
+    <!-- MediaPipe Hands via CDN -->
+    <script async src="https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils/camera_utils.js"></script>
+    <script async src="https://cdn.jsdelivr.net/npm/@mediapipe/drawing_utils/drawing_utils.js"></script>
+    <script async src="https://cdn.jsdelivr.net/npm/@mediapipe/hands/hands.js"></script>
+    
+    <!-- Three.js -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
 
-  <style>
-    html, body {
-      margin: 0;
-      padding: 0;
-      width: 100%;
-      height: 100%;
-      background: #050505;
-      overflow: hidden;
-      font-family: system-ui, sans-serif;
-      color: #f2f2f2;
-    }
+        body {
+            background-color: #050505;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            overflow: hidden;
+            height: 100vh;
+            color: #ffffff;
+            -webkit-user-select: none;
+            user-select: none;
+        }
 
-    canvas { display: block; }
+        #canvas {
+            display: block;
+            width: 100%;
+            height: 100%;
+        }
 
-    #start-overlay {
-      position: fixed;
-      inset: 0;
-      background: #050505;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      z-index: 10;
-    }
+        #video {
+            display: none;
+            position: absolute;
+            width: 100%;
+            height: 100%;
+        }
 
-    #start-overlay button {
-      background: none;
-      border: 1px solid #d4af37;
-      color: #d4af37;
-      padding: 16px 36px;
-      font-size: 16px;
-      letter-spacing: 0.1em;
-      cursor: pointer;
-    }
+        /* UI Overlay */
+        .overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: space-between;
+            padding: 40px 20px;
+        }
 
-    #text-overlay {
-      position: fixed;
-      top: 26px;
-      width: 100%;
-      text-align: center;
-      pointer-events: none;
-      z-index: 5;
-    }
+        .top-section {
+            text-align: center;
+            z-index: 10;
+        }
 
-    #ayah {
-      font-size: 26px;
-      line-height: 1.9;
-      opacity: 0;
-      transition: opacity 3s ease;
-    }
+        .ayah-text {
+            font-size: 2.2rem;
+            font-weight: 300;
+            letter-spacing: 0.05em;
+            color: #ffffff;
+            margin-bottom: 16px;
+            text-shadow: 0 0 20px rgba(200, 150, 100, 0.4);
+            line-height: 1.8;
+            direction: rtl;
+            animation: fadeInAyah 2s ease-in-out;
+        }
 
-    #translation {
-      margin-top: 6px;
-      font-size: 13px;
-      opacity: 0.6;
-    }
+        .ayah-translation {
+            font-size: 0.95rem;
+            color: rgba(255, 255, 255, 0.6);
+            font-style: italic;
+            max-width: 700px;
+            line-height: 1.6;
+            animation: fadeInTranslation 2.5s ease-in-out;
+        }
 
-    #hikmah {
-      margin-top: 14px;
-      font-size: 14px;
-      opacity: 0;
-      transition: opacity 2s ease;
-    }
-  </style>
+        .wisdom-line {
+            margin-top: 30px;
+            font-size: 0.9rem;
+            color: rgba(200, 150, 100, 0.8);
+            font-style: italic;
+            max-width: 600px;
+            opacity: 0;
+            animation: wisdomPulse 8s ease-in-out infinite;
+        }
 
-  <!-- THREE -->
-  <script src="https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.min.js"></script>
+        .bottom-section {
+            text-align: center;
+            z-index: 10;
+        }
 
-  <!-- MEDIAPIPE -->
-  <script src="https://cdn.jsdelivr.net/npm/@mediapipe/hands/hands.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils/camera_utils.js"></script>
+        .start-button {
+            padding: 16px 32px;
+            font-size: 1rem;
+            background: linear-gradient(135deg, rgba(200, 150, 100, 0.8), rgba(100, 150, 200, 0.6));
+            color: #ffffff;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 0 30px rgba(200, 150, 100, 0.3);
+        }
+
+        .start-button:hover {
+            box-shadow: 0 0 50px rgba(200, 150, 100, 0.6);
+            transform: scale(1.05);
+        }
+
+        .start-button:active {
+            transform: scale(0.98);
+        }
+
+        .hidden {
+            display: none !important;
+        }
+
+        .info-text {
+            margin-top: 20px;
+            font-size: 0.85rem;
+            color: rgba(255, 255, 255, 0.4);
+        }
+
+        .hand-hint {
+            position: absolute;
+            bottom: 30px;
+            right: 30px;
+            font-size: 0.85rem;
+            color: rgba(100, 150, 200, 0.6);
+            text-align: right;
+            z-index: 10;
+            opacity: 0.7;
+            transition: opacity 0.3s ease;
+        }
+
+        @keyframes fadeInAyah {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        @keyframes fadeInTranslation {
+            from { opacity: 0; }
+            to { opacity: 0.6; }
+        }
+
+        @keyframes wisdomPulse {
+            0%, 100% { opacity: 0; }
+            50% { opacity: 1; }
+        }
+
+        .center-indicator {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 4px;
+            height: 4px;
+            background: rgba(200, 150, 100, 0.3);
+            border-radius: 50%;
+            pointer-events: none;
+            z-index: 5;
+        }
+    </style>
 </head>
-
 <body>
+    <!-- Three.js Canvas -->
+    <canvas id="canvas"></canvas>
 
-<div id="start-overlay">
-  <button id="start-btn">BOSHLASH</button>
-</div>
+    <!-- Video Element for MediaPipe -->
+    <video id="video"></video>
 
-<div id="text-overlay">
-  <div id="ayah"></div>
-  <div id="translation"></div>
-  <div id="hikmah"></div>
-</div>
+    <!-- UI Overlay -->
+    <div class="overlay">
+        <div class="top-section">
+            <div class="ayah-text" id="ayahText">نور و علم</div>
+            <div class="ayah-translation" id="translationText">Light and Knowledge</div>
+            <div class="wisdom-line" id="wisdomLine"></div>
+        </div>
 
-<script>
-/* ============================================================
-   OYATLAR + HIKMATLAR
-   ============================================================ */
-const SEQUENCE = [
-  {
-    ar: "﴿اللَّهُ نُورُ السَّمَاوَاتِ وَالْأَرْضِ﴾",
-    uz: "Alloh osmonlar va yerning nuridir",
-    hikmah: "— Ilm hikmati: Nur — anglash imkonidir."
-  },
-  {
-    ar: "﴿اقْرَأْ بِاسْمِ رَبِّكَ الَّذِي خَلَقَ﴾",
-    uz: "Yaratgan Robbing nomi bilan o‘qi",
-    hikmah: "— Ilm hikmati: Ilm ibodat bilan boshlanadi."
-  },
-  {
-    ar: "﴿هَلْ يَسْتَوِي الَّذِينَ يَعْلَمُونَ وَالَّذِينَ لَا يَعْلَمُونَ﴾",
-    uz: "Biladiganlar bilan bilmaydiganlar teng bo‘lurmi?",
-    hikmah: "— Ilm hikmati: Bilish mas’uliyatdir."
-  },
-  {
-    ar: "﴿أَوَلَمْ يَرَ الَّذِينَ كَفَرُوا أَنَّ السَّمَاوَاتِ وَالْأَرْضَ كَانَتَا رَتْقًا﴾",
-    uz: "Osmonlar va yer bir butun bo‘lganini ko‘rmaydilarmi?",
-    hikmah: "— Ilm hikmati: Koinot kengaymoqda."
-  },
-  {
-    ar: "﴿أَفَلَا يَنْظُرُونَ إِلَى الْإِبِلِ كَيْفَ خُلِقَتْ﴾",
-    uz: "Ular yaratilishga nazar solmaydilarmi?",
-    hikmah: "— Ilm hikmati: Tafakkur kuzatishdan boshlanadi."
-  },
-  {
-    ar: "﴿سَنُرِيهِمْ آيَاتِنَا فِي الْآفَاقِ وَفِي أَنْفُسِهِمْ﴾",
-    uz: "Biz oyatlarimizni ufqlarda va o‘zlarida ko‘rsatamiz",
-    hikmah: "— Ilm hikmati: Qalb va koinot uyg‘un."
-  }
-];
+        <div class="bottom-section">
+            <button class="start-button" id="startButton">🎬 شروع کریں (Start)</button>
+            <div class="info-text" id="infoText">دست کو کیمرے کی طرف اٹھائیں</div>
+        </div>
+    </div>
 
-/* ============================================================
-   THREE.JS — FON
-   ============================================================ */
-const scene = new THREE.Scene();
-const camera = new THREE.PerspectiveCamera(60, innerWidth/innerHeight, 0.1, 100);
-camera.position.z = 3;
+    <div class="hand-hint" id="handHint">Hand Detected</div>
+    <div class="center-indicator"></div>
 
-const renderer = new THREE.WebGLRenderer({ antialias:true });
-renderer.setSize(innerWidth, innerHeight);
-renderer.setClearColor(0x050505);
-document.body.appendChild(renderer.domElement);
+    <script>
+        // ============================================
+        // CONSTANTS & CONFIG
+        // ============================================
+        
+        const AYAHS = [
+            {
+                arabic: "اللَّهُ نُورُ السَّمَاوَاتِ وَالْأَرْضِ",
+                translation: "Allah is the Light of the heavens and the earth",
+                wisdom: "— Nur encompasses all existence, from the cosmos to the heart.",
+                shape: 'NurSphere'
+            },
+            {
+                arabic: "اقْرَأْ بِاسْمِ رَبِّكَ الَّذِي خَلَقَ",
+                translation: "Read in the name of your Lord who created",
+                wisdom: "— The command to read is the first command. Ilm is the foundation of humanity.",
+                shape: 'AyahHalo'
+            },
+            {
+                arabic: "وَعَلَّمَهُ الْبَيَانَ",
+                translation: "And taught him eloquence",
+                wisdom: "— Knowledge is the gift that distinguishes humans.",
+                shape: 'KnowledgeSpiral'
+            },
+            {
+                arabic: "وَفِي السَّمَاءِ رِزْقُكُمْ وَمَا تُوعَدُونَ",
+                translation: "And in the sky is your sustenance and all that you are promised",
+                wisdom: "— The cosmos reveals the signs (ayahs) of divine wisdom.",
+                shape: 'CosmicExpansion'
+            },
+            {
+                arabic: "أَوَلَمْ يَنْظُرُوا إِلَى السَّمَاءِ فَوْقَهُمْ كَيْفَ بَنَيْنَاهَا",
+                translation: "Have they not observed the sky above them, how We constructed it?",
+                wisdom: "— Tafakkur (reflection) on creation leads to knowing the Creator.",
+                shape: 'QalbField'
+            },
+            {
+                arabic: "قُلِ انْظُرُوا مَاذَا فِي السَّمَاوَاتِ وَالْأَرْضِ",
+                translation: "Say: 'Observe what is in the heavens and on earth'",
+                wisdom: "— Science and revelation are mirrors reflecting one truth.",
+                shape: 'NurSphere'
+            }
+        ];
 
-const COUNT = 12000;
-const geo = new THREE.BufferGeometry();
-const pos = new Float32Array(COUNT * 3);
+        const WISDOM_QUOTES = [
+            "— Ibn Sina: 'Knowledge is power, enlightenment is liberation.'",
+            "— Al-Farabi: 'The intellect seeks harmony in all things.'",
+            "— Al-Biruni: 'The heavens declare the glory of understanding.'",
+            "— Imam Ghazali: 'The heart knows what the mind cannot express.'"
+        ];
 
-for (let i=0;i<COUNT;i++){
-  const r = Math.cbrt(Math.random());
-  const t = Math.random()*Math.PI*2;
-  const p = Math.acos(2*Math.random()-1);
-  pos[i*3]=r*Math.sin(p)*Math.cos(t);
-  pos[i*3+1]=r*Math.sin(p)*Math.sin(t);
-  pos[i*3+2]=r*Math.cos(p);
-}
+        // ============================================
+        // THREE.JS SETUP
+        // ============================================
 
-geo.setAttribute("position", new THREE.BufferAttribute(pos,3));
+        const canvas = document.getElementById('canvas');
+        const scene = new THREE.Scene();
+        const camera = new THREE.PerspectiveCamera(
+            75,
+            window.innerWidth / window.innerHeight,
+            0.1,
+            1000
+        );
+        const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: false });
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        renderer.setClearColor(0x050505);
 
-const mat = new THREE.PointsMaterial({
-  color:0xfff6cc,
-  size:0.01,
-  blending:THREE.AdditiveBlending,
-  depthWrite:false
-});
+        camera.position.z = 25;
 
-const pts = new THREE.Points(geo,mat);
-scene.add(pts);
+        // ============================================
+        // PARTICLE SYSTEM
+        // ============================================
 
-/* ============================================================
-   AUDIO ENGINE — NAFAS + HUM
-   ============================================================ */
-let audioCtx, humOsc, humGain, noiseSrc, noiseGain, noiseFilter;
-let calmness = 0.5;
+        const PARTICLE_COUNT = 15000;
+        let particles = null;
+        let particlePositions = null;
+        let particleTargetPositions = null;
+        let particleVelocities = null;
 
-function initAudio(){
-  audioCtx = new AudioContext();
+        function createParticles() {
+            if (particles) scene.remove(particles);
 
-  // Past hum
-  humOsc = audioCtx.createOscillator();
-  humOsc.type = "sine";
-  humOsc.frequency.value = 55;
+            const geometry = new THREE.BufferGeometry();
+            particlePositions = new Float32Array(PARTICLE_COUNT * 3);
+            particleTargetPositions = new Float32Array(PARTICLE_COUNT * 3);
+            particleVelocities = new Float32Array(PARTICLE_COUNT * 3);
 
-  humGain = audioCtx.createGain();
-  humGain.gain.value = 0.015;
+            // Initialize sphere
+            for (let i = 0; i < PARTICLE_COUNT; i++) {
+                const theta = Math.random() * Math.PI * 2;
+                const phi = Math.random() * Math.PI;
+                const radius = 5 + Math.random() * 8;
 
-  humOsc.connect(humGain).connect(audioCtx.destination);
-  humOsc.start();
+                const x = radius * Math.sin(phi) * Math.cos(theta);
+                const y = radius * Math.sin(phi) * Math.sin(theta);
+                const z = radius * Math.cos(phi);
 
-  // Nafas shovqini
-  const bufferSize = audioCtx.sampleRate * 2;
-  const buffer = audioCtx.createBuffer(1, bufferSize, audioCtx.sampleRate);
-  const data = buffer.getChannelData(0);
-  for (let i = 0; i < bufferSize; i++) {
-    data[i] = (Math.random() * 2 - 1) * 0.2;
-  }
+                particlePositions[i * 3] = x;
+                particlePositions[i * 3 + 1] = y;
+                particlePositions[i * 3 + 2] = z;
 
-  noiseSrc = audioCtx.createBufferSource();
-  noiseSrc.buffer = buffer;
-  noiseSrc.loop = true;
+                particleTargetPositions[i * 3] = x;
+                particleTargetPositions[i * 3 + 1] = y;
+                particleTargetPositions[i * 3 + 2] = z;
 
-  noiseFilter = audioCtx.createBiquadFilter();
-  noiseFilter.type = "bandpass";
-  noiseFilter.frequency.value = 600;
+                particleVelocities[i * 3] = 0;
+                particleVelocities[i * 3 + 1] = 0;
+                particleVelocities[i * 3 + 2] = 0;
+            }
 
-  noiseGain = audioCtx.createGain();
-  noiseGain.gain.value = 0.0;
+            geometry.setAttribute('position', new THREE.BufferAttribute(particlePositions, 3));
 
-  noiseSrc.connect(noiseFilter).connect(noiseGain).connect(audioCtx.destination);
-  noiseSrc.start();
-}
+            const material = new THREE.PointsMaterial({
+                color: 0xc89664,
+                size: 0.15,
+                sizeAttenuation: true,
+                transparent: true,
+                opacity: 0.9,
+                fog: false
+            });
 
-function updateAudio(motion){
-  calmness = THREE.MathUtils.lerp(calmness, motion, 0.05);
-  humGain.gain.value = 0.01 + calmness * 0.02;
-  noiseGain.gain.value = (1 - calmness) * 0.015;
-}
+            particles = new THREE.Points(geometry, material);
+            scene.add(particles);
+        }
 
-/* ============================================================
-   OYAT ROTATSIYASI
-   ============================================================ */
-let index = 0;
-const ayahEl = document.getElementById("ayah");
-const trEl = document.getElementById("translation");
-const hikmahEl = document.getElementById("hikmah");
+        function morphParticles(newShape) {
+            if (!particles) return;
 
-function showCurrent() {
-  const item = SEQUENCE[index];
-  ayahEl.textContent = item.ar;
-  trEl.textContent = item.uz;
-  hikmahEl.textContent = item.hikmah;
+            // Generate target positions based on shape
+            if (newShape === 'NurSphere') {
+                for (let i = 0; i < PARTICLE_COUNT; i++) {
+                    const theta = Math.random() * Math.PI * 2;
+                    const phi = Math.random() * Math.PI;
+                    const radius = 8 + Math.random() * 3;
 
-  ayahEl.style.opacity = 1;
-  hikmahEl.style.opacity = 1;
-}
+                    particleTargetPositions[i * 3] = radius * Math.sin(phi) * Math.cos(theta);
+                    particleTargetPositions[i * 3 + 1] = radius * Math.sin(phi) * Math.sin(theta);
+                    particleTargetPositions[i * 3 + 2] = radius * Math.cos(phi);
+                }
+            } else if (newShape === 'AyahHalo') {
+                for (let i = 0; i < PARTICLE_COUNT; i++) {
+                    const angle = (i / PARTICLE_COUNT) * Math.PI * 2;
+                    const ring = Math.floor((i / PARTICLE_COUNT) * 5);
+                    const radius = 3 + ring * 2;
+                    const height = (Math.random() - 0.5) * 8;
 
-function nextAyah(){
-  index = (index + 1) % SEQUENCE.length;
-  showCurrent();
-}
+                    particleTargetPositions[i * 3] = radius * Math.cos(angle);
+                    particleTargetPositions[i * 3 + 1] = height;
+                    particleTargetPositions[i * 3 + 2] = radius * Math.sin(angle);
+                }
+            } else if (newShape === 'KnowledgeSpiral') {
+                for (let i = 0; i < PARTICLE_COUNT; i++) {
+                    const t = (i / PARTICLE_COUNT) * 10;
+                    const radius = 2 + t * 0.5;
+                    const angle = t * Math.PI;
 
-/* ============================================================
-   ANIMATSIYA
-   ============================================================ */
-function animate(){
-  pts.rotation.y += 0.0002;
-  updateAudio(Math.abs(pts.rotation.y % 1));
-  renderer.render(scene,camera);
-  requestAnimationFrame(animate);
-}
+                    particleTargetPositions[i * 3] = radius * Math.cos(angle);
+                    particleTargetPositions[i * 3 + 1] = (t - 5) * 1.5;
+                    particleTargetPositions[i * 3 + 2] = radius * Math.sin(angle);
+                }
+            } else if (newShape === 'CosmicExpansion') {
+                for (let i = 0; i < PARTICLE_COUNT; i++) {
+                    const radius = (i / PARTICLE_COUNT) * 20;
+                    const theta = Math.random() * Math.PI * 2;
+                    const phi = Math.random() * Math.PI;
 
-/* ============================================================
-   START
-   ============================================================ */
-document.getElementById("start-btn").onclick = () => {
-  document.getElementById("start-overlay").remove();
-  initAudio();
-  showCurrent();
-  animate();
-  setInterval(nextAyah, 18000);
-};
-</script>
+                    particleTargetPositions[i * 3] = radius * Math.sin(phi) * Math.cos(theta);
+                    particleTargetPositions[i * 3 + 1] = radius * Math.sin(phi) * Math.sin(theta);
+                    particleTargetPositions[i * 3 + 2] = radius * Math.cos(phi);
+                }
+            } else if (newShape === 'QalbField') {
+                for (let i = 0; i < PARTICLE_COUNT; i++) {
+                    const x = (Math.random() - 0.5) * 16;
+                    const y = (Math.random() - 0.5) * 16;
+                    const z = (Math.random() - 0.5) * 16;
 
+                    const dist = Math.sqrt(x*x + y*y + z*z);
+                    const pull = Math.max(0, 1 - dist / 20);
+
+                    particleTargetPositions[i * 3] = x * pull;
+                    particleTargetPositions[i * 3 + 1] = y * pull;
+                    particleTargetPositions[i * 3 + 2] = z * pull;
+                }
+            }
+        }
+
+        // ============================================
+        // MEDIAPIPE HANDS
+        // ============================================
+
+        let hands = null;
+        let camera_hands = null;
+        let lastHandFrame = { hands: [], timestamp: 0 };
+        let isHandDetected = false;
+        let handSmoothX = 0, handSmoothY = 0, handSmoothZ = 0;
+
+        async function initMediaPipe() {
+            const video = document.getElementById('video');
+            
+            hands = new Hands({
+                locateFile: (file) => {
+                    return `https://cdn.jsdelivr.net/npm/@mediapipe/hands/${file}`;
+                }
+            });
+
+            hands.setOptions({
+                maxNumHands: 2,
+                modelComplexity: 1,
+                minDetectionConfidence: 0.5,
+                minTrackingConfidence: 0.5
+            });
+
+            hands.onResults(onHandsResults);
+
+            camera_hands = new Camera(video, {
+                onFrame: async () => {
+                    await hands.send({ image: video });
+                },
+                width: 640,
+                height: 480
+            });
+
+            camera_hands.start();
+        }
+
+        function onHandsResults(results) {
+            lastHandFrame = results;
+            isHandDetected = results.multiHandLandmarks && results.multiHandLandmarks.length > 0;
+
+            if (isHandDetected) {
+                const hand = results.multiHandLandmarks[0];
+                const indexFinger = hand[8];
+                
+                handSmoothX = handSmoothX * 0.85 + indexFinger.x * 0.15;
+                handSmoothY = handSmoothY * 0.85 + indexFinger.y * 0.15;
+                handSmoothZ = handSmoothZ * 0.85 + (indexFinger.z || 0) * 0.15;
+            }
+        }
+
+        // ============================================
+        // AUDIO ENGINE
+        // ============================================
+
+        let audioContext = null;
+        let oscillator = null;
+        let gainNode = null;
+        let filter = null;
+
+        function initAudio() {
+            if (audioContext) return;
+            
+            audioContext = new (window.AudioContext || window.webkitAudioContext)();
+            gainNode = audioContext.createGain();
+            filter = audioContext.createBiquadFilter();
+            
+            gainNode.connect(filter);
+            filter.connect(audioContext.destination);
+            
+            oscillator = audioContext.createOscillator();
+            oscillator.type = 'sine';
+            oscillator.frequency.value = 55;
+            oscillator.connect(gainNode);
+            
+            gainNode.gain.value = 0.05;
+            oscillator.start();
+        }
+
+        function updateAudioFromHand() {
+            if (!audioContext || !oscillator || !gainNode) return;
+
+            const handDepth = handSmoothZ;
+            const frequency = 55 + handDepth * 100;
+            const gain = Math.max(0.01, Math.min(0.15, handDepth * 0.2));
+
+            oscillator.frequency.setValueAtTime(frequency, audioContext.currentTime);
+            gainNode.gain.setValueAtTime(gain, audioContext.currentTime);
+        }
+
+        // ============================================
+        // APPLICATION STATE
+        // ============================================
+
+        let currentAyahIndex = 0;
+        let appStarted = false;
+        let sceneRotation = { x: 0, y: 0 };
+
+        function displayAyah(index) {
+            const ayah = AYAHS[index % AYAHS.length];
+            document.getElementById('ayahText').textContent = ayah.arabic;
+            document.getElementById('translationText').textContent = ayah.translation;
+            document.getElementById('wisdomLine').textContent = WISDOM_QUOTES[Math.floor(Math.random() * WISDOM_QUOTES.length)];
+            
+            morphParticles(ayah.shape);
+        }
+
+        // ============================================
+        // ANIMATION LOOP
+        // ============================================
+
+        function animate() {
+            requestAnimationFrame(animate);
+
+            if (appStarted && particles) {
+                // Update hand-based controls
+                if (isHandDetected) {
+                    sceneRotation.x = (handSmoothY - 0.5) * 0.5;
+                    sceneRotation.y = (handSmoothX - 0.5) * 0.5;
+                    updateAudioFromHand();
+                }
+
+                // Apply rotation
+                particles.rotation.x += (sceneRotation.x - particles.rotation.x) * 0.05;
+                particles.rotation.y += (sceneRotation.y - particles.rotation.y) * 0.05;
+
+                // Update particle positions with smooth lerp
+                for (let i = 0; i < PARTICLE_COUNT; i++) {
+                    const idx = i * 3;
+                    particlePositions[idx] += (particleTargetPositions[idx] - particlePositions[idx]) * 0.02;
+                    particlePositions[idx + 1] += (particleTargetPositions[idx + 1] - particlePositions[idx + 1]) * 0.02;
+                    particlePositions[idx + 2] += (particleTargetPositions[idx + 2] - particlePositions[idx + 2]) * 0.02;
+                }
+
+                particles.geometry.attributes.position.needsUpdate = true;
+
+                // Subtle color shift based on time
+                const time = Date.now() * 0.0005;
+                const hue = (time % 1);
+                const color = new THREE.Color().setHSL(0.05 + hue * 0.05, 0.5, 0.6);
+                particles.material.color.copy(color);
+            }
+
+            renderer.render(scene, camera);
+        }
+
+        // ============================================
+        // EVENT LISTENERS
+        // ============================================
+
+        document.getElementById('startButton').addEventListener('click', async () => {
+            if (!appStarted) {
+                appStarted = true;
+                document.getElementById('startButton').classList.add('hidden');
+                document.getElementById('infoText').textContent = '🤲 اپنے ہاتھ استعمال کریں (Use your hands)';
+                
+                createParticles();
+                displayAyah(0);
+                initAudio();
+                
+                await initMediaPipe();
+            }
+        });
+
+        // Keyboard shortcuts
+        document.addEventListener('keydown', (e) => {
+            if (!appStarted) return;
+            
+            if (e.key === 'ArrowRight' || e.key === ' ') {
+                currentAyahIndex++;
+                displayAyah(currentAyahIndex);
+            } else if (e.key === 'ArrowLeft') {
+                currentAyahIndex--;
+                displayAyah(currentAyahIndex);
+            }
+        });
+
+        // Responsive canvas
+        window.addEventListener('resize', () => {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        });
+
+        // ============================================
+        // INITIALIZATION
+        // ============================================
+
+        animate();
+    </script>
 </body>
 </html>
-</file>
-
-</project>
