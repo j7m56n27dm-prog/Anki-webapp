@@ -5,10 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Nur & Ilm - Hand Control Tadabbur</title>
   
-  <!-- Three.js -->
   <script src="https://cdn.jsdelivr.net/npm/three@r160/build/three.min.js"></script>
-  
-  <!-- MediaPipe -->
   <script src="https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils@0.4.1646424915/camera_utils.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/@mediapipe/drawing_utils@0.4.1646424915/drawing_utils.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/@mediapipe/hands@0.4.1646424915/hands.js"></script>
@@ -65,39 +62,64 @@
     }
     
     .ayah {
-      font-size: 48px;
+      font-size: 56px;
       color: #00d4ff;
       margin-bottom: 20px;
-      text-shadow: 0 0 20px rgba(0, 212, 255, 0.8);
+      text-shadow: 0 0 30px rgba(0, 212, 255, 0.9), 0 0 60px rgba(0, 212, 255, 0.5);
       font-weight: bold;
       direction: rtl;
+      letter-spacing: 2px;
     }
     
     .uzbek {
       font-size: 18px;
       color: #e0e0e0;
-      max-width: 600px;
-      line-height: 1.6;
+      max-width: 700px;
+      line-height: 1.8;
       margin: 0 auto;
     }
     
+    .theme-tag {
+      font-size: 12px;
+      color: #ffd700;
+      margin-top: 15px;
+      font-style: italic;
+    }
+    
     .hikmah-container {
-      animation: fadeIn 1s ease-in-out;
-      margin-top: 40px;
+      animation: fadeIn 1.5s ease-in-out;
+      margin-top: 50px;
+      max-width: 600px;
     }
     
     .hikmah {
       font-size: 16px;
       color: #ffd700;
       font-style: italic;
-      max-width: 500px;
-      margin: 0 auto;
+      margin: 0 auto 10px;
+      border-left: 3px solid #00d4ff;
+      padding-left: 20px;
     }
     
     .author {
-      font-size: 12px;
+      font-size: 13px;
       color: #a0a0a0;
-      margin-top: 10px;
+      margin-left: 20px;
+    }
+    
+    .scientific {
+      font-size: 14px;
+      color: #00ff88;
+      margin-top: 20px;
+      font-style: normal;
+      border-left: 3px solid #00ff88;
+      padding-left: 20px;
+    }
+    
+    .scientific-title {
+      font-weight: bold;
+      color: #00ff88;
+      margin-bottom: 8px;
     }
     
     .controls {
@@ -109,6 +131,8 @@
       pointer-events: all;
       display: flex;
       gap: 15px;
+      flex-wrap: wrap;
+      justify-content: center;
     }
     
     button {
@@ -140,6 +164,15 @@
       align-items: center;
       justify-content: center;
       z-index: 100;
+      flex-direction: column;
+      gap: 30px;
+    }
+    
+    .start-screen h1 {
+      color: #00d4ff;
+      text-shadow: 0 0 20px rgba(0, 212, 255, 0.8);
+      font-size: 48px;
+      margin-bottom: 20px;
     }
     
     .start-button {
@@ -161,67 +194,101 @@
     .hidden {
       display: none !important;
     }
+
+    .info {
+      position: absolute;
+      top: 20px;
+      left: 20px;
+      color: #a0a0a0;
+      font-size: 12px;
+      z-index: 5;
+    }
+
+    .info div {
+      margin: 5px 0;
+    }
   </style>
 </head>
 <body>
   <div id="canvas-container"></div>
+  
   <div id="start-screen" class="start-screen">
-    <button id="start-button" class="start-button">▶ Tadabbur Boshlash</button>
+    <h1>🕌 Nur & Ilm</h1>
+    <p style="color: #e0e0e0; font-size: 16px;">Qur'on bilan Tadabbur</p>
+    <button id="start-button" class="start-button">▶ Boshlash</button>
   </div>
   
   <div id="overlay" class="overlay hidden">
     <div class="content">
       <div class="ayah" id="ayah-text"></div>
       <div class="uzbek" id="uzbek-text"></div>
+      <div class="theme-tag" id="theme-tag"></div>
     </div>
     <div id="hikmah-container" class="hikmah-container hidden">
       <div class="hikmah" id="hikmah-text"></div>
       <div class="author" id="author-text"></div>
+      <div id="scientific-container" class="scientific hidden">
+        <div class="scientific-title" id="sci-title"></div>
+        <div id="sci-text"></div>
+      </div>
     </div>
+  </div>
+
+  <div id="info" class="info hidden">
+    <div>🖐 Hands: <span id="hand-count">0</span></div>
+    <div>Pinch: <span id="pinch-val">0</span></div>
+    <div>Distance: <span id="dist-val">0</span></div>
   </div>
   
   <div class="controls">
-    <button id="next-button" class="hidden">→ Keyingi Ayah</button>
+    <button id="next-button" class="hidden">→ Keyingi</button>
+    <button id="prev-button" class="hidden">← Oldingi</button>
   </div>
 
   <script>
-    // ====== QUR'ON DATA ======
+    // ====== QUR'ON VA HIKMAH DATA ======
     const AYAHS = [
       {
         id: 'an-nur-35',
         arabic: 'اللَّهُ نُورُ السَّمَاوَاتِ وَالْأَرْضِ',
         uzbek: 'Alloh osmonlar va yerning nuri',
-        theme: 'nur',
+        theme: '🌟 Nur - Yorug\'lik',
+        shape: 'sphere',
       },
       {
         id: 'al-alaq-1',
         arabic: 'بِسْمِ رَبِّكَ الَّذِي خَلَقَ',
-        uzbek: 'Rab nomida o\'qi, kimsan yamasi yaratdi',
-        theme: 'ilm',
+        uzbek: 'O\'zingning Rabbining nomida o\'qi, U yaratdi',
+        theme: '📖 Ilm - Bilik',
+        shape: 'halo',
       },
       {
         id: 'az-zumar-9',
-        arabic: 'قُلْ هَلْ يَسْتَوِي الَّذِينَ يَعْلَمُونَ',
-        uzbek: 'Aytingki: biluvchilar va bilmaslari teng bola',
-        theme: 'tafakkur',
+        arabic: 'قُلْ هَلْ يَسْتَوِي الَّذِينَ يَعْلَمُونَ وَالَّذِينَ لَا يَعْلَمُونَ',
+        uzbek: 'Biluvchilar va bilmaslari teng bola',
+        theme: '🧠 Tafakkur - Fikrash',
+        shape: 'spiral',
       },
       {
         id: 'al-anbiya-30',
-        arabic: 'أَوَلَمْ يَرَ الَّذِينَ كَفَرُوا أَنَّ السَّمَاوَاتِ وَالْأَرْضَ كَانَتَا رَتْقًا',
+        arabic: 'أَوَلَمْ يَرَ الَّذِينَ كَفَرُوا أَنَّ السَّمَاوَاتِ وَالْأَرْضَ كَانَتَا رَتْقًا فَفَتَقْنَاهُمَا',
         uzbek: 'Osmon va yer bir qolibda edi, Biz uni ajratdik',
-        theme: 'koinot',
+        theme: '🌌 Koinot - Olam',
+        shape: 'expansion',
       },
       {
         id: 'al-ghashiyah-17',
         arabic: 'أَفَلَا يَنظُرُونَ إِلَى الْإِبِلِ كَيْفَ خُلِقَتْ',
         uzbek: 'Ularning bunyodini ko\'rasanmi',
-        theme: 'yaratilish',
+        theme: '✨ Yaratilish - Xalq',
+        shape: 'wave',
       },
       {
         id: 'fussilat-53',
-        arabic: 'سَنُرِيهِمْ آيَاتِنَا فِي الْآفَاقِ',
+        arabic: 'سَنُرِيهِمْ آيَاتِنَا فِي الْآفَاقِ وَفِي أَنْفُسِهِمْ',
         uzbek: 'Ufqda va o\'zlarida Biz alamatlarni ko\'rsatamiz',
-        theme: 'alamat',
+        theme: '🔮 Alamat - Belgi',
+        shape: 'particle',
       },
     ];
 
@@ -233,14 +300,25 @@
       { author: 'Mirzo Ulugbek', text: 'Yulduzlarni o\'rganish — mangu haqiqatni bilishdir' },
     ];
 
+    const SCIENCE = [
+      { title: 'Kosmosning Kengayishi', text: 'Koinot o\'zi kengaymoqda — har bir moment yangi tug\'iladi' },
+      { title: 'Atom Tartibotasi', text: 'Atomda Samaviy nizam: elektron, proton, neutron — hamohang' },
+      { title: 'Vaqt Dilatasiyasi', text: 'Tezlik va tortishish joyida vaqt boshqacha o\'tadi' },
+      { title: 'Inson Idrokasi', text: 'Miya 86 milliard nevronndan — har biri bir olam' },
+    ];
+
     // ====== STATE ======
     let started = false;
     let currentAyahIdx = 0;
+    let showScienceIdx = 0;
     let scene, camera, renderer;
     let particles = null;
     let audioEngine = null;
     let hands = [];
     let pinchStrength = 0;
+    let handDistance = 0;
+    let sceneRotation = { x: 0, y: 0 };
+    let lastSwipeX = 0;
 
     // ====== AUDIO ENGINE ======
     class AudioEngine {
@@ -262,7 +340,7 @@
 
         this.osc.frequency.value = 55;
         this.osc.type = 'sine';
-        this.gain.gain.value = 0.05;
+        this.gain.gain.value = 0.03;
         this.filter.type = 'lowpass';
         this.filter.frequency.value = 800;
 
@@ -272,11 +350,12 @@
         this.osc.start();
       }
 
-      modulate(pinch) {
+      modulate(pinch, frequency = 55) {
         if (!this.ctx) return;
         const clamp = Math.max(0, Math.min(1, 1 - pinch));
-        this.gain.gain.setTargetAtTime(clamp * 0.1, this.ctx.currentTime, 0.1);
-        this.filter.frequency.setTargetAtTime(800 + clamp * 600, this.ctx.currentTime, 0.1);
+        this.gain.gain.setTargetAtTime(clamp * 0.12, this.ctx.currentTime, 0.1);
+        this.osc.frequency.setTargetAtTime(frequency * (0.8 + clamp * 0.4), this.ctx.currentTime, 0.05);
+        this.filter.frequency.setTargetAtTime(800 + clamp * 800, this.ctx.currentTime, 0.1);
       }
 
       whoosh() {
@@ -291,8 +370,8 @@
         const nf = this.ctx.createBiquadFilter();
         nf.type = 'bandpass';
         nf.frequency.setValueAtTime(200, now);
-        nf.frequency.exponentialRampToValueAtTime(1000, now + 0.3);
-        ng.gain.setValueAtTime(0.3, now);
+        nf.frequency.exponentialRampToValueAtTime(1200, now + 0.3);
+        ng.gain.setValueAtTime(0.4, now);
         ng.gain.exponentialRampToValueAtTime(0.01, now + 0.3);
         noise.connect(nf);
         nf.connect(ng);
@@ -302,7 +381,81 @@
       }
     }
 
-    // ====== THREE.JS SETUP ======
+    // ====== PARTICLE SHAPES ======
+    function generateShape(shape, count) {
+      const pos = new Float32Array(count * 3);
+      
+      if (shape === 'sphere') {
+        for (let i = 0; i < count; i++) {
+          const theta = Math.random() * Math.PI * 2;
+          const phi = Math.acos(Math.random() * 2 - 1);
+          const r = 1 + Math.random() * 0.3;
+          pos[i * 3] = r * Math.sin(phi) * Math.cos(theta);
+          pos[i * 3 + 1] = r * Math.sin(phi) * Math.sin(theta);
+          pos[i * 3 + 2] = r * Math.cos(phi);
+        }
+      } else if (shape === 'halo') {
+        for (let i = 0; i < count; i++) {
+          const angle = (i / count) * Math.PI * 2;
+          const r = 0.8 + Math.sin(angle * 4) * 0.3;
+          pos[i * 3] = r * Math.cos(angle);
+          pos[i * 3 + 1] = r * Math.sin(angle);
+          pos[i * 3 + 2] = Math.sin(angle * 3) * 0.2;
+        }
+      } else if (shape === 'spiral') {
+        for (let i = 0; i < count; i++) {
+          const t = (i / count) * Math.PI * 8;
+          const r = (i / count) * 1.5;
+          pos[i * 3] = r * Math.cos(t);
+          pos[i * 3 + 1] = (i / count) * 2 - 1;
+          pos[i * 3 + 2] = r * Math.sin(t);
+        }
+      } else if (shape === 'expansion') {
+        for (let i = 0; i < count; i++) {
+          const theta = Math.random() * Math.PI * 2;
+          const phi = Math.random() * Math.PI;
+          const r = Math.random() * 2;
+          pos[i * 3] = r * Math.sin(phi) * Math.cos(theta);
+          pos[i * 3 + 1] = r * Math.sin(phi) * Math.sin(theta);
+          pos[i * 3 + 2] = r * Math.cos(phi);
+        }
+      } else if (shape === 'wave') {
+        for (let i = 0; i < count; i++) {
+          const x = (i / count) * Math.PI * 4;
+          const y = Math.sin(x) * 0.8;
+          const z = Math.cos(x * 2) * 0.5;
+          pos[i * 3] = (i / count) * 2 - 1;
+          pos[i * 3 + 1] = y;
+          pos[i * 3 + 2] = z;
+        }
+      } else {
+        for (let i = 0; i < count; i++) {
+          const x = Math.sin((i / count) * Math.PI * 4) * 1.5;
+          const y = Math.cos((i / count) * Math.PI * 6) * 0.8;
+          const z = Math.sin((i / count) * Math.PI * 8) * 0.5;
+          pos[i * 3] = x;
+          pos[i * 3 + 1] = y;
+          pos[i * 3 + 2] = z;
+        }
+      }
+      return pos;
+    }
+
+    function createParticleTexture() {
+      const canvas = document.createElement('canvas');
+      canvas.width = 64;
+      canvas.height = 64;
+      const ctx = canvas.getContext('2d');
+      const g = ctx.createRadialGradient(32, 32, 0, 32, 32, 32);
+      g.addColorStop(0, 'rgba(0, 212, 255, 1)');
+      g.addColorStop(0.5, 'rgba(0, 212, 255, 0.5)');
+      g.addColorStop(1, 'rgba(0, 212, 255, 0)');
+      ctx.fillStyle = g;
+      ctx.fillRect(0, 0, 64, 64);
+      return new THREE.CanvasTexture(canvas);
+    }
+
+    // ====== THREE.JS ======
     function initThreeJS() {
       const container = document.getElementById('canvas-container');
       scene = new THREE.Scene();
@@ -316,36 +469,32 @@
       renderer.setPixelRatio(window.devicePixelRatio);
       container.appendChild(renderer.domElement);
 
-      // Particles
-      const geo = new THREE.BufferGeometry();
-      const pos = generateNurSphere(15000);
-      geo.setAttribute('position', new THREE.BufferAttribute(pos, 3));
+      createParticles();
 
-      const tex = createParticleTexture();
-      const mat = new THREE.PointsMaterial({
-        size: 0.01,
-        sizeAttenuation: true,
-        map: tex,
-        transparent: true,
-        depthWrite: false,
-        blending: THREE.AdditiveBlending,
-      });
-
-      particles = new THREE.Points(geo, mat);
-      scene.add(particles);
-
-      const light = new THREE.PointLight(0xffffff, 1);
+      const light = new THREE.PointLight(0x00d4ff, 1);
       light.position.set(5, 5, 5);
       scene.add(light);
 
-      // Animation loop
+      let frameCount = 0;
       function animate() {
         requestAnimationFrame(animate);
+        frameCount++;
+
+        // Scene rotation based on hand
+        if (hands.length > 0) {
+          const hand = hands[0];
+          const palm = hand.landmarks[9];
+          sceneRotation.x += (palm.y - 0.5) * 0.01;
+          sceneRotation.y += (palm.x - 0.5) * 0.01;
+        }
+
+        scene.rotation.x += (sceneRotation.x - scene.rotation.x) * 0.05;
+        scene.rotation.y += (sceneRotation.y - scene.rotation.y) * 0.05;
+
         renderer.render(scene, camera);
       }
       animate();
 
-      // Resize
       window.addEventListener('resize', () => {
         camera.aspect = window.innerWidth / window.innerHeight;
         camera.updateProjectionMatrix();
@@ -355,32 +504,25 @@
       initMediaPipe();
     }
 
-    // ====== PARTICLE SHAPES ======
-    function generateNurSphere(count) {
-      const pos = new Float32Array(count * 3);
-      for (let i = 0; i < count; i++) {
-        const theta = Math.random() * Math.PI * 2;
-        const phi = Math.acos(Math.random() * 2 - 1);
-        const r = 1 + Math.random() * 0.3;
-        pos[i * 3] = r * Math.sin(phi) * Math.cos(theta);
-        pos[i * 3 + 1] = r * Math.sin(phi) * Math.sin(theta);
-        pos[i * 3 + 2] = r * Math.cos(phi);
-      }
-      return pos;
-    }
+    function createParticles() {
+      const ayah = AYAHS[currentAyahIdx];
+      const geo = new THREE.BufferGeometry();
+      const pos = generateShape(ayah.shape, 15000);
+      geo.setAttribute('position', new THREE.BufferAttribute(pos, 3));
 
-    function createParticleTexture() {
-      const canvas = document.createElement('canvas');
-      canvas.width = 64;
-      canvas.height = 64;
-      const ctx = canvas.getContext('2d');
-      const g = ctx.createRadialGradient(32, 32, 0, 32, 32, 32);
-      g.addColorStop(0, 'rgba(255, 255, 255, 1)');
-      g.addColorStop(0.5, 'rgba(255, 255, 255, 0.5)');
-      g.addColorStop(1, 'rgba(255, 255, 255, 0)');
-      ctx.fillStyle = g;
-      ctx.fillRect(0, 0, 64, 64);
-      return new THREE.CanvasTexture(canvas);
+      const tex = createParticleTexture();
+      const mat = new THREE.PointsMaterial({
+        size: 0.015,
+        sizeAttenuation: true,
+        map: tex,
+        transparent: true,
+        depthWrite: false,
+        blending: THREE.AdditiveBlending,
+      });
+
+      if (particles) scene.remove(particles);
+      particles = new THREE.Points(geo, mat);
+      scene.add(particles);
     }
 
     // ====== MEDIAPIPE ======
@@ -410,15 +552,48 @@
             });
           });
 
+          // Pinch calculation
           if (hands.length > 0) {
             const thumb = hands[0].landmarks[4];
             const index = hands[0].landmarks[8];
             pinchStrength = Math.sqrt(
               Math.pow(thumb.x - index.x, 2) + Math.pow(thumb.y - index.y, 2)
             );
-            audioEngine?.modulate(pinchStrength);
+            
+            // Synth modulation
+            const freq = 55 * (1 + pinchStrength);
+            audioEngine?.modulate(pinchStrength, freq);
+
+            // Swipe detection
+            const currentX = index.x;
+            if (Math.abs(currentX - lastSwipeX) > 0.2) {
+              if (currentX > lastSwipeX) {
+                nextAyah();
+              } else {
+                prevAyah();
+              }
+              lastSwipeX = currentX;
+            } else {
+              lastSwipeX = currentX;
+            }
+          }
+
+          // Dual hand distance
+          if (hands.length === 2) {
+            const leftIndex = hands[0].landmarks[8];
+            const rightIndex = hands[1].landmarks[8];
+            handDistance = Math.sqrt(
+              Math.pow(leftIndex.x - rightIndex.x, 2) +
+              Math.pow(leftIndex.y - rightIndex.y, 2) +
+              Math.pow(leftIndex.z - rightIndex.z, 2)
+            );
           }
         }
+
+        // Update info
+        document.getElementById('hand-count').textContent = hands.length;
+        document.getElementById('pinch-val').textContent = pinchStrength.toFixed(2);
+        document.getElementById('dist-val').textContent = handDistance.toFixed(2);
       });
 
       const cam = new window.Camera(video, {
@@ -429,20 +604,33 @@
       cam.start();
     }
 
-    // ====== UI HANDLERS ======
+    // ====== UI ======
     function updateUI() {
       const ayah = AYAHS[currentAyahIdx];
       const hikmah = HIKMAH[currentAyahIdx % HIKMAH.length];
+      const sci = SCIENCE[currentAyahIdx % SCIENCE.length];
 
       document.getElementById('ayah-text').textContent = ayah.arabic;
       document.getElementById('uzbek-text').textContent = ayah.uzbek;
+      document.getElementById('theme-tag').textContent = ayah.theme;
       document.getElementById('hikmah-text').textContent = `"${hikmah.text}"`;
       document.getElementById('author-text').textContent = `— ${hikmah.author}`;
+      document.getElementById('sci-title').textContent = sci.title;
+      document.getElementById('sci-text').textContent = sci.text;
 
       document.getElementById('hikmah-container').classList.add('hidden');
+      document.getElementById('scientific-container').classList.add('hidden');
+      
       setTimeout(() => {
         document.getElementById('hikmah-container').classList.remove('hidden');
-      }, 3000);
+      }, 2000);
+
+      setTimeout(() => {
+        document.getElementById('scientific-container').classList.remove('hidden');
+      }, 4000);
+
+      createParticles();
+      sceneRotation = { x: 0, y: 0 };
     }
 
     async function startApp() {
@@ -450,6 +638,8 @@
       document.getElementById('start-screen').classList.add('hidden');
       document.getElementById('overlay').classList.remove('hidden');
       document.getElementById('next-button').classList.remove('hidden');
+      document.getElementById('prev-button').classList.remove('hidden');
+      document.getElementById('info').classList.remove('hidden');
 
       audioEngine = new AudioEngine();
       await audioEngine.init();
@@ -463,14 +653,21 @@
       updateUI();
     }
 
+    function prevAyah() {
+      audioEngine?.whoosh();
+      currentAyahIdx = (currentAyahIdx - 1 + AYAHS.length) % AYAHS.length;
+      updateUI();
+    }
+
     // ====== EVENT LISTENERS ======
     document.getElementById('start-button').addEventListener('click', startApp);
     document.getElementById('next-button').addEventListener('click', nextAyah);
+    document.getElementById('prev-button').addEventListener('click', prevAyah);
 
-    // Keyboard support
     document.addEventListener('keydown', (e) => {
       if (e.code === 'Space' && !started) startApp();
       if (e.code === 'ArrowRight' && started) nextAyah();
+      if (e.code === 'ArrowLeft' && started) prevAyah();
     });
   </script>
 </body>
