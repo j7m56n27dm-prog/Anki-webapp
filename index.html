@@ -3,575 +3,813 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Nur & Ilm Hand Control - Digital Tadabbur</title>
-    
-    <!-- MediaPipe Hands via CDN -->
-    <script async src="https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils/camera_utils.js"></script>
-    <script async src="https://cdn.jsdelivr.net/npm/@mediapipe/drawing_utils/drawing_utils.js"></script>
-    <script async src="https://cdn.jsdelivr.net/npm/@mediapipe/hands/hands.js"></script>
-    
-    <!-- Three.js -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
-    
+    <title>Nur & Ilm Hand Control</title>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.160.0/examples/js/controls/OrbitControls.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@mediapipe/hands/hands.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        * {
+        @import url('https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&family=Inter:wght@300;400;500&display=swap');
+        
+        body {
             margin: 0;
             padding: 0;
-            box-sizing: border-box;
-        }
-
-        body {
-            background-color: #050505;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             overflow: hidden;
-            height: 100vh;
-            color: #ffffff;
-            -webkit-user-select: none;
-            user-select: none;
+            background: #050505;
+            font-family: 'Inter', sans-serif;
+            color: rgba(255, 255, 255, 0.9);
         }
-
-        #canvas {
+        
+        canvas {
             display: block;
-            width: 100%;
-            height: 100%;
         }
-
-        #video {
-            display: none;
-            position: absolute;
-            width: 100%;
-            height: 100%;
-        }
-
-        /* UI Overlay */
-        .overlay {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            pointer-events: none;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: space-between;
-            padding: 40px 20px;
-        }
-
-        .top-section {
-            text-align: center;
-            z-index: 10;
-        }
-
-        .ayah-text {
-            font-size: 2.2rem;
-            font-weight: 300;
-            letter-spacing: 0.05em;
-            color: #ffffff;
-            margin-bottom: 16px;
-            text-shadow: 0 0 20px rgba(200, 150, 100, 0.4);
-            line-height: 1.8;
-            direction: rtl;
-            animation: fadeInAyah 2s ease-in-out;
-        }
-
-        .ayah-translation {
-            font-size: 0.95rem;
-            color: rgba(255, 255, 255, 0.6);
-            font-style: italic;
-            max-width: 700px;
+        
+        .ar-text {
+            font-family: 'Amiri', serif;
+            font-size: 2.5rem;
             line-height: 1.6;
-            animation: fadeInTranslation 2.5s ease-in-out;
-        }
-
-        .wisdom-line {
-            margin-top: 30px;
-            font-size: 0.9rem;
-            color: rgba(200, 150, 100, 0.8);
-            font-style: italic;
-            max-width: 600px;
-            opacity: 0;
-            animation: wisdomPulse 8s ease-in-out infinite;
-        }
-
-        .bottom-section {
             text-align: center;
-            z-index: 10;
         }
-
-        .start-button {
-            padding: 16px 32px;
-            font-size: 1rem;
-            background: linear-gradient(135deg, rgba(200, 150, 100, 0.8), rgba(100, 150, 200, 0.6));
-            color: #ffffff;
-            border: 1px solid rgba(255, 255, 255, 0.3);
-            border-radius: 8px;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            box-shadow: 0 0 30px rgba(200, 150, 100, 0.3);
+        
+        .overlay-text {
+            background: linear-gradient(180deg, rgba(5,5,5,0.9) 0%, transparent 100%);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
         }
-
-        .start-button:hover {
-            box-shadow: 0 0 50px rgba(200, 150, 100, 0.6);
-            transform: scale(1.05);
+        
+        .breath-animation {
+            animation: breath 8s ease-in-out infinite;
         }
-
-        .start-button:active {
-            transform: scale(0.98);
-        }
-
-        .hidden {
-            display: none !important;
-        }
-
-        .info-text {
-            margin-top: 20px;
-            font-size: 0.85rem;
-            color: rgba(255, 255, 255, 0.4);
-        }
-
-        .hand-hint {
-            position: absolute;
-            bottom: 30px;
-            right: 30px;
-            font-size: 0.85rem;
-            color: rgba(100, 150, 200, 0.6);
-            text-align: right;
-            z-index: 10;
-            opacity: 0.7;
-            transition: opacity 0.3s ease;
-        }
-
-        @keyframes fadeInAyah {
-            from { opacity: 0; }
-            to { opacity: 1; }
-        }
-
-        @keyframes fadeInTranslation {
-            from { opacity: 0; }
-            to { opacity: 0.6; }
-        }
-
-        @keyframes wisdomPulse {
-            0%, 100% { opacity: 0; }
+        
+        @keyframes breath {
+            0%, 100% { opacity: 0.7; }
             50% { opacity: 1; }
         }
-
-        .center-indicator {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            width: 4px;
-            height: 4px;
-            background: rgba(200, 150, 100, 0.3);
-            border-radius: 50%;
-            pointer-events: none;
-            z-index: 5;
+        
+        .gold-gradient {
+            background: linear-gradient(135deg, #D4AF37 0%, #FFD700 50%, #B8860B 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        
+        .emerald-gradient {
+            background: linear-gradient(135deg, #50C878 0%, #0BDA51 50%, #00693E 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        
+        .particle-glow {
+            filter: drop-shadow(0 0 10px rgba(212, 175, 55, 0.3));
         }
     </style>
 </head>
-<body>
-    <!-- Three.js Canvas -->
-    <canvas id="canvas"></canvas>
-
-    <!-- Video Element for MediaPipe -->
-    <video id="video"></video>
-
-    <!-- UI Overlay -->
-    <div class="overlay">
-        <div class="top-section">
-            <div class="ayah-text" id="ayahText">نور و علم</div>
-            <div class="ayah-translation" id="translationText">Light and Knowledge</div>
-            <div class="wisdom-line" id="wisdomLine"></div>
+<body class="bg-[#050505]">
+    <!-- Hidden video for MediaPipe -->
+    <video id="video-input" style="display: none; position: absolute; width: 640px; height: 480px;"></video>
+    
+    <!-- Canvas for Three.js -->
+    <canvas id="scene-canvas"></canvas>
+    
+    <!-- Overlay UI -->
+    <div class="absolute inset-0 pointer-events-none">
+        <!-- Ayah Display -->
+        <div id="ayah-container" class="absolute top-4 left-1/2 transform -translate-x-1/2 w-full max-w-4xl px-4 overlay-text breath-animation hidden">
+            <div class="ar-text gold-gradient mb-2" id="arabic-text"></div>
+            <div class="text-sm opacity-80 text-center mb-6" id="translation-text"></div>
         </div>
-
-        <div class="bottom-section">
-            <button class="start-button" id="startButton">🎬 شروع کریں (Start)</button>
-            <div class="info-text" id="infoText">دست کو کیمرے کی طرف اٹھائیں</div>
+        
+        <!-- Wisdom Text -->
+        <div id="wisdom-container" class="absolute bottom-20 left-1/2 transform -translate-x-1/2 w-full max-w-2xl px-4 text-center hidden">
+            <div class="text-lg emerald-gradient mb-1" id="wisdom-text"></div>
+            <div class="text-xs opacity-70" id="wisdom-source"></div>
+        </div>
+        
+        <!-- Scientific Insight -->
+        <div id="science-container" class="absolute bottom-8 left-1/2 transform -translate-x-1/2 w-full max-w-2xl px-4 text-center hidden">
+            <div class="text-sm text-blue-300" id="science-text"></div>
+        </div>
+        
+        <!-- Start Button -->
+        <div id="start-container" class="absolute inset-0 flex items-center justify-center bg-[#050505] transition-opacity duration-1000">
+            <div class="text-center">
+                <div class="mb-8">
+                    <div class="text-4xl gold-gradient mb-2">Nur & Ilm</div>
+                    <div class="text-lg opacity-80">Hand Control</div>
+                </div>
+                <button id="start-button" 
+                        class="pointer-events-auto px-8 py-3 bg-gradient-to-r from-[#D4AF37] to-[#B8860B] text-black rounded-lg text-lg font-medium hover:opacity-90 transition-opacity">
+                    Boshlash
+                </button>
+                <div class="mt-4 text-sm opacity-60 max-w-md">
+                    Ilohiy oyatlarni qo'l harakatlaringiz orqali kashf eting.<br>
+                    Kamera ruxsati kerak. Hech qanday video serverga yuborilmaydi.
+                </div>
+            </div>
+        </div>
+        
+        <!-- Status -->
+        <div class="absolute top-4 right-4 text-xs opacity-60">
+            <div>15,000 nuriy zarrachalar</div>
+            <div id="fps-counter">60 FPS</div>
+        </div>
+        
+        <!-- Instructions -->
+        <div class="absolute bottom-4 left-4 text-xs opacity-50 max-w-xs">
+            <div class="mb-1">👆 Bitta qo'l: aylantirish</div>
+            <div class="mb-1">✌️ Ikkita qo'l: chuqurlik</div>
+            <div>👌 Pinch: birlik / tarqalish</div>
         </div>
     </div>
 
-    <div class="hand-hint" id="handHint">Hand Detected</div>
-    <div class="center-indicator"></div>
-
     <script>
-        // ============================================
-        // CONSTANTS & CONFIG
-        // ============================================
-        
-        const AYAHS = [
+        // ==================== TYPES & DATA ====================
+        const ParticleShape = {
+            NurSphere: 0,
+            AyahHalo: 1,
+            KnowledgeSpiral: 2,
+            CosmicExpansion: 3,
+            QalbField: 4
+        };
+
+        const AYAH_DATA = [
             {
-                arabic: "اللَّهُ نُورُ السَّمَاوَاتِ وَالْأَرْضِ",
-                translation: "Allah is the Light of the heavens and the earth",
-                wisdom: "— Nur encompasses all existence, from the cosmos to the heart.",
-                shape: 'NurSphere'
+                arabic: "ٱللَّهُ نُورُ ٱلسَّمَـٰوَٰتِ وَٱلْأَرْضِ ۚ مَثَلُ نُورِهِۦ كَمِشْكَوٰةٍ فِيهَا مِصْبَاحٌ ۖ ٱلْمِصْبَاحُ فِى زُجَاجَةٍ ۖ ٱلزُّجَاجَةُ كَأَنَّهَا كَوْكَبٌ دُرِّىٌّ",
+                translation: "Alloh osmonlar va Yerning nuridir. Uning nurining misoli bir mushkobda boʻlgan chiroqqa oʻxshaydi. U chiroq shishada, shisha esa marvaridga oʻxshash yulduzdek.",
+                wisdom: "Nur mohiyati mushkobda yashiringan chiroqdek — u bor, lekin bevosita koʻrinmaydi",
+                source: "Ibn Sina — Ilm hikmati",
+                science: "Har bir nur nuriyasi subatomik darajada kvant maydonlarining tebranishidir"
             },
             {
-                arabic: "اقْرَأْ بِاسْمِ رَبِّكَ الَّذِي خَلَقَ",
-                translation: "Read in the name of your Lord who created",
-                wisdom: "— The command to read is the first command. Ilm is the foundation of humanity.",
-                shape: 'AyahHalo'
+                arabic: "ٱقْرَأْ بِٱسْمِ رَبِّكَ ٱلَّذِى خَلَقَ * خَلَقَ ٱلْإِنسَـٰنَ مِنْ عَلَقٍ * ٱقْرَأْ وَرَبُّكَ ٱلْأَكْرَمُ * ٱلَّذِى عَلَّمَ بِٱلْقَلَمِ",
+                translation: "Yaratgan Rabbingning nomi bilan oʻqi! U insonni alaqadan yaratdi. Oʻqi, chunki Rabbing eng saxiydir. U qalam bilan oʻrgatdi.",
+                wisdom: "Birinchi vahiy 'oʻqish' bilan boshlanadi — bu ilmdan o'zib ketish emas, balki ma'rifatga yo'l",
+                source: "Al-Farabi — Ilm hikmati",
+                science: "Inson miyasining neyroplastikligi — oʻqish va oʻrganish orqali miya tuzilishi oʻzgaradi"
             },
             {
-                arabic: "وَعَلَّمَهُ الْبَيَانَ",
-                translation: "And taught him eloquence",
-                wisdom: "— Knowledge is the gift that distinguishes humans.",
-                shape: 'KnowledgeSpiral'
-            },
-            {
-                arabic: "وَفِي السَّمَاءِ رِزْقُكُمْ وَمَا تُوعَدُونَ",
-                translation: "And in the sky is your sustenance and all that you are promised",
-                wisdom: "— The cosmos reveals the signs (ayahs) of divine wisdom.",
-                shape: 'CosmicExpansion'
-            },
-            {
-                arabic: "أَوَلَمْ يَنْظُرُوا إِلَى السَّمَاءِ فَوْقَهُمْ كَيْفَ بَنَيْنَاهَا",
-                translation: "Have they not observed the sky above them, how We constructed it?",
-                wisdom: "— Tafakkur (reflection) on creation leads to knowing the Creator.",
-                shape: 'QalbField'
-            },
-            {
-                arabic: "قُلِ انْظُرُوا مَاذَا فِي السَّمَاوَاتِ وَالْأَرْضِ",
-                translation: "Say: 'Observe what is in the heavens and on earth'",
-                wisdom: "— Science and revelation are mirrors reflecting one truth.",
-                shape: 'NurSphere'
+                arabic: "أَفَلَا يَنظُرُونَ إِلَى ٱلْإِبِلِ كَيْفَ خُلِقَتْ * وَإِلَى ٱلسَّمَآءِ كَيْفَ رُفِعَتْ * وَإِلَى ٱلْجِبَالِ كَيْفَ نُصِبَتْ * وَإِلَى ٱلْأَرْضِ كَيْفَ سُطِحَتْ",
+                translation: "Ular tuyaga qaramaydilarmikin, qanday yaratilganiga? Osmonga qaramaydilarmikin, qanday koʻtarilganiga? Togʻlarga qaramaydilarmikin, qanday qoʻyilganiga? Yerga qaramaydilarmikin, qanday yoyilganiga?",
+                wisdom: "Har bir mahluk o'zida Koinotning sirli yozuvini saqlaydi",
+                source: "Al-Biruni — Ilm hikmati",
+                science: "Yer yuzasining tekislanishi tektonik plitalar harakatining milyon yillik natijasidir"
             }
         ];
 
-        const WISDOM_QUOTES = [
-            "— Ibn Sina: 'Knowledge is power, enlightenment is liberation.'",
-            "— Al-Farabi: 'The intellect seeks harmony in all things.'",
-            "— Al-Biruni: 'The heavens declare the glory of understanding.'",
-            "— Imam Ghazali: 'The heart knows what the mind cannot express.'"
+        const WISDOM_DATA = [
+            "Aql — bu nur, qalb esa uning uyi. Ikkalasi muvozanatda boʻlsa, haqiqat yorqin koʻrinadi",
+            "Koinotning har bir nuqtasi Butunning xabarchisidir",
+            "Vaqt — bu mavjudotning nafasi, har bir daqiqa yangi imkoniyat",
+            "Ilm — bu qalbni Allohga olib boradigan nuriy yoʻl"
         ];
 
-        // ============================================
-        // THREE.JS SETUP
-        // ============================================
-
-        const canvas = document.getElementById('canvas');
-        const scene = new THREE.Scene();
-        const camera = new THREE.PerspectiveCamera(
-            75,
-            window.innerWidth / window.innerHeight,
-            0.1,
-            1000
-        );
-        const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: false });
-        renderer.setSize(window.innerWidth, window.innerHeight);
-        renderer.setClearColor(0x050505);
-
-        camera.position.z = 25;
-
-        // ============================================
-        // PARTICLE SYSTEM
-        // ============================================
-
-        const PARTICLE_COUNT = 15000;
-        let particles = null;
-        let particlePositions = null;
-        let particleTargetPositions = null;
-        let particleVelocities = null;
-
-        function createParticles() {
-            if (particles) scene.remove(particles);
-
-            const geometry = new THREE.BufferGeometry();
-            particlePositions = new Float32Array(PARTICLE_COUNT * 3);
-            particleTargetPositions = new Float32Array(PARTICLE_COUNT * 3);
-            particleVelocities = new Float32Array(PARTICLE_COUNT * 3);
-
-            // Initialize sphere
-            for (let i = 0; i < PARTICLE_COUNT; i++) {
-                const theta = Math.random() * Math.PI * 2;
-                const phi = Math.random() * Math.PI;
-                const radius = 5 + Math.random() * 8;
-
-                const x = radius * Math.sin(phi) * Math.cos(theta);
-                const y = radius * Math.sin(phi) * Math.sin(theta);
-                const z = radius * Math.cos(phi);
-
-                particlePositions[i * 3] = x;
-                particlePositions[i * 3 + 1] = y;
-                particlePositions[i * 3 + 2] = z;
-
-                particleTargetPositions[i * 3] = x;
-                particleTargetPositions[i * 3 + 1] = y;
-                particleTargetPositions[i * 3 + 2] = z;
-
-                particleVelocities[i * 3] = 0;
-                particleVelocities[i * 3 + 1] = 0;
-                particleVelocities[i * 3 + 2] = 0;
-            }
-
-            geometry.setAttribute('position', new THREE.BufferAttribute(particlePositions, 3));
-
-            const material = new THREE.PointsMaterial({
-                color: 0xc89664,
-                size: 0.15,
-                sizeAttenuation: true,
-                transparent: true,
-                opacity: 0.9,
-                fog: false
-            });
-
-            particles = new THREE.Points(geometry, material);
-            scene.add(particles);
-        }
-
-        function morphParticles(newShape) {
-            if (!particles) return;
-
-            // Generate target positions based on shape
-            if (newShape === 'NurSphere') {
-                for (let i = 0; i < PARTICLE_COUNT; i++) {
-                    const theta = Math.random() * Math.PI * 2;
-                    const phi = Math.random() * Math.PI;
-                    const radius = 8 + Math.random() * 3;
-
-                    particleTargetPositions[i * 3] = radius * Math.sin(phi) * Math.cos(theta);
-                    particleTargetPositions[i * 3 + 1] = radius * Math.sin(phi) * Math.sin(theta);
-                    particleTargetPositions[i * 3 + 2] = radius * Math.cos(phi);
-                }
-            } else if (newShape === 'AyahHalo') {
-                for (let i = 0; i < PARTICLE_COUNT; i++) {
-                    const angle = (i / PARTICLE_COUNT) * Math.PI * 2;
-                    const ring = Math.floor((i / PARTICLE_COUNT) * 5);
-                    const radius = 3 + ring * 2;
-                    const height = (Math.random() - 0.5) * 8;
-
-                    particleTargetPositions[i * 3] = radius * Math.cos(angle);
-                    particleTargetPositions[i * 3 + 1] = height;
-                    particleTargetPositions[i * 3 + 2] = radius * Math.sin(angle);
-                }
-            } else if (newShape === 'KnowledgeSpiral') {
-                for (let i = 0; i < PARTICLE_COUNT; i++) {
-                    const t = (i / PARTICLE_COUNT) * 10;
-                    const radius = 2 + t * 0.5;
-                    const angle = t * Math.PI;
-
-                    particleTargetPositions[i * 3] = radius * Math.cos(angle);
-                    particleTargetPositions[i * 3 + 1] = (t - 5) * 1.5;
-                    particleTargetPositions[i * 3 + 2] = radius * Math.sin(angle);
-                }
-            } else if (newShape === 'CosmicExpansion') {
-                for (let i = 0; i < PARTICLE_COUNT; i++) {
-                    const radius = (i / PARTICLE_COUNT) * 20;
-                    const theta = Math.random() * Math.PI * 2;
-                    const phi = Math.random() * Math.PI;
-
-                    particleTargetPositions[i * 3] = radius * Math.sin(phi) * Math.cos(theta);
-                    particleTargetPositions[i * 3 + 1] = radius * Math.sin(phi) * Math.sin(theta);
-                    particleTargetPositions[i * 3 + 2] = radius * Math.cos(phi);
-                }
-            } else if (newShape === 'QalbField') {
-                for (let i = 0; i < PARTICLE_COUNT; i++) {
-                    const x = (Math.random() - 0.5) * 16;
-                    const y = (Math.random() - 0.5) * 16;
-                    const z = (Math.random() - 0.5) * 16;
-
-                    const dist = Math.sqrt(x*x + y*y + z*z);
-                    const pull = Math.max(0, 1 - dist / 20);
-
-                    particleTargetPositions[i * 3] = x * pull;
-                    particleTargetPositions[i * 3 + 1] = y * pull;
-                    particleTargetPositions[i * 3 + 2] = z * pull;
-                }
-            }
-        }
-
-        // ============================================
-        // MEDIAPIPE HANDS
-        // ============================================
-
-        let hands = null;
-        let camera_hands = null;
-        let lastHandFrame = { hands: [], timestamp: 0 };
-        let isHandDetected = false;
-        let handSmoothX = 0, handSmoothY = 0, handSmoothZ = 0;
-
-        async function initMediaPipe() {
-            const video = document.getElementById('video');
-            
-            hands = new Hands({
-                locateFile: (file) => {
-                    return `https://cdn.jsdelivr.net/npm/@mediapipe/hands/${file}`;
-                }
-            });
-
-            hands.setOptions({
-                maxNumHands: 2,
-                modelComplexity: 1,
-                minDetectionConfidence: 0.5,
-                minTrackingConfidence: 0.5
-            });
-
-            hands.onResults(onHandsResults);
-
-            camera_hands = new Camera(video, {
-                onFrame: async () => {
-                    await hands.send({ image: video });
-                },
-                width: 640,
-                height: 480
-            });
-
-            camera_hands.start();
-        }
-
-        function onHandsResults(results) {
-            lastHandFrame = results;
-            isHandDetected = results.multiHandLandmarks && results.multiHandLandmarks.length > 0;
-
-            if (isHandDetected) {
-                const hand = results.multiHandLandmarks[0];
-                const indexFinger = hand[8];
+        // ==================== UTILITIES ====================
+        class ShapesGenerator {
+            static generateSphere(particleCount) {
+                const positions = new Float32Array(particleCount * 3);
+                const radius = 3;
                 
-                handSmoothX = handSmoothX * 0.85 + indexFinger.x * 0.15;
-                handSmoothY = handSmoothY * 0.85 + indexFinger.y * 0.15;
-                handSmoothZ = handSmoothZ * 0.85 + (indexFinger.z || 0) * 0.15;
-            }
-        }
-
-        // ============================================
-        // AUDIO ENGINE
-        // ============================================
-
-        let audioContext = null;
-        let oscillator = null;
-        let gainNode = null;
-        let filter = null;
-
-        function initAudio() {
-            if (audioContext) return;
-            
-            audioContext = new (window.AudioContext || window.webkitAudioContext)();
-            gainNode = audioContext.createGain();
-            filter = audioContext.createBiquadFilter();
-            
-            gainNode.connect(filter);
-            filter.connect(audioContext.destination);
-            
-            oscillator = audioContext.createOscillator();
-            oscillator.type = 'sine';
-            oscillator.frequency.value = 55;
-            oscillator.connect(gainNode);
-            
-            gainNode.gain.value = 0.05;
-            oscillator.start();
-        }
-
-        function updateAudioFromHand() {
-            if (!audioContext || !oscillator || !gainNode) return;
-
-            const handDepth = handSmoothZ;
-            const frequency = 55 + handDepth * 100;
-            const gain = Math.max(0.01, Math.min(0.15, handDepth * 0.2));
-
-            oscillator.frequency.setValueAtTime(frequency, audioContext.currentTime);
-            gainNode.gain.setValueAtTime(gain, audioContext.currentTime);
-        }
-
-        // ============================================
-        // APPLICATION STATE
-        // ============================================
-
-        let currentAyahIndex = 0;
-        let appStarted = false;
-        let sceneRotation = { x: 0, y: 0 };
-
-        function displayAyah(index) {
-            const ayah = AYAHS[index % AYAHS.length];
-            document.getElementById('ayahText').textContent = ayah.arabic;
-            document.getElementById('translationText').textContent = ayah.translation;
-            document.getElementById('wisdomLine').textContent = WISDOM_QUOTES[Math.floor(Math.random() * WISDOM_QUOTES.length)];
-            
-            morphParticles(ayah.shape);
-        }
-
-        // ============================================
-        // ANIMATION LOOP
-        // ============================================
-
-        function animate() {
-            requestAnimationFrame(animate);
-
-            if (appStarted && particles) {
-                // Update hand-based controls
-                if (isHandDetected) {
-                    sceneRotation.x = (handSmoothY - 0.5) * 0.5;
-                    sceneRotation.y = (handSmoothX - 0.5) * 0.5;
-                    updateAudioFromHand();
-                }
-
-                // Apply rotation
-                particles.rotation.x += (sceneRotation.x - particles.rotation.x) * 0.05;
-                particles.rotation.y += (sceneRotation.y - particles.rotation.y) * 0.05;
-
-                // Update particle positions with smooth lerp
-                for (let i = 0; i < PARTICLE_COUNT; i++) {
+                for (let i = 0; i < particleCount; i++) {
+                    const theta = Math.random() * Math.PI * 2;
+                    const phi = Math.acos(2 * Math.random() - 1);
+                    const r = radius * Math.cbrt(Math.random());
+                    
                     const idx = i * 3;
-                    particlePositions[idx] += (particleTargetPositions[idx] - particlePositions[idx]) * 0.02;
-                    particlePositions[idx + 1] += (particleTargetPositions[idx + 1] - particlePositions[idx + 1]) * 0.02;
-                    particlePositions[idx + 2] += (particleTargetPositions[idx + 2] - particlePositions[idx + 2]) * 0.02;
+                    positions[idx] = r * Math.sin(phi) * Math.cos(theta);
+                    positions[idx + 1] = r * Math.sin(phi) * Math.sin(theta);
+                    positions[idx + 2] = r * Math.cos(phi);
                 }
-
-                particles.geometry.attributes.position.needsUpdate = true;
-
-                // Subtle color shift based on time
-                const time = Date.now() * 0.0005;
-                const hue = (time % 1);
-                const color = new THREE.Color().setHSL(0.05 + hue * 0.05, 0.5, 0.6);
-                particles.material.color.copy(color);
+                
+                return positions;
             }
-
-            renderer.render(scene, camera);
+            
+            static generateHalo(particleCount) {
+                const positions = new Float32Array(particleCount * 3);
+                const radius = 4;
+                
+                for (let i = 0; i < particleCount; i++) {
+                    const angle = (i / particleCount) * Math.PI * 2;
+                    const r = radius + Math.sin(angle * 5) * 0.5;
+                    
+                    const idx = i * 3;
+                    positions[idx] = Math.cos(angle) * r;
+                    positions[idx + 1] = Math.sin(angle) * r;
+                    positions[idx + 2] = Math.sin(angle * 3) * 0.5;
+                }
+                
+                return positions;
+            }
+            
+            static generateSpiral(particleCount) {
+                const positions = new Float32Array(particleCount * 3);
+                const turns = 8;
+                
+                for (let i = 0; i < particleCount; i++) {
+                    const t = i / particleCount;
+                    const angle = t * Math.PI * 2 * turns;
+                    const radius = t * 3;
+                    const height = (t - 0.5) * 8;
+                    
+                    const idx = i * 3;
+                    positions[idx] = Math.cos(angle) * radius;
+                    positions[idx + 1] = height;
+                    positions[idx + 2] = Math.sin(angle) * radius;
+                }
+                
+                return positions;
+            }
+            
+            static generateExpansion(particleCount) {
+                const positions = new Float32Array(particleCount * 3);
+                
+                for (let i = 0; i < particleCount; i++) {
+                    const theta = Math.random() * Math.PI * 2;
+                    const phi = Math.acos(2 * Math.random() - 1);
+                    const r = Math.pow(Math.random(), 0.3) * 6;
+                    
+                    const idx = i * 3;
+                    positions[idx] = r * Math.sin(phi) * Math.cos(theta);
+                    positions[idx + 1] = r * Math.sin(phi) * Math.sin(theta) * 0.3;
+                    positions[idx + 2] = r * Math.cos(phi);
+                }
+                
+                return positions;
+            }
+            
+            static generateHeartField(particleCount) {
+                const positions = new Float32Array(particleCount * 3);
+                
+                for (let i = 0; i < particleCount; i++) {
+                    const t = Math.random() * Math.PI * 2;
+                    const scale = 2 + Math.random() * 2;
+                    
+                    const x = scale * 16 * Math.pow(Math.sin(t), 3);
+                    const y = scale * (13 * Math.cos(t) - 5 * Math.cos(2*t) - 2 * Math.cos(3*t) - Math.cos(4*t));
+                    const z = (Math.random() - 0.5) * 3;
+                    
+                    const idx = i * 3;
+                    positions[idx] = x * 0.1;
+                    positions[idx + 1] = y * 0.1;
+                    positions[idx + 2] = z;
+                }
+                
+                return positions;
+            }
+            
+            static getShapePositions(shape, particleCount) {
+                switch(shape) {
+                    case ParticleShape.NurSphere:
+                        return this.generateSphere(particleCount);
+                    case ParticleShape.AyahHalo:
+                        return this.generateHalo(particleCount);
+                    case ParticleShape.KnowledgeSpiral:
+                        return this.generateSpiral(particleCount);
+                    case ParticleShape.CosmicExpansion:
+                        return this.generateExpansion(particleCount);
+                    case ParticleShape.QalbField:
+                        return this.generateHeartField(particleCount);
+                    default:
+                        return this.generateSphere(particleCount);
+                }
+            }
         }
 
-        // ============================================
-        // EVENT LISTENERS
-        // ============================================
-
-        document.getElementById('startButton').addEventListener('click', async () => {
-            if (!appStarted) {
-                appStarted = true;
-                document.getElementById('startButton').classList.add('hidden');
-                document.getElementById('infoText').textContent = '🤲 اپنے ہاتھ استعمال کریں (Use your hands)';
-                
-                createParticles();
-                displayAyah(0);
-                initAudio();
-                
-                await initMediaPipe();
+        class AudioEngine {
+            constructor() {
+                this.audioContext = null;
+                this.gainNode = null;
+                this.oscillator = null;
+                this.noiseNode = null;
+                this.isPlaying = false;
             }
-        });
-
-        // Keyboard shortcuts
-        document.addEventListener('keydown', (e) => {
-            if (!appStarted) return;
             
-            if (e.key === 'ArrowRight' || e.key === ' ') {
-                currentAyahIndex++;
-                displayAyah(currentAyahIndex);
-            } else if (e.key === 'ArrowLeft') {
-                currentAyahIndex--;
-                displayAyah(currentAyahIndex);
+            init() {
+                if (this.audioContext) return;
+                
+                this.audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                this.gainNode = this.audioContext.createGain();
+                this.gainNode.gain.value = 0.1;
+                this.gainNode.connect(this.audioContext.destination);
+                
+                // Create calm hum
+                this.oscillator = this.audioContext.createOscillator();
+                this.oscillator.type = 'sine';
+                this.oscillator.frequency.value = 55; // Low frequency for calmness
+                this.oscillator.connect(this.gainNode);
+                
+                // Create breath-like noise
+                this.noiseNode = this.audioContext.createBufferSource();
+                const bufferSize = this.audioContext.sampleRate * 2;
+                const buffer = this.audioContext.createBuffer(1, bufferSize, this.audioContext.sampleRate);
+                const output = buffer.getChannelData(0);
+                
+                for (let i = 0; i < bufferSize; i++) {
+                    output[i] = Math.random() * 2 - 1;
+                }
+                
+                this.noiseNode.buffer = buffer;
+                this.noiseNode.loop = true;
+                
+                const noiseFilter = this.audioContext.createBiquadFilter();
+                noiseFilter.type = 'bandpass';
+                noiseFilter.frequency.value = 200;
+                noiseFilter.Q.value = 0.5;
+                
+                const noiseGain = this.audioContext.createGain();
+                noiseGain.gain.value = 0.02;
+                
+                this.noiseNode.connect(noiseFilter);
+                noiseFilter.connect(noiseGain);
+                noiseGain.connect(this.gainNode);
             }
+            
+            start() {
+                if (!this.audioContext || this.isPlaying) return;
+                
+                this.init();
+                this.oscillator.start();
+                this.noiseNode.start();
+                this.isPlaying = true;
+            }
+            
+            updateFromHands(handData) {
+                if (!this.isPlaying || !this.audioContext) return;
+                
+                const calmness = 1 - (handData.speed || 0);
+                const targetGain = 0.05 + calmness * 0.1;
+                const targetFreq = 55 + (1 - calmness) * 20;
+                
+                this.gainNode.gain.linearRampToValueAtTime(
+                    targetGain,
+                    this.audioContext.currentTime + 0.1
+                );
+                
+                this.oscillator.frequency.linearRampToValueAtTime(
+                    targetFreq,
+                    this.audioContext.currentTime + 0.1
+                );
+            }
+            
+            playSwipeEffect() {
+                if (!this.audioContext) return;
+                
+                const oscillator = this.audioContext.createOscillator();
+                const gainNode = this.audioContext.createGain();
+                
+                oscillator.connect(gainNode);
+                gainNode.connect(this.audioContext.destination);
+                
+                oscillator.frequency.setValueAtTime(300, this.audioContext.currentTime);
+                oscillator.frequency.exponentialRampToValueAtTime(100, this.audioContext.currentTime + 0.5);
+                
+                gainNode.gain.setValueAtTime(0.1, this.audioContext.currentTime);
+                gainNode.gain.exponentialRampToValueAtTime(0.01, this.audioContext.currentTime + 0.5);
+                
+                oscillator.start();
+                oscillator.stop(this.audioContext.currentTime + 0.5);
+            }
+        }
+
+        // ==================== MAIN APPLICATION ====================
+        class NurIlmApp {
+            constructor() {
+                this.particleCount = 15000;
+                this.currentShape = ParticleShape.NurSphere;
+                this.targetShape = ParticleShape.NurSphere;
+                this.morphProgress = 0;
+                this.morphSpeed = 0.02;
+                
+                this.hands = null;
+                this.lastHandsTime = 0;
+                this.handData = {
+                    left: null,
+                    right: null,
+                    pinchStrength: 0,
+                    speed: 0
+                };
+                
+                this.scene = null;
+                this.camera = null;
+                this.renderer = null;
+                this.particles = null;
+                this.positions = null;
+                this.targetPositions = null;
+                
+                this.currentAyahIndex = 0;
+                this.textDisplayTime = 0;
+                this.textCycleInterval = 15000; // 15 seconds
+                
+                this.audioEngine = new AudioEngine();
+                this.lastFrameTime = 0;
+                this.fps = 60;
+                
+                this.isStarted = false;
+                
+                this.init();
+            }
+            
+            init() {
+                this.initThreeJS();
+                this.initMediaPipe();
+                this.initEventListeners();
+                this.updateUI();
+                this.animate();
+            }
+            
+            initThreeJS() {
+                // Scene
+                this.scene = new THREE.Scene();
+                this.scene.background = new THREE.Color(0x050505);
+                
+                // Camera
+                this.camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 1000);
+                this.camera.position.z = 15;
+                
+                // Renderer
+                this.renderer = new THREE.WebGLRenderer({
+                    canvas: document.getElementById('scene-canvas'),
+                    antialias: true,
+                    alpha: true
+                });
+                this.renderer.setSize(window.innerWidth, window.innerHeight);
+                this.renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+                this.renderer.setClearColor(0x000000, 1);
+                
+                // Particles
+                this.createParticles();
+                
+                // Lights
+                const ambientLight = new THREE.AmbientLight(0xffffff, 0.3);
+                this.scene.add(ambientLight);
+                
+                const directionalLight = new THREE.DirectionalLight(0xD4AF37, 0.5);
+                directionalLight.position.set(5, 5, 5);
+                this.scene.add(directionalLight);
+                
+                // Window resize
+                window.addEventListener('resize', () => {
+                    this.camera.aspect = window.innerWidth / window.innerHeight;
+                    this.camera.updateProjectionMatrix();
+                    this.renderer.setSize(window.innerWidth, window.innerHeight);
+                });
+            }
+            
+            createParticles() {
+                const geometry = new THREE.BufferGeometry();
+                
+                // Initial positions
+                this.positions = ShapesGenerator.getShapePositions(this.currentShape, this.particleCount);
+                geometry.setAttribute('position', new THREE.BufferAttribute(this.positions, 3));
+                
+                // Colors
+                const colors = new Float32Array(this.particleCount * 3);
+                for (let i = 0; i < this.particleCount; i++) {
+                    const idx = i * 3;
+                    colors[idx] = 0.85;     // R
+                    colors[idx + 1] = 0.75; // G
+                    colors[idx + 2] = 0.3;  // B
+                }
+                geometry.setAttribute('color', new THREE.BufferAttribute(colors, 3));
+                
+                // Material
+                const material = new THREE.PointsMaterial({
+                    size: 0.05,
+                    vertexColors: true,
+                    transparent: true,
+                    opacity: 0.8,
+                    blending: THREE.AdditiveBlending,
+                    depthWrite: false
+                });
+                
+                this.particles = new THREE.Points(geometry, material);
+                this.scene.add(this.particles);
+                
+                // Create target positions
+                this.targetPositions = new Float32Array(this.particleCount * 3);
+                this.updateTargetPositions();
+            }
+            
+            updateTargetPositions() {
+                const newPositions = ShapesGenerator.getShapePositions(this.targetShape, this.particleCount);
+                this.targetPositions.set(newPositions);
+            }
+            
+            initMediaPipe() {
+                const videoElement = document.getElementById('video-input');
+                
+                this.hands = new Hands({
+                    locateFile: (file) => {
+                        return `https://cdn.jsdelivr.net/npm/@mediapipe/hands/${file}`;
+                    }
+                });
+                
+                this.hands.setOptions({
+                    maxNumHands: 2,
+                    modelComplexity: 1,
+                    minDetectionConfidence: 0.5,
+                    minTrackingConfidence: 0.5
+                });
+                
+                this.hands.onResults((results) => this.onHandResults(results));
+                
+                // Start camera
+                const camera = new Camera(videoElement, {
+                    onFrame: async () => {
+                        await this.hands.send({image: videoElement});
+                    },
+                    width: 640,
+                    height: 480
+                });
+                
+                camera.start();
+            }
+            
+            onHandResults(results) {
+                const now = Date.now();
+                const timeDiff = now - this.lastHandsTime;
+                this.lastHandsTime = now;
+                
+                if (results.multiHandLandmarks && results.multiHandLandmarks.length > 0) {
+                    this.processHandLandmarks(results.multiHandLandmarks, timeDiff);
+                } else {
+                    this.handData.left = null;
+                    this.handData.right = null;
+                    this.handData.pinchStrength = 0;
+                    this.handData.speed = 0;
+                }
+                
+                // Update audio based on hand movement
+                this.audioEngine.updateFromHands(this.handData);
+            }
+            
+            processHandLandmarks(landmarks, timeDiff) {
+                let leftHand = null;
+                let rightHand = null;
+                
+                // Separate left and right hands
+                landmarks.forEach((hand, index) => {
+                    if (hand.length >= 21) {
+                        if (index === 0) {
+                            leftHand = hand;
+                        } else {
+                            rightHand = hand;
+                        }
+                    }
+                });
+                
+                this.handData.left = leftHand;
+                this.handData.right = rightHand;
+                
+                // Calculate pinch strength from first hand
+                if (leftHand || rightHand) {
+                    const hand = leftHand || rightHand;
+                    const thumbTip = hand[4];
+                    const indexTip = hand[8];
+                    
+                    const dx = thumbTip.x - indexTip.x;
+                    const dy = thumbTip.y - indexTip.y;
+                    const dz = thumbTip.z - indexTip.z;
+                    
+                    const distance = Math.sqrt(dx*dx + dy*dy + dz*dz);
+                    this.handData.pinchStrength = 1 - Math.min(distance * 5, 1);
+                    
+                    // Calculate speed based on index finger movement
+                    if (this.lastIndexPosition) {
+                        const movement = Math.sqrt(
+                            Math.pow(hand[8].x - this.lastIndexPosition.x, 2) +
+                            Math.pow(hand[8].y - this.lastIndexPosition.y, 2)
+                        );
+                        this.handData.speed = movement / (timeDiff || 1) * 1000;
+                    }
+                    
+                    this.lastIndexPosition = hand[8];
+                }
+                
+                // Detect swipe for shape change
+                this.detectSwipe();
+            }
+            
+            detectSwipe() {
+                if (!this.handData.left && !this.handData.right) return;
+                
+                const hand = this.handData.left || this.handData.right;
+                const indexTip = hand[8];
+                
+                if (!this.lastSwipePosition) {
+                    this.lastSwipePosition = {x: indexTip.x, y: indexTip.y, time: Date.now()};
+                    return;
+                }
+                
+                const dx = indexTip.x - this.lastSwipePosition.x;
+                const dt = Date.now() - this.lastSwipePosition.time;
+                
+                // Swipe detected if fast horizontal movement
+                if (dt > 100 && dt < 500 && Math.abs(dx) > 0.3) {
+                    this.nextShape();
+                    this.lastSwipePosition = null;
+                    this.audioEngine.playSwipeEffect();
+                    return;
+                }
+                
+                // Update position every 100ms
+                if (dt > 100) {
+                    this.lastSwipePosition = {x: indexTip.x, y: indexTip.y, time: Date.now()};
+                }
+            }
+            
+            nextShape() {
+                this.targetShape = (this.targetShape + 1) % 5;
+                this.updateTargetPositions();
+                this.morphProgress = 0;
+                
+                // Update ayah display
+                this.currentAyahIndex = (this.currentAyahIndex + 1) % AYAH_DATA.length;
+                this.updateUI();
+            }
+            
+            initEventListeners() {
+                document.getElementById('start-button').addEventListener('click', () => {
+                    this.startExperience();
+                });
+            }
+            
+            startExperience() {
+                this.isStarted = true;
+                document.getElementById('start-container').style.opacity = '0';
+                document.getElementById('start-container').style.pointerEvents = 'none';
+                
+                // Show ayah container
+                document.getElementById('ayah-container').classList.remove('hidden');
+                document.getElementById('wisdom-container').classList.remove('hidden');
+                document.getElementById('science-container').classList.remove('hidden');
+                
+                // Start audio
+                this.audioEngine.start();
+                
+                // Initial UI update
+                this.updateUI();
+                
+                // Hide start container after transition
+                setTimeout(() => {
+                    document.getElementById('start-container').style.display = 'none';
+                }, 1000);
+            }
+            
+            updateUI() {
+                if (!this.isStarted) return;
+                
+                const ayahData = AYAH_DATA[this.currentAyahIndex];
+                
+                // Update Arabic text
+                document.getElementById('arabic-text').textContent = ayahData.arabic;
+                document.getElementById('translation-text').textContent = ayahData.translation;
+                document.getElementById('wisdom-text').textContent = ayahData.wisdom;
+                document.getElementById('wisdom-source').textContent = ayahData.source;
+                document.getElementById('science-text').textContent = ayahData.science;
+                
+                // Reset text timer
+                this.textDisplayTime = Date.now();
+            }
+            
+            updateParticles() {
+                const positions = this.particles.geometry.attributes.position.array;
+                
+                // Morph towards target shape
+                if (this.morphProgress < 1) {
+                    this.morphProgress += this.morphSpeed;
+                    
+                    for (let i = 0; i < this.particleCount * 3; i++) {
+                        positions[i] += (this.targetPositions[i] - positions[i]) * this.morphSpeed;
+                    }
+                    
+                    this.particles.geometry.attributes.position.needsUpdate = true;
+                }
+                
+                // Apply hand interactions
+                if (this.handData.pinchStrength > 0.1) {
+                    this.applyHandPhysics(positions);
+                }
+                
+                // Rotate scene based on hand position
+                if (this.handData.left || this.handData.right) {
+                    const hand = this.handData.left || this.handData.right;
+                    const wrist = hand[0];
+                    
+                    this.scene.rotation.x = (wrist.y - 0.5) * 0.5;
+                    this.scene.rotation.y = (wrist.x - 0.5) * 0.5;
+                }
+                
+                // Update colors based on pinch
+                const colors = this.particles.geometry.attributes.color.array;
+                const pinch = this.handData.pinchStrength;
+                
+                for (let i = 0; i < this.particleCount; i++) {
+                    const idx = i * 3;
+                    colors[idx] = 0.85 + pinch * 0.15;     // R
+                    colors[idx + 1] = 0.75 + pinch * 0.1; // G
+                    colors[idx + 2] = 0.3 - pinch * 0.1;  // B
+                }
+                
+                this.particles.geometry.attributes.color.needsUpdate = true;
+            }
+            
+            applyHandPhysics(positions) {
+                const pinch = this.handData.pinchStrength;
+                
+                for (let i = 0; i < this.particleCount; i++) {
+                    const idx = i * 3;
+                    const x = positions[idx];
+                    const y = positions[idx + 1];
+                    const z = positions[idx + 2];
+                    
+                    const distance = Math.sqrt(x*x + y*y + z*z);
+                    
+                    if (pinch > 0.5) {
+                        // Attract towards center (Tawhid)
+                        const force = 0.005 * pinch;
+                        positions[idx] -= x * force;
+                        positions[idx + 1] -= y * force;
+                        positions[idx + 2] -= z * force;
+                    } else {
+                        // Gentle repulsion (Expansion)
+                        const force = 0.002 * (1 - pinch);
+                        positions[idx] += x * force / (distance + 0.1);
+                        positions[idx + 1] += y * force / (distance + 0.1);
+                        positions[idx + 2] += z * force / (distance + 0.1);
+                    }
+                }
+                
+                this.particles.geometry.attributes.position.needsUpdate = true;
+            }
+            
+            animate(currentTime = 0) {
+                requestAnimationFrame((time) => this.animate(time));
+                
+                // Calculate FPS
+                const delta = currentTime - this.lastFrameTime;
+                this.lastFrameTime = currentTime;
+                this.fps = Math.round(1000 / delta);
+                
+                // Update FPS display
+                document.getElementById('fps-counter').textContent = `${Math.min(this.fps, 60)} FPS`;
+                
+                // Update particles
+                if (this.particles) {
+                    this.updateParticles();
+                }
+                
+                // Auto-cycle text after interval
+                if (this.isStarted && Date.now() - this.textDisplayTime > this.textCycleInterval) {
+                    this.nextShape();
+                }
+                
+                // Render
+                if (this.renderer && this.scene && this.camera) {
+                    this.renderer.render(this.scene, this.camera);
+                }
+            }
+        }
+
+        // ==================== INITIALIZATION ====================
+        // Wait for page to load
+        window.addEventListener('load', () => {
+            // Initialize app
+            window.app = new NurIlmApp();
+            
+            // Add touch prevention for mobile
+            document.addEventListener('touchmove', (e) => {
+                if (e.scale !== 1) {
+                    e.preventDefault();
+                }
+            }, { passive: false });
         });
 
-        // Responsive canvas
-        window.addEventListener('resize', () => {
-            camera.aspect = window.innerWidth / window.innerHeight;
-            camera.updateProjectionMatrix();
-            renderer.setSize(window.innerWidth, window.innerHeight);
-        });
-
-        // ============================================
-        // INITIALIZATION
-        // ============================================
-
-        animate();
+        // Polyfill for requestAnimationFrame
+        (function() {
+            var lastTime = 0;
+            var vendors = ['ms', 'moz', 'webkit', 'o'];
+            for(var x = 0; x < vendors.length && !window.requestAnimationFrame; ++x) {
+                window.requestAnimationFrame = window[vendors[x]+'RequestAnimationFrame'];
+                window.cancelAnimationFrame = window[vendors[x]+'CancelAnimationFrame'] 
+                                           || window[vendors[x]+'CancelRequestAnimationFrame'];
+            }
+            
+            if (!window.requestAnimationFrame)
+                window.requestAnimationFrame = function(callback, element) {
+                    var currTime = new Date().getTime();
+                    var timeToCall = Math.max(0, 16 - (currTime - lastTime));
+                    var id = window.setTimeout(function() { callback(currTime + timeToCall); }, 
+                      timeToCall);
+                    lastTime = currTime + timeToCall;
+                    return id;
+                };
+            
+            if (!window.cancelAnimationFrame)
+                window.cancelAnimationFrame = function(id) {
+                    clearTimeout(id);
+                };
+        }());
     </script>
 </body>
 </html>
