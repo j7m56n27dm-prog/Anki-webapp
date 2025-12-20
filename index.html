@@ -1,797 +1,624 @@
 <!DOCTYPE html>
-<html lang="uz">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <meta name="theme-color" content="#000000">
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <title>Anki PRO Ultra 2025</title>
-    
-    <!-- Icons & Fonts -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-    <link href="https://fonts.googleapis.com/css2?family=SF+Pro+Display:wght@300;400;500;600;700;800&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nebula Hand Control</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r160/three.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@mediapipe/hands@0.4.1646424915/hands.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils@0.4.1646424915/camera_utils.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@mediapipe/drawing_utils@0.4.1646424915/drawing_utils.min.js"></script>
     <style>
-        /* =========================================
-           ULTRA DESIGN SYSTEM (macOS/iOS Style)
-           ========================================= */
-        :root {
-            --bg-body: #000000;
-            --bg-card: #1C1C1E;
-            --bg-glass: rgba(28, 28, 30, 0.75);
-            --border-light: rgba(255, 255, 255, 0.12);
-            --primary: #0A84FF;
-            --primary-dark: #0077ED;
-            --accent-purple: #BF5AF2;
-            --accent-orange: #FF9F0A;
-            --accent-green: #30D158;
-            --accent-red: #FF453A;
-            --text-main: #FFFFFF;
-            --text-sub: #8E8E93;
-            --font-stack: 'SF Pro Display', -apple-system, BlinkMacSystemFont, 'Inter', sans-serif;
-            --safe-top: env(safe-area-inset-top, 20px);
-            --safe-bottom: env(safe-area-inset-bottom, 20px);
-            --radius-box: 18px;
-            --shadow-glow: 0 0 20px rgba(10, 132, 255, 0.2);
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
         }
 
-        * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; font-family: var(--font-stack); }
-        
         body {
-            background-color: var(--bg-body);
-            color: var(--text-main);
-            height: 100dvh;
+            background: #050505;
+            color: #fff;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
             overflow: hidden;
-            display: flex;
-            justify-content: center;
+            width: 100vw;
+            height: 100vh;
         }
 
-        /* Ambient Background */
-        .ambient-light {
-            position: fixed; top: -20%; left: -20%; width: 70%; height: 70%;
-            background: radial-gradient(circle, rgba(10,132,255,0.15), transparent 70%);
-            z-index: -1; animation: float 10s infinite alternate;
-        }
-        .ambient-light-2 {
-            position: fixed; bottom: -20%; right: -20%; width: 60%; height: 60%;
-            background: radial-gradient(circle, rgba(191,90,242,0.1), transparent 70%);
-            z-index: -1; animation: float 15s infinite alternate-reverse;
+        #canvas {
+            display: block;
+            width: 100%;
+            height: 100%;
         }
 
-        @keyframes float { 0% { transform: translate(0, 0); } 100% { transform: translate(30px, 30px); } }
-
-        /* App Container */
-        .app-container {
-            width: 100%; max-width: 480px; height: 100%;
-            display: flex; flex-direction: column; position: relative;
-            background: rgba(0,0,0,0.2);
+        #video {
+            display: none;
         }
 
-        /* Header */
-        .header {
-            padding: calc(var(--safe-top) + 12px) 20px 12px;
-            display: flex; justify-content: space-between; align-items: center;
-            background: rgba(0,0,0,0.6); backdrop-filter: blur(20px);
-            border-bottom: 0.5px solid var(--border-light); z-index: 50;
-        }
-        .brand { font-size: 22px; font-weight: 800; letter-spacing: -0.5px; display: flex; align-items: center; gap: 8px; }
-        .brand i { background: linear-gradient(135deg, var(--primary), var(--accent-purple)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
-        
-        .streak-pill {
-            background: rgba(255, 159, 10, 0.15); border: 1px solid rgba(255, 159, 10, 0.3);
-            padding: 6px 12px; border-radius: 20px; font-size: 13px; font-weight: 600;
-            color: var(--accent-orange); display: flex; align-items: center; gap: 6px;
+        .ui-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 10;
         }
 
-        /* Content Area */
-        .content {
-            flex: 1; overflow-y: auto; overflow-x: hidden;
-            padding: 20px; padding-bottom: 100px;
-        }
-        .content::-webkit-scrollbar { display: none; }
-
-        /* Typography */
-        h2 { font-size: 20px; font-weight: 700; margin-bottom: 15px; letter-spacing: -0.3px; }
-        .text-muted { color: var(--text-sub); font-size: 13px; }
-
-        /* Cards */
-        .card-box {
-            background: var(--bg-card); border-radius: var(--radius-box);
-            padding: 18px; margin-bottom: 16px; position: relative;
-            border: 1px solid var(--border-light);
-            transition: transform 0.2s, background 0.2s;
-        }
-        .card-box:active { transform: scale(0.98); background: #252528; }
-        
-        .deck-item { display: flex; align-items: center; justify-content: space-between; }
-        .deck-icon {
-            width: 48px; height: 48px; border-radius: 14px;
-            display: flex; align-items: center; justify-content: center;
-            font-size: 20px; margin-right: 15px; color: white;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
-        }
-        .badge {
-            background: var(--accent-red); color: white;
-            padding: 4px 10px; border-radius: 12px;
-            font-size: 12px; font-weight: 700;
-        }
-
-        /* Buttons */
-        .btn-main {
-            width: 100%; background: var(--primary); color: white;
-            border: none; padding: 16px; border-radius: 16px;
-            font-size: 16px; font-weight: 600; cursor: pointer;
-            box-shadow: 0 8px 24px rgba(10, 132, 255, 0.3);
-            transition: 0.2s; display: flex; justify-content: center; align-items: center; gap: 8px;
-        }
-        .btn-main:active { transform: scale(0.96); opacity: 0.9; }
-
-        /* Inputs */
-        .input-group { margin-bottom: 20px; }
-        .input-label { display: block; color: var(--text-sub); font-size: 12px; margin-bottom: 8px; text-transform: uppercase; letter-spacing: 0.5px; font-weight: 600; }
-        .input-field {
-            width: 100%; background: #2C2C2E; border: 1px solid var(--border-light);
-            padding: 16px; border-radius: 14px; color: white; font-size: 16px;
-            outline: none; transition: 0.3s;
-        }
-        .input-field:focus { border-color: var(--primary); background: #323235; }
-        .cloze-hint { font-size: 11px; color: var(--primary); margin-top: 6px; }
-
-        /* Navigation */
-        .nav-bar {
-            position: absolute; bottom: 0; width: 100%;
-            height: calc(80px + var(--safe-bottom));
-            background: rgba(20, 20, 20, 0.85);
-            backdrop-filter: blur(30px); border-top: 0.5px solid var(--border-light);
-            display: flex; justify-content: space-around;
-            padding-top: 10px; padding-bottom: var(--safe-bottom);
+        .start-button {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            padding: 20px 60px;
+            font-size: 18px;
+            font-weight: 600;
+            color: #050505;
+            background: linear-gradient(135deg, #00d9ff, #0099ff);
+            border: none;
+            border-radius: 50px;
+            cursor: pointer;
+            box-shadow: 0 0 30px rgba(0, 217, 255, 0.5);
+            transition: all 0.3s ease;
+            pointer-events: all;
             z-index: 100;
         }
-        .nav-item {
-            display: flex; flex-direction: column; align-items: center; justify-content: center;
-            gap: 4px; color: var(--text-sub); width: 60px; font-size: 10px; font-weight: 500;
-            transition: 0.3s;
-        }
-        .nav-item i { font-size: 24px; transition: 0.3s; }
-        .nav-item.active { color: var(--primary); }
-        .nav-item.active i { transform: translateY(-3px); }
 
-        .add-btn-wrapper { position: relative; top: -30px; }
-        .add-btn {
-            width: 58px; height: 58px; border-radius: 50%;
-            background: linear-gradient(135deg, var(--primary), #5E5CE6);
-            display: flex; align-items: center; justify-content: center;
-            font-size: 26px; color: white;
-            box-shadow: 0 10px 30px rgba(10, 132, 255, 0.4);
-            border: 4px solid var(--bg-body);
+        .start-button:hover {
+            transform: translate(-50%, -50%) scale(1.1);
+            box-shadow: 0 0 50px rgba(0, 217, 255, 0.8);
         }
 
-        /* Study Mode */
-        .study-modal {
-            position: fixed; inset: 0; background: var(--bg-body); z-index: 200;
-            display: none; flex-direction: column;
-            animation: slideUp 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+        .start-button.hidden {
+            display: none;
         }
-        .study-modal.active { display: flex; }
-        .study-header {
-            padding: var(--safe-top) 20px 10px; display: flex; justify-content: space-between; align-items: center;
-        }
-        .flashcard-area {
-            flex: 1; perspective: 1000px; padding: 20px; display: flex; align-items: center; justify-content: center;
-        }
-        .flashcard {
-            width: 100%; height: 60vh; position: relative; transform-style: preserve-3d;
-            transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1);
-        }
-        .flashcard.flipped { transform: rotateY(180deg); }
-        .card-face {
-            position: absolute; inset: 0; backface-visibility: hidden;
-            background: #1C1C1E; border: 1px solid var(--border-light);
-            border-radius: 30px; display: flex; flex-direction: column;
-            align-items: center; justify-content: center; padding: 30px;
-            text-align: center; box-shadow: 0 20px 40px -10px rgba(0,0,0,0.5);
-        }
-        .card-back { transform: rotateY(180deg); background: #222; border: 1px solid var(--primary); }
-        .card-content { font-size: 24px; font-weight: 600; line-height: 1.5; }
-        
-        /* Cloze Styles */
-        .cloze-hidden { background: var(--primary); color: transparent; border-radius: 4px; padding: 0 6px; }
-        .cloze-revealed { color: var(--primary); font-weight: 800; }
 
-        .study-controls { padding: 20px; padding-bottom: calc(var(--safe-bottom) + 20px); }
-        .rating-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; }
-        .rate-btn {
-            background: #2C2C2E; border: none; padding: 12px 4px; border-radius: 12px;
-            display: flex; flex-direction: column; align-items: center; gap: 4px;
+        .info-panel {
+            position: absolute;
+            bottom: 20px;
+            left: 20px;
+            background: rgba(5, 5, 5, 0.9);
+            border: 1px solid rgba(0, 217, 255, 0.3);
+            border-radius: 8px;
+            padding: 15px 20px;
+            font-size: 12px;
+            color: #00d9ff;
+            pointer-events: all;
+            max-width: 280px;
+            backdrop-filter: blur(10px);
         }
-        .rate-btn small { font-size: 10px; opacity: 0.7; font-weight: 500; }
-        .rate-btn span { font-size: 12px; font-weight: 700; }
-        .c-1 { color: var(--accent-red); background: rgba(255,69,58,0.1); }
-        .c-2 { color: var(--accent-orange); background: rgba(255,159,10,0.1); }
-        .c-3 { color: var(--primary); background: rgba(10,132,255,0.1); }
-        .c-4 { color: var(--accent-green); background: rgba(48,209,88,0.1); }
 
-        /* Stats Chart */
-        .chart-wrap { display: flex; align-items: flex-end; justify-content: space-between; height: 120px; padding-top: 20px; }
-        .bar-col { display: flex; flex-direction: column; align-items: center; gap: 6px; flex: 1; }
-        .bar { width: 8px; background: #333; border-radius: 4px; transition: height 1s cubic-bezier(0.4, 0, 0.2, 1); position: relative; }
-        .bar.fill { background: var(--primary); box-shadow: 0 0 10px var(--primary); }
-        .day-label { font-size: 10px; color: var(--text-sub); }
-
-        /* Made By Footer */
-        .footer-credit {
-            text-align: center; margin-top: 40px; margin-bottom: 20px;
-            font-size: 12px; color: var(--text-sub); opacity: 0.6;
+        .info-panel p {
+            margin: 8px 0;
+            line-height: 1.4;
         }
-        .footer-credit span { color: var(--primary); font-weight: 600; }
 
-        /* Animations */
-        @keyframes slideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
-        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
-        .fade-in { animation: fadeIn 0.4s ease forwards; }
+        .shape-indicator {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: rgba(5, 5, 5, 0.9);
+            border: 2px solid rgba(0, 217, 255, 0.5);
+            border-radius: 8px;
+            padding: 15px 25px;
+            font-size: 14px;
+            color: #00d9ff;
+            text-align: center;
+            pointer-events: all;
+            backdrop-filter: blur(10px);
+            min-width: 150px;
+        }
 
-        .hidden { display: none !important; }
+        .shape-name {
+            font-weight: 600;
+            font-size: 16px;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+
+        .hand-count {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            background: rgba(5, 5, 5, 0.9);
+            border: 1px solid rgba(0, 217, 255, 0.3);
+            border-radius: 8px;
+            padding: 10px 15px;
+            font-size: 12px;
+            color: #00d9ff;
+            pointer-events: all;
+            backdrop-filter: blur(10px);
+        }
+
+        .copyright {
+            position: absolute;
+            bottom: 15px;
+            right: 15px;
+            font-size: 11px;
+            color: rgba(0, 217, 255, 0.4);
+            pointer-events: all;
+        }
     </style>
 </head>
 <body>
-    <div class="ambient-light"></div>
-    <div class="ambient-light-2"></div>
-
-    <div class="app-container">
-        <!-- HEADER -->
-        <header class="header">
-            <div class="brand">
-                <i class="fa-solid fa-layer-group"></i> Anki PRO
-            </div>
-            <div class="streak-pill">
-                <i class="fa-solid fa-fire"></i>
-                <span id="streakCount">0</span>
-            </div>
-        </header>
-
-        <!-- MAIN VIEW -->
-        <main class="content" id="mainView">
-            <!-- Dynamic Content -->
-        </main>
-
-        <!-- NAVIGATION -->
-        <nav class="nav-bar">
-            <div class="nav-item active" onclick="Router.go('home')" id="nav-home">
-                <i class="fa-solid fa-house"></i>
-                <span>Asosiy</span>
-            </div>
-            <div class="nav-item" onclick="Router.go('stats')" id="nav-stats">
-                <i class="fa-solid fa-chart-bar"></i>
-                <span>Statistika</span>
-            </div>
-            <div class="add-btn-wrapper">
-                <div class="add-btn" onclick="Router.go('add')">
-                    <i class="fa-solid fa-plus"></i>
-                </div>
-            </div>
-            <div class="nav-item" onclick="Router.go('tips')" id="nav-tips">
-                <i class="fa-solid fa-lightbulb"></i>
-                <span>Smart</span>
-            </div>
-            <div class="nav-item" onclick="Router.go('profile')" id="nav-profile">
-                <i class="fa-solid fa-user-circle"></i>
-                <span>Profil</span>
-            </div>
-        </nav>
-    </div>
-
-    <!-- STUDY INTERFACE (Immersive) -->
-    <div class="study-modal" id="studyModal">
-        <div class="study-header">
-            <div onclick="Study.exit()" style="font-size:16px; color:var(--text-sub); display:flex; align-items:center; gap:5px;">
-                <i class="fa-solid fa-chevron-down"></i> Yopish
-            </div>
-            <div style="font-size:14px; font-weight:600;" id="studyCounter">0 / 0</div>
-            <div style="width:50px;"></div> <!-- Spacer -->
+    <canvas id="canvas"></canvas>
+    <video id="video" width="640" height="480" playsinline></video>
+    
+    <div class="ui-overlay">
+        <button class="start-button" id="startBtn">START NEBULA</button>
+        <div class="hand-count" id="handCount">Hands: 0</div>
+        <div class="shape-indicator" id="shapeIndicator">
+            <div class="shape-name" id="shapeName">SPHERE</div>
         </div>
-
-        <div class="flashcard-area">
-            <div class="flashcard" id="activeCard" onclick="Study.flip()">
-                <div class="card-face">
-                    <div style="color:var(--text-sub); font-size:12px; text-transform:uppercase; margin-bottom:20px;">Savol</div>
-                    <div class="card-content" id="cardFront">...</div>
-                    <div style="position:absolute; bottom:30px; font-size:12px; color:var(--primary); opacity:0.6;">Javobni ko'rish uchun bosing</div>
-                </div>
-                <div class="card-face card-back">
-                    <div style="color:var(--primary); font-size:12px; text-transform:uppercase; margin-bottom:20px;">Javob</div>
-                    <div class="card-content" id="cardBack">...</div>
-                </div>
-            </div>
+        <div class="info-panel">
+            <p><strong>Controls:</strong></p>
+            <p>🖐️ Hand position → Rotate</p>
+            <p>✌️ Pinch → Attract/Repel</p>
+            <p>👋 Swipe → Change shape</p>
+            <p>🤝 Two hands → Zoom</p>
         </div>
-
-        <div class="study-controls" id="studyControls">
-            <button class="btn-main" onclick="Study.flip()">Javobni Ko'rsatish</button>
-        </div>
+        <div class="copyright">© 2025 Muhammad Daler - Nebula Hand Control</div>
     </div>
 
     <script>
-        // ===============================================
-        // 1. DATABASE & CONFIG
-        // ===============================================
-        const DB = {
-            data: {
-                user: { xp: 0, streak: 0, lastStudy: null, totalCards: 0, reviewsToday: 0, history: [0,0,0,0,0,0,0] },
-                decks: [
-                    { id: 'd1', name: 'Ingliz Tili (IELTS)', icon: 'fa-earth-americas', color: 'linear-gradient(135deg, #0A84FF, #5E5CE6)', cards: [] },
-                    { id: 'd2', name: 'Dasturlash (IT)', icon: 'fa-code', color: 'linear-gradient(135deg, #FF9F0A, #FF453A)', cards: [] },
-                    { id: 'd3', name: 'Tibbiyot', icon: 'fa-heart-pulse', color: 'linear-gradient(135deg, #30D158, #00C7BE)', cards: [] }
-                ]
-            },
-            init() {
-                const saved = localStorage.getItem('anki_ultra_pro_v2');
-                if (saved) {
-                    this.data = JSON.parse(saved);
-                } else {
-                    this.seed(); // First time setup
-                }
-                this.checkStreak();
-            },
-            seed() {
-                const now = Date.now();
-                // Demo Cards including Cloze Deletion
-                this.data.decks[0].cards.push(
-                    { id: 1, type: 'basic', f: "Ubiquitous", b: "Hamma joyda mavjud bo'lgan", interval: 0, ease: 2.5, due: now, state: 'new' },
-                    { id: 2, type: 'cloze', f: "O'zbekiston poytaxti {{c1::Toshkent}} shahridir.", b: "", interval: 0, ease: 2.5, due: now, state: 'new' }
-                );
-                this.data.decks[1].cards.push(
-                    { id: 3, type: 'basic', f: "HTML qisqartmasi?", b: "HyperText Markup Language", interval: 0, ease: 2.5, due: now, state: 'new' }
-                );
-                this.save();
-            },
-            save() {
-                localStorage.setItem('anki_ultra_pro_v2', JSON.stringify(this.data));
-            },
-            checkStreak() {
-                const today = new Date().toDateString();
-                if (this.data.user.lastStudy !== today) {
-                    const yesterday = new Date();
-                    yesterday.setDate(yesterday.getDate() - 1);
-                    if (this.data.user.lastStudy !== yesterday.toDateString()) {
-                         if(this.data.user.lastStudy) this.data.user.streak = 0;
-                    }
-                }
-                document.getElementById('streakCount').innerText = this.data.user.streak;
-            }
+        // ==================== CONFIGURATION ====================
+        const CONFIG = {
+            particleCount: 15000,
+            shapes: ['SPHERE', 'HEART', 'FLOWER', 'SATURN', 'FIREWORKS'],
+            audioEnabled: false,
+            handSmoothing: 0.15,
+            particleLerpSpeed: 0.08,
         };
 
-        // ===============================================
-        // 2. CONTENT (TIPS & QUOTES)
-        // ===============================================
-        const Content = {
-            tips: [
-                { title: "Cloze Deletion", text: "Gap ichidagi so'zlarni yashirish uchun '{{c1::so'z}}' formatidan foydalaning. Bu kontekstda yodlashga yordam beradi." },
-                { title: "Active Recall", text: "Javobni shunchaki o'qimang. Uni ko'z oldingizga keltirmasdan turib kartani o'girmang." },
-                { title: "Spaced Repetition", text: "Miya ma'lumotni unutish arafasida turganda takrorlasa, xotira eng kuchli bo'ladi." },
-                { title: "Pomodoro", text: "25 daqiqa diqqat bilan o'qing, 5 daqiqa dam oling. Bu miya charchashini oldini oladi." },
-                { title: "Uyqu rejimi", text: "Xotira uyqu vaqtida mustahkamlanadi. Kuniga 7-8 soat uxlashni unutmang." }
-            ],
-            quotes: [
-                "Ilm — aqlning chirog'i.",
-                "Bugungi harakat — ertangi muvaffaqiyat.",
-                "Qiyinchiliksiz yuksalish bo'lmaydi.",
-                "Ming chaqirimlik yo'l birinchi qadamdan boshlanadi.",
-                "Bilim — bu hech kim sizdan tortib ololmaydigan boylikdir.",
-                "O'rganishni to'xtatgan kishi qariydi, u xoh 20 da bo'lsin, xoh 80 da.",
-                "Intizom — bu xohlagan narsangiz va kerakli narsangiz o'rtasidagi ko'prik."
-            ]
+        // ==================== STATE ====================
+        const state = {
+            started: false,
+            currentShapeIndex: 0,
+            hands: [],
+            audioContext: null,
+            audioEngine: null,
         };
 
-        // ===============================================
-        // 3. LOGIC (ANKI SM-2 ALGORITHM)
-        // ===============================================
-        const Scheduler = {
-            // Quality: 1 (Again), 2 (Hard), 3 (Good), 4 (Easy)
-            calculate(card, quality) {
-                const now = Date.now();
-                const ONE_DAY = 24 * 60 * 60 * 1000;
-                let nextDue;
+        // ==================== THREE.JS SETUP ====================
+        const canvas = document.getElementById('canvas');
+        const scene = new THREE.Scene();
+        const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+        const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true });
+        
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        renderer.setClearColor(0x050505, 1);
+        camera.position.z = 25;
 
-                if (quality === 1) { // Again
-                    card.state = 'learning';
-                    card.interval = 0; // Reset
-                    nextDue = now + (60 * 1000); // 1 minute
-                    card.ease = Math.max(1.3, card.ease - 0.2);
-                } else {
-                    if (card.state === 'new' || card.state === 'learning') {
-                        if (quality === 2) { // Hard
-                             nextDue = now + (10 * 60 * 1000); // 10 mins
-                        } else { // Good/Easy -> Graduate
-                             card.state = 'review';
-                             card.interval = 1; // 1 day
-                             nextDue = now + ONE_DAY;
-                        }
-                    } else { // Review State
-                        if (quality === 2) { // Hard
-                            card.interval = Math.max(1, card.interval * 1.2);
-                            card.ease = Math.max(1.3, card.ease - 0.15);
-                        } else if (quality === 3) { // Good
-                            card.interval = Math.round(card.interval * card.ease);
-                        } else if (quality === 4) { // Easy
-                            card.interval = Math.round(card.interval * card.ease * 1.3);
-                            card.ease += 0.15;
-                        }
-                        nextDue = now + (card.interval * ONE_DAY);
-                    }
-                }
-                
-                card.due = nextDue;
-                return { card, nextDue };
-            },
+        // ==================== PARTICLE SYSTEM ====================
+        let particleGeometry;
+        let particleMesh;
+        let targetPositions = new Float32Array(CONFIG.particleCount * 3);
+        let currentPositions = new Float32Array(CONFIG.particleCount * 3);
+
+        function createParticleSystem() {
+            if (particleMesh) scene.remove(particleMesh);
+
+            particleGeometry = new THREE.BufferGeometry();
+            const positions = generateSphereParticles(CONFIG.particleCount);
             
-            formatTime(ms) {
-                const s = Math.floor(ms / 1000);
-                if(s < 60) return "<1 daq";
-                const m = Math.floor(s / 60);
-                if(m < 60) return m + " daq";
-                const h = Math.floor(m / 60);
-                if(h < 24) return h + " soat";
-                const d = Math.floor(h / 24);
-                return d + " kun";
+            particleGeometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+            
+            const canvas = createParticleTexture();
+            const texture = new THREE.CanvasTexture(canvas);
+
+            const material = new THREE.PointsMaterial({
+                size: 0.15,
+                map: texture,
+                transparent: true,
+                sizeAttenuation: true,
+                blending: THREE.AdditiveBlending,
+            });
+
+            particleMesh = new THREE.Points(particleGeometry, material);
+            scene.add(particleMesh);
+
+            currentPositions = positions.slice();
+            targetPositions = positions.slice();
+        }
+
+        function createParticleTexture() {
+            const canvas = document.createElement('canvas');
+            canvas.width = 128;
+            canvas.height = 128;
+            const ctx = canvas.getContext('2d');
+
+            const gradient = ctx.createRadialGradient(64, 64, 0, 64, 64, 64);
+            gradient.addColorStop(0, 'rgba(0, 217, 255, 1)');
+            gradient.addColorStop(0.5, 'rgba(0, 150, 255, 0.5)');
+            gradient.addColorStop(1, 'rgba(0, 100, 255, 0)');
+
+            ctx.fillStyle = gradient;
+            ctx.fillRect(0, 0, 128, 128);
+
+            return canvas;
+        }
+
+        function generateSphereParticles(count) {
+            const positions = new Float32Array(count * 3);
+            for (let i = 0; i < count; i++) {
+                const theta = Math.random() * Math.PI * 2;
+                const phi = Math.acos(Math.random() * 2 - 1);
+                const radius = 8;
+
+                positions[i * 3] = radius * Math.sin(phi) * Math.cos(theta);
+                positions[i * 3 + 1] = radius * Math.sin(phi) * Math.sin(theta);
+                positions[i * 3 + 2] = radius * Math.cos(phi);
             }
-        };
+            return positions;
+        }
 
-        // ===============================================
-        // 4. ROUTER & VIEWS
-        // ===============================================
-        const Router = {
-            go(page) {
-                document.querySelectorAll('.nav-item').forEach(e => e.classList.remove('active'));
-                const nav = document.getElementById('nav-' + page);
-                if(nav) nav.classList.add('active');
-                
-                const main = document.getElementById('mainView');
-                main.innerHTML = '';
-                
-                switch(page) {
-                    case 'home': Pages.home(main); break;
-                    case 'stats': Pages.stats(main); break;
-                    case 'tips': Pages.tips(main); break;
-                    case 'add': Pages.add(main); break;
-                    case 'profile': Pages.profile(main); break;
-                }
+        function generateHeartParticles(count) {
+            const positions = new Float32Array(count * 3);
+            for (let i = 0; i < count; i++) {
+                const t = (i / count) * Math.PI * 2;
+                const scale = 4;
+
+                const x = 16 * Math.pow(Math.sin(t), 3);
+                const y = 13 * Math.cos(t) - 5 * Math.cos(2 * t) - 2 * Math.cos(3 * t) - Math.cos(4 * t);
+
+                positions[i * 3] = (x / 5) + (Math.random() - 0.5) * 0.5;
+                positions[i * 3 + 1] = (y / 5) + (Math.random() - 0.5) * 0.5;
+                positions[i * 3 + 2] = (Math.random() - 0.5) * 2;
             }
-        };
+            return positions;
+        }
 
-        const Pages = {
-            home(el) {
-                const totalDue = DB.data.decks.reduce((sum, d) => sum + d.cards.filter(c => c.due <= Date.now()).length, 0);
-                
-                let html = `
-                    <div class="fade-in">
-                        <h2 style="font-size:28px; margin-bottom:5px;">Assalomu alaykum</h2>
-                        <p class="text-muted" style="margin-bottom:25px;">Bugungi maqsad sari olg'a!</p>
+        function generateFlowerParticles(count) {
+            const positions = new Float32Array(count * 3);
+            for (let i = 0; i < count; i++) {
+                const t = (i / count) * Math.PI * 2;
+                const r = 8 * Math.sin(5 * t);
+                const x = r * Math.cos(t);
+                const y = r * Math.sin(t);
 
-                        <!-- Hero Stats -->
-                        <div class="card-box" style="background: linear-gradient(135deg, #1c1c1e, #000); border:1px solid #333;">
-                            <div style="display:flex; justify-content:space-between; align-items:end;">
-                                <div>
-                                    <div class="text-muted" style="text-transform:uppercase; font-size:11px; margin-bottom:4px;">Kutilayotgan Kartalar</div>
-                                    <div style="font-size:36px; font-weight:800; color:white;">${totalDue}</div>
-                                </div>
-                                <button onclick="Study.startAll()" class="btn-main" style="width:auto; padding:10px 24px; font-size:14px; border-radius:30px;">
-                                    <i class="fa-solid fa-play"></i> Boshlash
-                                </button>
-                            </div>
-                        </div>
-
-                        <h2 style="margin-top:30px;">To'plamlar</h2>
-                `;
-
-                DB.data.decks.forEach(deck => {
-                    const due = deck.cards.filter(c => c.due <= Date.now()).length;
-                    html += `
-                        <div class="card-box" onclick="Study.startDeck('${deck.id}')">
-                            <div class="deck-item">
-                                <div style="display:flex; align-items:center;">
-                                    <div class="deck-icon" style="background:${deck.color}">
-                                        <i class="fa-solid ${deck.icon}"></i>
-                                    </div>
-                                    <div>
-                                        <div style="font-weight:600; font-size:16px; margin-bottom:2px;">${deck.name}</div>
-                                        <div class="text-muted">${deck.cards.length} ta karta</div>
-                                    </div>
-                                </div>
-                                ${due > 0 ? `<div class="badge">${due}</div>` : ''}
-                            </div>
-                        </div>
-                    `;
-                });
-                
-                html += '</div>';
-                el.innerHTML = html;
-            },
-
-            tips(el) {
-                const randomQuote = Content.quotes[Math.floor(Math.random() * Content.quotes.length)];
-                let html = `
-                    <div class="fade-in">
-                        <div class="card-box" style="background:rgba(10, 132, 255, 0.1); border-color:rgba(10, 132, 255, 0.3);">
-                            <div style="font-size:12px; color:var(--primary); font-weight:700; margin-bottom:8px;">HIKMATLI SO'Z</div>
-                            <div style="font-size:18px; font-weight:600; font-style:italic; line-height:1.4;">"${randomQuote}"</div>
-                        </div>
-
-                        <h2>Professional Tavsiyalar</h2>
-                `;
-
-                Content.tips.forEach(tip => {
-                    html += `
-                        <div class="card-box">
-                            <div style="display:flex; align-items:center; gap:10px; margin-bottom:8px;">
-                                <i class="fa-solid fa-lightbulb" style="color:var(--accent-orange)"></i>
-                                <div style="font-weight:700;">${tip.title}</div>
-                            </div>
-                            <div class="text-muted" style="line-height:1.5;">${tip.text}</div>
-                        </div>
-                    `;
-                });
-                html += '</div>';
-                el.innerHTML = html;
-            },
-
-            stats(el) {
-                const history = DB.data.user.history; // Array of 7 days
-                const max = Math.max(...history, 10);
-                
-                let bars = '';
-                const days = ['Du', 'Se', 'Ch', 'Pa', 'Ju', 'Sh', 'Ya'];
-                
-                history.forEach((val, i) => {
-                    const h = (val / max) * 100;
-                    bars += `
-                        <div class="bar-col">
-                            <div class="bar ${val>0?'fill':''}" style="height:${h}%"></div>
-                            <div class="day-label">${days[i]}</div>
-                        </div>
-                    `;
-                });
-
-                el.innerHTML = `
-                    <div class="fade-in">
-                        <h2>Sizning Natijalaringiz</h2>
-                        <div class="card-box">
-                            <div style="font-size:12px; font-weight:600; color:var(--text-sub);">HAFTALIK KO'RSATKICH</div>
-                            <div class="chart-wrap">
-                                ${bars}
-                            </div>
-                        </div>
-
-                        <div style="display:grid; grid-template-columns:1fr 1fr; gap:15px;">
-                            <div class="card-box">
-                                <div class="text-muted" style="font-size:11px; font-weight:700; margin-bottom:5px;">REVIEWED</div>
-                                <div style="font-size:28px; font-weight:800; color:var(--accent-purple);">${DB.data.user.reviewsToday}</div>
-                                <div class="text-muted">Bugun</div>
-                            </div>
-                            <div class="card-box">
-                                <div class="text-muted" style="font-size:11px; font-weight:700; margin-bottom:5px;">STREAK</div>
-                                <div style="font-size:28px; font-weight:800; color:var(--accent-orange);">${DB.data.user.streak}</div>
-                                <div class="text-muted">Kun</div>
-                            </div>
-                        </div>
-                    </div>
-                `;
-            },
-
-            add(el) {
-                const options = DB.data.decks.map(d => `<option value="${d.id}">${d.name}</option>`).join('');
-                el.innerHTML = `
-                    <div class="fade-in">
-                        <h2>Yangi Karta</h2>
-                        
-                        <div class="input-group">
-                            <label class="input-label">To'plamni tanlang</label>
-                            <select id="newDeck" class="input-field" style="appearance:none;">${options}</select>
-                        </div>
-
-                        <div class="input-group">
-                            <label class="input-label">Savol (Front)</label>
-                            <input type="text" id="newFront" class="input-field" placeholder="Masalan: Apple">
-                            <div class="cloze-hint">💡 Cloze uchun: {{c1::yashirin so'z}}</div>
-                        </div>
-
-                        <div class="input-group">
-                            <label class="input-label">Javob (Back)</label>
-                            <textarea id="newBack" class="input-field" rows="4" placeholder="Masalan: Olma"></textarea>
-                        </div>
-
-                        <button class="btn-main" onclick="Actions.createCard()">
-                            <i class="fa-solid fa-save"></i> Saqlash
-                        </button>
-                    </div>
-                `;
-            },
-
-            profile(el) {
-                el.innerHTML = `
-                    <div class="fade-in" style="text-align:center; padding-top:40px;">
-                        <div style="width:100px; height:100px; border-radius:50%; background:#2C2C2E; border:2px solid var(--primary); margin:0 auto 20px; display:flex; align-items:center; justify-content:center; font-size:40px; color:var(--text-sub);">
-                            <i class="fa-solid fa-user"></i>
-                        </div>
-                        <h2 style="margin-bottom:5px;">Premium Foydalanuvchi</h2>
-                        <p class="text-muted">Anki PRO Ultra v2.0</p>
-                        
-                        <div class="card-box" style="margin-top:30px; text-align:left;">
-                            <div style="display:flex; justify-content:space-between; align-items:center; padding:10px 0; border-bottom:1px solid #333;">
-                                <span>Tungi Rejim</span>
-                                <i class="fa-solid fa-toggle-on" style="font-size:24px; color:var(--primary);"></i>
-                            </div>
-                            <div style="display:flex; justify-content:space-between; align-items:center; padding:10px 0;">
-                                <span>Bildirishnomalar</span>
-                                <i class="fa-solid fa-toggle-on" style="font-size:24px; color:var(--primary);"></i>
-                            </div>
-                        </div>
-
-                        <button onclick="localStorage.clear(); location.reload()" style="margin-top:20px; background:none; border:none; color:var(--accent-red); font-weight:600;">
-                            Barcha ma'lumotlarni o'chirish
-                        </button>
-
-                        <div class="footer-credit">
-                            Made by <span>Muhammad Daler</span>
-                        </div>
-                    </div>
-                `;
+                positions[i * 3] = x + (Math.random() - 0.5) * 0.3;
+                positions[i * 3 + 1] = y + (Math.random() - 0.5) * 0.3;
+                positions[i * 3 + 2] = (Math.random() - 0.5) * 2;
             }
-        };
+            return positions;
+        }
 
-        // ===============================================
-        // 5. ACTIONS & STUDY CONTROLLER
-        // ===============================================
-        const Actions = {
-            createCard() {
-                const deckId = document.getElementById('newDeck').value;
-                const f = document.getElementById('newFront').value;
-                const b = document.getElementById('newBack').value;
+        function generateSaturnParticles(count) {
+            const positions = new Float32Array(count * 3);
+            const coreCount = Math.floor(count * 0.6);
+            const ringCount = count - coreCount;
 
-                if (!f) return alert("Savol qismini to'ldiring");
+            for (let i = 0; i < coreCount; i++) {
+                const theta = Math.random() * Math.PI * 2;
+                const phi = Math.acos(Math.random() * 2 - 1);
+                const radius = 4;
 
-                // Auto-detect Cloze
-                const type = f.includes('{{c1::') ? 'cloze' : 'basic';
-
-                const deck = DB.data.decks.find(d => d.id === deckId);
-                deck.cards.push({
-                    id: Date.now(),
-                    type: type,
-                    f: f,
-                    b: b, // Cloze cards usually don't need back, but we keep it for extra notes
-                    interval: 0,
-                    ease: 2.5,
-                    due: Date.now(),
-                    state: 'new'
-                });
-                DB.save();
-                Router.go('home');
-                // Could add a toast notification here
+                positions[i * 3] = radius * Math.sin(phi) * Math.cos(theta);
+                positions[i * 3 + 1] = radius * Math.sin(phi) * Math.sin(theta);
+                positions[i * 3 + 2] = radius * Math.cos(phi);
             }
-        };
 
-        const Study = {
-            queue: [],
-            current: null,
+            for (let i = coreCount; i < count; i++) {
+                const theta = Math.random() * Math.PI * 2;
+                const distance = 10 + Math.random() * 1;
 
-            startAll() {
-                let all = [];
-                DB.data.decks.forEach(d => all = all.concat(d.cards.filter(c => c.due <= Date.now())));
-                this.initQueue(all);
-            },
+                positions[i * 3] = distance * Math.cos(theta);
+                positions[i * 3 + 1] = (Math.random() - 0.5) * 1;
+                positions[i * 3 + 2] = distance * Math.sin(theta);
+            }
+            return positions;
+        }
 
-            startDeck(id) {
-                const deck = DB.data.decks.find(d => d.id === id);
-                const due = deck.cards.filter(c => c.due <= Date.now());
-                this.initQueue(due);
-            },
+        function generateFireworksParticles(count) {
+            const positions = new Float32Array(count * 3);
+            for (let i = 0; i < count; i++) {
+                const theta = Math.random() * Math.PI * 2;
+                const phi = Math.random() * Math.PI;
+                const radius = Math.random() * 15;
 
-            initQueue(cards) {
-                if (cards.length === 0) return alert("Hozircha takrorlash uchun kartalar yo'q. Ajoyib!");
-                this.queue = cards;
-                document.getElementById('studyModal').classList.add('active');
-                this.next();
-            },
+                positions[i * 3] = radius * Math.sin(phi) * Math.cos(theta);
+                positions[i * 3 + 1] = radius * Math.sin(phi) * Math.sin(theta);
+                positions[i * 3 + 2] = radius * Math.cos(phi);
+            }
+            return positions;
+        }
 
-            next() {
-                if (this.queue.length === 0) {
-                    this.exit();
-                    alert("Sessiya yakunlandi! Ajoyib natija.");
-                    return;
-                }
-                this.current = this.queue.shift();
-                
-                // Update counter
-                document.getElementById('studyCounter').innerText = `${1} / ${this.queue.length + 1}`;
+        function changeShape(index) {
+            const shapeGenerators = [
+                generateSphereParticles,
+                generateHeartParticles,
+                generateFlowerParticles,
+                generateSaturnParticles,
+                generateFireworksParticles,
+            ];
 
-                // Render Front
-                const activeCard = document.getElementById('activeCard');
-                activeCard.classList.remove('flipped');
-                
-                // Content Logic
-                let frontText = this.current.f;
-                let backText = this.current.b;
+            targetPositions = shapeGenerators[index](CONFIG.particleCount);
+            document.getElementById('shapeName').textContent = CONFIG.shapes[index];
 
-                if (this.current.type === 'cloze') {
-                    // Replace {{c1::answer}} with [...]
-                    frontText = this.current.f.replace(/{{c1::(.*?)}}/g, '<span class="cloze-hidden">...</span>');
-                    // Prepare back text (Show answer)
-                    backText = this.current.f.replace(/{{c1::(.*?)}}/g, '<span class="cloze-revealed">$1</span>');
-                    if(this.current.b) backText += `<br><br><small style='color:gray'>${this.current.b}</small>`;
+            if (state.audioEngine) {
+                state.audioEngine.playSFX();
+            }
+        }
+
+        // ==================== AUDIO ENGINE ====================
+        class AudioEngine {
+            constructor(audioContext) {
+                this.ctx = audioContext;
+                this.droneOscillator = null;
+                this.droneLowPass = null;
+                this.droneGain = null;
+                this.isPlaying = false;
+            }
+
+            start() {
+                if (this.isPlaying) return;
+                this.isPlaying = true;
+
+                this.droneOscillator = this.ctx.createOscillator();
+                this.droneOscillator.type = 'sine';
+                this.droneOscillator.frequency.value = 55;
+
+                this.droneLowPass = this.ctx.createBiquadFilter();
+                this.droneLowPass.type = 'lowpass';
+                this.droneLowPass.frequency.value = 2000;
+                this.droneLowPass.Q.value = 2;
+
+                this.droneGain = this.ctx.createGain();
+                this.droneGain.gain.value = 0.1;
+
+                this.droneOscillator.connect(this.droneLowPass);
+                this.droneLowPass.connect(this.droneGain);
+                this.droneGain.connect(this.ctx.destination);
+
+                this.droneOscillator.start();
+            }
+
+            updatePinch(pinchDistance) {
+                if (!this.isPlaying) return;
+
+                const freq = 55 + pinchDistance * 500;
+                const cutoff = 800 + pinchDistance * 1500;
+                const volume = Math.max(0.05, 0.3 - pinchDistance * 0.2);
+
+                this.droneOscillator.frequency.setValueAtTime(freq, this.ctx.currentTime);
+                this.droneLowPass.frequency.setValueAtTime(cutoff, this.ctx.currentTime);
+                this.droneGain.gain.setValueAtTime(volume, this.ctx.currentTime);
+            }
+
+            playSFX() {
+                const noise = this.ctx.createBufferSource();
+                const buffer = this.ctx.createBuffer(1, this.ctx.sampleRate * 0.3, this.ctx.sampleRate);
+                const data = buffer.getChannelData(0);
+
+                for (let i = 0; i < buffer.length; i++) {
+                    data[i] = Math.random() * 2 - 1;
                 }
 
-                document.getElementById('cardFront').innerHTML = frontText;
-                document.getElementById('cardBack').innerHTML = backText;
+                noise.buffer = buffer;
 
-                // Controls
-                document.getElementById('studyControls').innerHTML = `
-                    <button class="btn-main" onclick="Study.flip()">Javobni Ko'rsatish</button>
-                `;
-            },
+                const filter = this.ctx.createBiquadFilter();
+                filter.type = 'bandpass';
+                filter.frequency.setValueAtTime(5000, this.ctx.currentTime);
+                filter.frequency.exponentialRampToValueAtTime(500, this.ctx.currentTime + 0.3);
 
-            flip() {
-                document.getElementById('activeCard').classList.add('flipped');
-                
-                // Generate times for buttons
-                const c = this.current;
-                const t1 = Scheduler.formatTime(Scheduler.calculate({...c}, 1).nextDue - Date.now());
-                const t2 = Scheduler.formatTime(Scheduler.calculate({...c}, 2).nextDue - Date.now());
-                const t3 = Scheduler.formatTime(Scheduler.calculate({...c}, 3).nextDue - Date.now());
-                const t4 = Scheduler.formatTime(Scheduler.calculate({...c}, 4).nextDue - Date.now());
+                const gain = this.ctx.createGain();
+                gain.gain.setValueAtTime(0.3, this.ctx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.01, this.ctx.currentTime + 0.3);
 
-                document.getElementById('studyControls').innerHTML = `
-                    <div class="rating-grid">
-                        <button class="rate-btn c-1" onclick="Study.rate(1)"><span>Qayta</span><small>${t1}</small></button>
-                        <button class="rate-btn c-2" onclick="Study.rate(2)"><span>Qiyin</span><small>${t2}</small></button>
-                        <button class="rate-btn c-3" onclick="Study.rate(3)"><span>Yaxshi</span><small>${t3}</small></button>
-                        <button class="rate-btn c-4" onclick="Study.rate(4)"><span>Oson</span><small>${t4}</small></button>
-                    </div>
-                `;
-            },
+                noise.connect(filter);
+                filter.connect(gain);
+                gain.connect(this.ctx.destination);
 
-            rate(quality) {
-                // Update Card Logic
-                const res = Scheduler.calculate(this.current, quality);
-                
-                // Save to DB
-                DB.data.decks.forEach(d => {
-                    const idx = d.cards.findIndex(x => x.id === this.current.id);
-                    if(idx !== -1) d.cards[idx] = res.card;
-                });
-
-                // Stats Update
-                DB.data.user.reviewsToday++;
-                // Update weekly graph (simplified logic for demo)
-                const dayIdx = new Date().getDay() - 1; 
-                const safeIdx = dayIdx < 0 ? 6 : dayIdx;
-                DB.data.user.history[safeIdx]++;
-
-                // Update Streak
-                const today = new Date().toDateString();
-                if (DB.data.user.lastStudy !== today) {
-                    DB.data.user.lastStudy = today;
-                    DB.data.user.streak++;
-                }
-                
-                DB.save();
-
-                if (quality === 1) {
-                    this.queue.push(this.current); // Re-queue if Again
-                }
-                
-                this.next();
-            },
-
-            exit() {
-                document.getElementById('studyModal').classList.remove('active');
-                Router.go('home');
+                noise.start();
             }
+
+            stop() {
+                if (this.droneOscillator) {
+                    this.droneOscillator.stop();
+                    this.isPlaying = false;
+                }
+            }
+        }
+
+        // ==================== MEDIAPIPE SETUP ====================
+        const videoElement = document.getElementById('video');
+        const canvasElement = canvas;
+        let mediaStreamCreated = false;
+
+        async function initMediaPipe() {
+            const hands = new Hands({
+                locateFile: (file) => {
+                    return `https://cdn.jsdelivr.net/npm/@mediapipe/hands@0.4.1646424915/${file}`;
+                },
+            });
+
+            hands.setOptions({
+                maxNumHands: 2,
+                modelComplexity: 1,
+                minDetectionConfidence: 0.5,
+                minTrackingConfidence: 0.5,
+            });
+
+            hands.onResults((results) => {
+                state.hands = results.multiHandLandmarks || [];
+                document.getElementById('handCount').textContent = `Hands: ${state.hands.length}`;
+            });
+
+            if (!mediaStreamCreated) {
+                const camera = new Camera(videoElement, {
+                    onFrame: async () => {
+                        await hands.send({ image: videoElement });
+                    },
+                    width: 640,
+                    height: 480,
+                });
+                await camera.initialize();
+                await camera.start();
+                mediaStreamCreated = true;
+            }
+        }
+
+        // ==================== HAND INTERACTION ====================
+        const handState = {
+            left: { position: null, pinchDistance: 0, lastSwipeX: 0 },
+            right: { position: null, pinchDistance: 0, lastSwipeX: 0 },
         };
 
-        // Initialize
-        DB.init();
-        Router.go('home');
+        function processHands() {
+            if (state.hands.length === 0) return;
 
+            if (state.hands.length >= 1) {
+                const landmarks = state.hands[0];
+                const indexFinger = landmarks[8];
+                const thumb = landmarks[4];
+                const middleFinger = landmarks[12];
+
+                const pinchDist = Math.hypot(
+                    indexFinger.x - thumb.x,
+                    indexFinger.y - thumb.y
+                );
+
+                handState.left.pinchDistance = pinchDist;
+                handState.left.position = indexFinger;
+
+                if (Math.abs(indexFinger.x - handState.left.lastSwipeX) > 0.15) {
+                    if (indexFinger.x > handState.left.lastSwipeX) {
+                        state.currentShapeIndex = (state.currentShapeIndex + 1) % CONFIG.shapes.length;
+                        changeShape(state.currentShapeIndex);
+                    }
+                    handState.left.lastSwipeX = indexFinger.x;
+                }
+            }
+
+            if (state.hands.length >= 2) {
+                const leftIndexFinger = state.hands[0][8];
+                const rightIndexFinger = state.hands[1][8];
+
+                const zoomDistance = Math.hypot(
+                    rightIndexFinger.x - leftIndexFinger.x,
+                    rightIndexFinger.y - leftIndexFinger.y
+                );
+
+                const scale = 0.5 + zoomDistance * 2.5;
+                camera.scale.set(scale, scale, scale);
+            } else {
+                camera.scale.set(1, 1, 1);
+            }
+        }
+
+        function attractRepelParticles(handIndex) {
+            if (!state.hands[handIndex]) return;
+
+            const landmarks = state.hands[handIndex];
+            const indexFinger = landmarks[8];
+            const pinchDistance = Math.hypot(
+                indexFinger.x - landmarks[4].x,
+                indexFinger.y - landmarks[4].y
+            );
+
+            const handWorldX = (indexFinger.x - 0.5) * 40;
+            const handWorldY = (0.5 - indexFinger.y) * 30;
+            const handWorldZ = 0;
+
+            const attractThreshold = 0.2;
+            const attractRadius = 15;
+
+            for (let i = 0; i < CONFIG.particleCount; i++) {
+                const idx = i * 3;
+                const px = currentPositions[idx];
+                const py = currentPositions[idx + 1];
+                const pz = currentPositions[idx + 2];
+
+                const dx = px - handWorldX;
+                const dy = py - handWorldY;
+                const dz = pz - handWorldZ;
+                const dist = Math.sqrt(dx * dx + dy * dy + dz * dz);
+
+                if (dist < attractRadius) {
+                    if (pinchDistance < attractThreshold) {
+                        const force = (1 - dist / attractRadius) * 0.5;
+                        targetPositions[idx] = px - (dx / dist) * force;
+                        targetPositions[idx + 1] = py - (dy / dist) * force;
+                        targetPositions[idx + 2] = pz - (dz / dist) * force;
+                    } else {
+                        const force = (1 - dist / attractRadius) * 0.3;
+                        targetPositions[idx] = px + (dx / dist) * force;
+                        targetPositions[idx + 1] = py + (dy / dist) * force;
+                        targetPositions[idx + 2] = pz + (dz / dist) * force;
+                    }
+                }
+            }
+
+            if (state.audioEngine) {
+                state.audioEngine.updatePinch(pinchDistance);
+            }
+        }
+
+        function rotateSceneByHand() {
+            if (!state.hands[0]) return;
+
+            const indexFinger = state.hands[0][8];
+            const rotX = (indexFinger.y - 0.5) * Math.PI * 0.5;
+            const rotY = (indexFinger.x - 0.5) * Math.PI * 0.5;
+
+            particleMesh.rotation.x += (rotX - particleMesh.rotation.x) * 0.1;
+            particleMesh.rotation.y += (rotY - particleMesh.rotation.y) * 0.1;
+        }
+
+        // ==================== ANIMATION LOOP ====================
+        function animate() {
+            requestAnimationFrame(animate);
+
+            if (!state.started) {
+                renderer.render(scene, camera);
+                return;
+            }
+
+            processHands();
+            rotateSceneByHand();
+
+            for (let i = 0; i < state.hands.length; i++) {
+                attractRepelParticles(i);
+            }
+
+            // Lerp particles to target positions
+            const positions = particleGeometry.attributes.position.array;
+            for (let i = 0; i < CONFIG.particleCount * 3; i++) {
+                currentPositions[i] += (targetPositions[i] - currentPositions[i]) * CONFIG.particleLerpSpeed;
+                positions[i] = currentPositions[i];
+            }
+            particleGeometry.attributes.position.needsUpdate = true;
+
+            // Color animation
+            particleMesh.rotation.z += 0.001;
+
+            renderer.render(scene, camera);
+        }
+
+        // ==================== UI EVENT LISTENERS ====================
+        document.getElementById('startBtn').addEventListener('click', async () => {
+            state.started = true;
+
+            if (!state.audioContext) {
+                state.audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                state.audioEngine = new AudioEngine(state.audioContext);
+                state.audioEngine.start();
+            }
+
+            document.getElementById('startBtn').classList.add('hidden');
+
+            await initMediaPipe();
+        });
+
+        // ==================== WINDOW RESIZE ====================
+        window.addEventListener('resize', () => {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        });
+
+        // ==================== INITIALIZATION ====================
+        createParticleSystem();
+        animate();
     </script>
 </body>
 </html>
-
-
