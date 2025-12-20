@@ -3,383 +3,475 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Nur & Ilm - Tadabbur</title>
-  <script crossorigin src="https://unpkg.com/react@19/umd/react.production.min.js"></script>
-  <script crossorigin src="https://unpkg.com/react-dom@19/umd/react-dom.production.min.js"></script>
-  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+  <title>Nur & Ilm - Hand Control Tadabbur</title>
+  
+  <!-- Three.js -->
   <script src="https://cdn.jsdelivr.net/npm/three@r160/build/three.min.js"></script>
-  <script async src="https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils@0.4.1646424915/camera_utils.js"></script>
-  <script async src="https://cdn.jsdelivr.net/npm/@mediapipe/drawing_utils@0.4.1646424915/drawing_utils.js"></script>
-  <script async src="https://cdn.jsdelivr.net/npm/@mediapipe/hands@0.4.1646424915/hands.js"></script>
+  
+  <!-- MediaPipe -->
+  <script src="https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils@0.4.1646424915/camera_utils.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@mediapipe/drawing_utils@0.4.1646424915/drawing_utils.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@mediapipe/hands@0.4.1646424915/hands.js"></script>
+  
   <style>
-    * { margin: 0; padding: 0; box-sizing: border-box; }
-    body { background: #050505; color: #e0e0e0; font-family: 'Inter', -apple-system, sans-serif; overflow: hidden; width: 100vw; height: 100vh; }
-    #root { width: 100%; height: 100%; }
-    canvas { display: block; }
-    video { display: none; }
-    @keyframes fadeIn { from { opacity: 0; transform: translateY(-20px); } to { opacity: 1; transform: translateY(0); } }
-    .ayah { font-size: 48px; color: #00d4ff; text-shadow: 0 0 20px rgba(0,212,255,0.8); font-weight: bold; margin-bottom: 20px; animation: fadeIn 2s ease-in-out; }
-    .uzbek { font-size: 18px; color: #e0e0e0; max-width: 600px; line-height: 1.6; }
-    .hikmah { font-size: 16px; color: #ffd700; font-style: italic; max-width: 500px; animation: fadeIn 1s ease-in-out; margin-top: 40px; }
-    .author { font-size: 12px; color: #a0a0a0; margin-top: 10px; }
-    button { padding: 12px 30px; font-size: 14px; background: #00d4ff; border: none; border-radius: 6px; cursor: pointer; color: #050505; font-weight: bold; box-shadow: 0 0 15px rgba(0,212,255,0.6); }
-    button:hover { box-shadow: 0 0 25px rgba(0,212,255,0.8); transform: scale(1.05); }
-    .start-btn { padding: 20px 40px; font-size: 18px; }
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    
+    body {
+      background: #050505;
+      color: #e0e0e0;
+      font-family: 'Arial', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      overflow: hidden;
+      width: 100vw;
+      height: 100vh;
+    }
+    
+    #canvas-container {
+      width: 100%;
+      height: 100%;
+      position: relative;
+    }
+    
+    canvas {
+      display: block;
+      width: 100%;
+      height: 100%;
+    }
+    
+    video {
+      display: none;
+    }
+    
+    .overlay {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      pointer-events: none;
+      z-index: 10;
+    }
+    
+    .content {
+      text-align: center;
+      animation: fadeIn 2s ease-in-out;
+    }
+    
+    .ayah {
+      font-size: 48px;
+      color: #00d4ff;
+      margin-bottom: 20px;
+      text-shadow: 0 0 20px rgba(0, 212, 255, 0.8);
+      font-weight: bold;
+      direction: rtl;
+    }
+    
+    .uzbek {
+      font-size: 18px;
+      color: #e0e0e0;
+      max-width: 600px;
+      line-height: 1.6;
+      margin: 0 auto;
+    }
+    
+    .hikmah-container {
+      animation: fadeIn 1s ease-in-out;
+      margin-top: 40px;
+    }
+    
+    .hikmah {
+      font-size: 16px;
+      color: #ffd700;
+      font-style: italic;
+      max-width: 500px;
+      margin: 0 auto;
+    }
+    
+    .author {
+      font-size: 12px;
+      color: #a0a0a0;
+      margin-top: 10px;
+    }
+    
+    .controls {
+      position: absolute;
+      bottom: 40px;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 20;
+      pointer-events: all;
+      display: flex;
+      gap: 15px;
+    }
+    
+    button {
+      padding: 12px 30px;
+      font-size: 14px;
+      background: #00d4ff;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      color: #050505;
+      font-weight: bold;
+      box-shadow: 0 0 15px rgba(0, 212, 255, 0.6);
+      transition: all 0.3s ease;
+    }
+    
+    button:hover {
+      box-shadow: 0 0 25px rgba(0, 212, 255, 0.8);
+      transform: scale(1.05);
+    }
+    
+    .start-screen {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: #050505;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 100;
+    }
+    
+    .start-button {
+      padding: 20px 40px;
+      font-size: 18px;
+    }
+    
+    @keyframes fadeIn {
+      from {
+        opacity: 0;
+        transform: translateY(-20px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+    
+    .hidden {
+      display: none !important;
+    }
   </style>
 </head>
 <body>
-  <div id="root"></div>
-  <script type="text/babel">
-    // Qur'on Data
+  <div id="canvas-container"></div>
+  <div id="start-screen" class="start-screen">
+    <button id="start-button" class="start-button">▶ Tadabbur Boshlash</button>
+  </div>
+  
+  <div id="overlay" class="overlay hidden">
+    <div class="content">
+      <div class="ayah" id="ayah-text"></div>
+      <div class="uzbek" id="uzbek-text"></div>
+    </div>
+    <div id="hikmah-container" class="hikmah-container hidden">
+      <div class="hikmah" id="hikmah-text"></div>
+      <div class="author" id="author-text"></div>
+    </div>
+  </div>
+  
+  <div class="controls">
+    <button id="next-button" class="hidden">→ Keyingi Ayah</button>
+  </div>
+
+  <script>
+    // ====== QUR'ON DATA ======
     const AYAHS = [
       {
         id: 'an-nur-35',
         arabic: 'اللَّهُ نُورُ السَّمَاوَاتِ وَالْأَرْضِ',
         uzbek: 'Alloh osmonlar va yerning nuri',
         theme: 'nur',
-        shape: 'nurSphere',
       },
       {
         id: 'al-alaq-1',
         arabic: 'بِسْمِ رَبِّكَ الَّذِي خَلَقَ',
         uzbek: 'Rab nomida o\'qi, kimsan yamasi yaratdi',
         theme: 'ilm',
-        shape: 'ayahHalo',
       },
       {
         id: 'az-zumar-9',
         arabic: 'قُلْ هَلْ يَسْتَوِي الَّذِينَ يَعْلَمُونَ',
         uzbek: 'Aytingki: biluvchilar va bilmaslari teng bola',
         theme: 'tafakkur',
-        shape: 'knowledgeSpiral',
       },
       {
         id: 'al-anbiya-30',
         arabic: 'أَوَلَمْ يَرَ الَّذِينَ كَفَرُوا أَنَّ السَّمَاوَاتِ وَالْأَرْضَ كَانَتَا رَتْقًا',
         uzbek: 'Osmon va yer bir qolibda edi, Biz uni ajratdik',
         theme: 'koinot',
-        shape: 'cosmicExpansion',
       },
       {
         id: 'al-ghashiyah-17',
         arabic: 'أَفَلَا يَنظُرُونَ إِلَى الْإِبِلِ كَيْفَ خُلِقَتْ',
         uzbek: 'Ularning bunyodini ko\'rasanmi',
         theme: 'yaratilish',
-        shape: 'qalbField',
       },
       {
         id: 'fussilat-53',
         arabic: 'سَنُرِيهِمْ آيَاتِنَا فِي الْآفَاقِ',
         uzbek: 'Ufqda va o\'zlarida Biz alamatlarni ko\'rsatamiz',
         theme: 'alamat',
-        shape: 'nurSphere',
       },
     ];
 
     const HIKMAH = [
-      { author: 'Ibn Sina', text: 'Ilm — qalbning nur, aql — ruhning shodiyasi', category: 'ibn-sina' },
-      { author: 'Al-Farabi', text: 'Intellekt sarflash — kosmosning garmoniyasiga erishish', category: 'al-farabi' },
-      { author: 'Al-Biruni', text: 'Koinotni o\'rganish — Yaratuvchini qabul qilishdir', category: 'al-biruni' },
-      { author: 'Imam Ghazali', text: 'Qalb va aql — ikkita qanotli qushlar singari', category: 'ghazali' },
-      { author: 'Mirzo Ulugbek', text: 'Yulduzlarni o\'rganish — mangu haqiqatni bilishdir', category: 'ulugbek' },
+      { author: 'Ibn Sina', text: 'Ilm — qalbning nur, aql — ruhning shodiyasi' },
+      { author: 'Al-Farabi', text: 'Intellekt sarflash — kosmosning garmoniyasiga erishish' },
+      { author: 'Al-Biruni', text: 'Koinotni o\'rganish — Yaratuvchini qabul qilishdir' },
+      { author: 'Imam Ghazali', text: 'Qalb va aql — ikkita qanotli qushlar singari' },
+      { author: 'Mirzo Ulugbek', text: 'Yulduzlarni o\'rganish — mangu haqiqatni bilishdir' },
     ];
 
-    // Particle Shape Generators
-    const generateNurSphere = (count) => {
-      const positions = new Float32Array(count * 3);
-      for (let i = 0; i < count; i++) {
-        const theta = Math.random() * Math.PI * 2;
-        const phi = Math.acos(Math.random() * 2 - 1);
-        const r = 1 + Math.random() * 0.3;
-        positions[i * 3] = r * Math.sin(phi) * Math.cos(theta);
-        positions[i * 3 + 1] = r * Math.sin(phi) * Math.sin(theta);
-        positions[i * 3 + 2] = r * Math.cos(phi);
-      }
-      return positions;
-    };
+    // ====== STATE ======
+    let started = false;
+    let currentAyahIdx = 0;
+    let scene, camera, renderer;
+    let particles = null;
+    let audioEngine = null;
+    let hands = [];
+    let pinchStrength = 0;
 
-    const generateCosmicExpansion = (count) => {
-      const positions = new Float32Array(count * 3);
-      for (let i = 0; i < count; i++) {
-        const theta = Math.random() * Math.PI * 2;
-        const phi = Math.random() * Math.PI;
-        const r = Math.random() * 2;
-        positions[i * 3] = r * Math.sin(phi) * Math.cos(theta);
-        positions[i * 3 + 1] = r * Math.sin(phi) * Math.sin(theta);
-        positions[i * 3 + 2] = r * Math.cos(phi);
-      }
-      return positions;
-    };
-
-    // Audio Engine
+    // ====== AUDIO ENGINE ======
     class AudioEngine {
       constructor() {
-        this.audioContext = null;
-        this.oscillator = null;
-        this.gainNode = null;
+        this.ctx = null;
+        this.osc = null;
+        this.gain = null;
         this.filter = null;
       }
 
-      async initialize() {
-        if (this.audioContext) return;
-        this.audioContext = new (window.AudioContext || window.webkitAudioContext)();
-        await this.audioContext.resume();
+      async init() {
+        if (this.ctx) return;
+        this.ctx = new (window.AudioContext || window.webkitAudioContext)();
+        await this.ctx.resume();
 
-        this.oscillator = this.audioContext.createOscillator();
-        this.gainNode = this.audioContext.createGain();
-        this.filter = this.audioContext.createBiquadFilter();
+        this.osc = this.ctx.createOscillator();
+        this.gain = this.ctx.createGain();
+        this.filter = this.ctx.createBiquadFilter();
 
-        this.oscillator.frequency.value = 55;
-        this.oscillator.type = 'sine';
-        this.gainNode.gain.value = 0.05;
+        this.osc.frequency.value = 55;
+        this.osc.type = 'sine';
+        this.gain.gain.value = 0.05;
         this.filter.type = 'lowpass';
         this.filter.frequency.value = 800;
 
-        this.oscillator.connect(this.filter);
-        this.filter.connect(this.gainNode);
-        this.gainNode.connect(this.audioContext.destination);
-        this.oscillator.start();
+        this.osc.connect(this.filter);
+        this.filter.connect(this.gain);
+        this.gain.connect(this.ctx.destination);
+        this.osc.start();
       }
 
-      modulate(pinchStrength) {
-        if (!this.audioContext) return;
-        const clampedPinch = Math.max(0, Math.min(1, 1 - pinchStrength));
-        this.gainNode.gain.setTargetAtTime(clampedPinch * 0.1, this.audioContext.currentTime, 0.1);
-        this.filter.frequency.setTargetAtTime(800 + clampedPinch * 600, this.audioContext.currentTime, 0.1);
+      modulate(pinch) {
+        if (!this.ctx) return;
+        const clamp = Math.max(0, Math.min(1, 1 - pinch));
+        this.gain.gain.setTargetAtTime(clamp * 0.1, this.ctx.currentTime, 0.1);
+        this.filter.frequency.setTargetAtTime(800 + clamp * 600, this.ctx.currentTime, 0.1);
       }
 
-      playWhoosh() {
-        if (!this.audioContext) return;
-        const now = this.audioContext.currentTime;
-        const noise = this.audioContext.createBufferSource();
-        const buffer = this.audioContext.createBuffer(1, this.audioContext.sampleRate * 0.5, this.audioContext.sampleRate);
-        const data = buffer.getChannelData(0);
-        for (let i = 0; i < buffer.length; i++) {
-          data[i] = Math.random() * 2 - 1;
-        }
-        noise.buffer = buffer;
-        const noiseGain = this.audioContext.createGain();
-        const noiseFilter = this.audioContext.createBiquadFilter();
-        noiseFilter.type = 'bandpass';
-        noiseFilter.frequency.setValueAtTime(200, now);
-        noiseFilter.frequency.exponentialRampToValueAtTime(1000, now + 0.3);
-        noiseGain.gain.setValueAtTime(0.3, now);
-        noiseGain.gain.exponentialRampToValueAtTime(0.01, now + 0.3);
-        noise.connect(noiseFilter);
-        noiseFilter.connect(noiseGain);
-        noiseGain.connect(this.audioContext.destination);
+      whoosh() {
+        if (!this.ctx) return;
+        const now = this.ctx.currentTime;
+        const noise = this.ctx.createBufferSource();
+        const buf = this.ctx.createBuffer(1, this.ctx.sampleRate * 0.5, this.ctx.sampleRate);
+        const data = buf.getChannelData(0);
+        for (let i = 0; i < buf.length; i++) data[i] = Math.random() * 2 - 1;
+        noise.buffer = buf;
+        const ng = this.ctx.createGain();
+        const nf = this.ctx.createBiquadFilter();
+        nf.type = 'bandpass';
+        nf.frequency.setValueAtTime(200, now);
+        nf.frequency.exponentialRampToValueAtTime(1000, now + 0.3);
+        ng.gain.setValueAtTime(0.3, now);
+        ng.gain.exponentialRampToValueAtTime(0.01, now + 0.3);
+        noise.connect(nf);
+        nf.connect(ng);
+        ng.connect(this.ctx.destination);
         noise.start(now);
         noise.stop(now + 0.3);
       }
     }
 
-    // Main App Component
-    function App() {
-      const [started, setStarted] = React.useState(false);
-      const [currentAyahIdx, setCurrentAyahIdx] = React.useState(0);
-      const [showHikmah, setShowHikmah] = React.useState(false);
-      const containerRef = React.useRef(null);
-      const audioEngineRef = React.useRef(new AudioEngine());
-      const sceneRef = React.useRef(null);
-      const rendererRef = React.useRef(null);
-      const cameraRef = React.useRef(null);
-      const particlesRef = React.useRef(null);
-      const handsRef = React.useRef([]);
-      const pinchStrengthRef = React.useRef(0);
+    // ====== THREE.JS SETUP ======
+    function initThreeJS() {
+      const container = document.getElementById('canvas-container');
+      scene = new THREE.Scene();
+      scene.background = new THREE.Color(0x050505);
 
-      const currentAyah = AYAHS[currentAyahIdx];
-      const currentHikmah = HIKMAH[currentAyahIdx % HIKMAH.length];
+      camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+      camera.position.z = 3;
 
-      const handleStart = async () => {
-        await audioEngineRef.current.initialize();
-        setStarted(true);
-        initializeThreeJS();
-      };
+      renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+      renderer.setSize(window.innerWidth, window.innerHeight);
+      renderer.setPixelRatio(window.devicePixelRatio);
+      container.appendChild(renderer.domElement);
 
-      const initializeThreeJS = () => {
-        if (!containerRef.current) return;
+      // Particles
+      const geo = new THREE.BufferGeometry();
+      const pos = generateNurSphere(15000);
+      geo.setAttribute('position', new THREE.BufferAttribute(pos, 3));
 
-        // Scene setup
-        const scene = new THREE.Scene();
-        sceneRef.current = scene;
-        scene.background = new THREE.Color(0x050505);
+      const tex = createParticleTexture();
+      const mat = new THREE.PointsMaterial({
+        size: 0.01,
+        sizeAttenuation: true,
+        map: tex,
+        transparent: true,
+        depthWrite: false,
+        blending: THREE.AdditiveBlending,
+      });
 
-        const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
-        camera.position.z = 3;
-        cameraRef.current = camera;
+      particles = new THREE.Points(geo, mat);
+      scene.add(particles);
 
-        const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
-        renderer.setSize(window.innerWidth, window.innerHeight);
-        renderer.setPixelRatio(window.devicePixelRatio);
-        containerRef.current.appendChild(renderer.domElement);
-        rendererRef.current = renderer;
+      const light = new THREE.PointLight(0xffffff, 1);
+      light.position.set(5, 5, 5);
+      scene.add(light);
 
-        // Particles
-        const particleCount = 15000;
-        const geometry = new THREE.BufferGeometry();
-        const positions = generateNurSphere(particleCount);
-        geometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
-
-        const canvas = document.createElement('canvas');
-        canvas.width = 64;
-        canvas.height = 64;
-        const ctx = canvas.getContext('2d');
-        const gradient = ctx.createRadialGradient(32, 32, 0, 32, 32, 32);
-        gradient.addColorStop(0, 'rgba(255, 255, 255, 1)');
-        gradient.addColorStop(0.5, 'rgba(255, 255, 255, 0.5)');
-        gradient.addColorStop(1, 'rgba(255, 255, 255, 0)');
-        ctx.fillStyle = gradient;
-        ctx.fillRect(0, 0, 64, 64);
-        const texture = new THREE.CanvasTexture(canvas);
-
-        const material = new THREE.PointsMaterial({
-          size: 0.01,
-          sizeAttenuation: true,
-          map: texture,
-          transparent: true,
-          depthWrite: false,
-          blending: THREE.AdditiveBlending,
-        });
-
-        const points = new THREE.Points(geometry, material);
-        scene.add(points);
-        particlesRef.current = points;
-
-        const light = new THREE.PointLight(0xffffff, 1);
-        light.position.set(5, 5, 5);
-        scene.add(light);
-
-        // Animation loop
-        const animate = () => {
-          requestAnimationFrame(animate);
-          renderer.render(scene, camera);
-        };
-        animate();
-
-        // MediaPipe initialization
-        initializeMediaPipe();
-      };
-
-      const initializeMediaPipe = async () => {
-        const video = document.createElement('video');
-        video.style.display = 'none';
-        document.body.appendChild(video);
-
-        const hands = new window.Hands({
-          locateFile: (file) => `https://cdn.jsdelivr.net/npm/@mediapipe/hands@0.4.1646424915/${file}`,
-        });
-
-        hands.setOptions({
-          maxNumHands: 2,
-          modelComplexity: 1,
-          minDetectionConfidence: 0.5,
-          minTrackingConfidence: 0.5,
-        });
-
-        hands.onResults((results) => {
-          handsRef.current = [];
-          if (results.multiHandLandmarks) {
-            results.multiHandLandmarks.forEach((landmarks, idx) => {
-              handsRef.current.push({
-                landmarks: landmarks.map((lm) => ({ x: lm.x, y: lm.y, z: lm.z })),
-                handedness: results.multiHandedness[idx].label,
-              });
-            });
-
-            if (handsRef.current.length > 0) {
-              const thumb = handsRef.current[0].landmarks[4];
-              const index = handsRef.current[0].landmarks[8];
-              const distance = Math.sqrt(
-                Math.pow(thumb.x - index.x, 2) + Math.pow(thumb.y - index.y, 2)
-              );
-              pinchStrengthRef.current = distance;
-              audioEngineRef.current.modulate(distance);
-            }
-          }
-        });
-
-        const camera = new window.Camera(video, {
-          onFrame: async () => {
-            await hands.send({ image: video });
-          },
-          width: 640,
-          height: 480,
-        });
-        camera.start();
-      };
-
-      const handleNextAyah = () => {
-        audioEngineRef.current.playWhoosh();
-        setCurrentAyahIdx((idx) => (idx + 1) % AYAHS.length);
-        setShowHikmah(false);
-      };
-
-      React.useEffect(() => {
-        if (started) {
-          const timer = setTimeout(() => setShowHikmah(true), 3000);
-          return () => clearTimeout(timer);
-        }
-      }, [currentAyahIdx, started]);
-
-      if (!started) {
-        return (
-          <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-            <button className="start-btn" onClick={handleStart}>
-              ▶ Tadabbur Boshlash
-            </button>
-          </div>
-        );
+      // Animation loop
+      function animate() {
+        requestAnimationFrame(animate);
+        renderer.render(scene, camera);
       }
+      animate();
 
-      return (
-        <div style={{ width: '100%', height: '100%', position: 'relative', overflow: 'hidden' }}>
-          <div ref={containerRef} style={{ width: '100%', height: '100%' }} />
+      // Resize
+      window.addEventListener('resize', () => {
+        camera.aspect = window.innerWidth / window.innerHeight;
+        camera.updateProjectionMatrix();
+        renderer.setSize(window.innerWidth, window.innerHeight);
+      });
 
-          <div
-            style={{
-              position: 'absolute',
-              top: 0,
-              left: 0,
-              right: 0,
-              bottom: 0,
-              display: 'flex',
-              flexDirection: 'column',
-              alignItems: 'center',
-              justifyContent: 'center',
-              pointerEvents: 'none',
-              zIndex: 10,
-            }}
-          >
-            <div style={{ textAlign: 'center', marginBottom: '40px' }}>
-              <h1 className="ayah">{currentAyah.arabic}</h1>
-              <p className="uzbek">{currentAyah.uzbek}</p>
-            </div>
-
-            {showHikmah && (
-              <div style={{ textAlign: 'center' }}>
-                <p className="hikmah">"{currentHikmah.text}"</p>
-                <p className="author">— {currentHikmah.author}</p>
-              </div>
-            )}
-          </div>
-
-          <div
-            style={{
-              position: 'absolute',
-              bottom: '40px',
-              left: '50%',
-              transform: 'translateX(-50%)',
-              zIndex: 20,
-              pointerEvents: 'all',
-            }}
-          >
-            <button onClick={handleNextAyah}>→ Keyingi Ayah</button>
-          </div>
-        </div>
-      );
+      initMediaPipe();
     }
 
-    ReactDOM.createRoot(document.getElementById('root')).render(<App />);
+    // ====== PARTICLE SHAPES ======
+    function generateNurSphere(count) {
+      const pos = new Float32Array(count * 3);
+      for (let i = 0; i < count; i++) {
+        const theta = Math.random() * Math.PI * 2;
+        const phi = Math.acos(Math.random() * 2 - 1);
+        const r = 1 + Math.random() * 0.3;
+        pos[i * 3] = r * Math.sin(phi) * Math.cos(theta);
+        pos[i * 3 + 1] = r * Math.sin(phi) * Math.sin(theta);
+        pos[i * 3 + 2] = r * Math.cos(phi);
+      }
+      return pos;
+    }
+
+    function createParticleTexture() {
+      const canvas = document.createElement('canvas');
+      canvas.width = 64;
+      canvas.height = 64;
+      const ctx = canvas.getContext('2d');
+      const g = ctx.createRadialGradient(32, 32, 0, 32, 32, 32);
+      g.addColorStop(0, 'rgba(255, 255, 255, 1)');
+      g.addColorStop(0.5, 'rgba(255, 255, 255, 0.5)');
+      g.addColorStop(1, 'rgba(255, 255, 255, 0)');
+      ctx.fillStyle = g;
+      ctx.fillRect(0, 0, 64, 64);
+      return new THREE.CanvasTexture(canvas);
+    }
+
+    // ====== MEDIAPIPE ======
+    async function initMediaPipe() {
+      const video = document.createElement('video');
+      video.style.display = 'none';
+      document.body.appendChild(video);
+
+      const h = new window.Hands({
+        locateFile: (f) => `https://cdn.jsdelivr.net/npm/@mediapipe/hands@0.4.1646424915/${f}`,
+      });
+
+      h.setOptions({
+        maxNumHands: 2,
+        modelComplexity: 1,
+        minDetectionConfidence: 0.5,
+        minTrackingConfidence: 0.5,
+      });
+
+      h.onResults((r) => {
+        hands = [];
+        if (r.multiHandLandmarks) {
+          r.multiHandLandmarks.forEach((lm, idx) => {
+            hands.push({
+              landmarks: lm.map((l) => ({ x: l.x, y: l.y, z: l.z })),
+              handedness: r.multiHandedness[idx].label,
+            });
+          });
+
+          if (hands.length > 0) {
+            const thumb = hands[0].landmarks[4];
+            const index = hands[0].landmarks[8];
+            pinchStrength = Math.sqrt(
+              Math.pow(thumb.x - index.x, 2) + Math.pow(thumb.y - index.y, 2)
+            );
+            audioEngine?.modulate(pinchStrength);
+          }
+        }
+      });
+
+      const cam = new window.Camera(video, {
+        onFrame: async () => await h.send({ image: video }),
+        width: 640,
+        height: 480,
+      });
+      cam.start();
+    }
+
+    // ====== UI HANDLERS ======
+    function updateUI() {
+      const ayah = AYAHS[currentAyahIdx];
+      const hikmah = HIKMAH[currentAyahIdx % HIKMAH.length];
+
+      document.getElementById('ayah-text').textContent = ayah.arabic;
+      document.getElementById('uzbek-text').textContent = ayah.uzbek;
+      document.getElementById('hikmah-text').textContent = `"${hikmah.text}"`;
+      document.getElementById('author-text').textContent = `— ${hikmah.author}`;
+
+      document.getElementById('hikmah-container').classList.add('hidden');
+      setTimeout(() => {
+        document.getElementById('hikmah-container').classList.remove('hidden');
+      }, 3000);
+    }
+
+    async function startApp() {
+      started = true;
+      document.getElementById('start-screen').classList.add('hidden');
+      document.getElementById('overlay').classList.remove('hidden');
+      document.getElementById('next-button').classList.remove('hidden');
+
+      audioEngine = new AudioEngine();
+      await audioEngine.init();
+      initThreeJS();
+      updateUI();
+    }
+
+    function nextAyah() {
+      audioEngine?.whoosh();
+      currentAyahIdx = (currentAyahIdx + 1) % AYAHS.length;
+      updateUI();
+    }
+
+    // ====== EVENT LISTENERS ======
+    document.getElementById('start-button').addEventListener('click', startApp);
+    document.getElementById('next-button').addEventListener('click', nextAyah);
+
+    // Keyboard support
+    document.addEventListener('keydown', (e) => {
+      if (e.code === 'Space' && !started) startApp();
+      if (e.code === 'ArrowRight' && started) nextAyah();
+    });
   </script>
 </body>
 </html>
